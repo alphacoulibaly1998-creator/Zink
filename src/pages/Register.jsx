@@ -1,21 +1,149 @@
 import { useState } from "react";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { paysList } from "../indicatifs";
 
 function Register() {
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
+  const [pseudo, setPseudo] = useState("");
+  const [paysChoisi, setPaysChoisi] = useState(null);
+  const [telephone, setTelephone] = useState("");
+  const [telephoneMasque, setTelephoneMasque] = useState(false);
   const [erreur, setErreur] = useState("");
+  const [erreurPseudo, setErreurPseudo] = useState("");
+  const [suggestionsPseudo, setSuggestionsPseudo] = useState([]);
+  const [erreurTel, setErreurTel] = useState("");
+  const [chargement, setChargement] = useState(false);
   const navigate = useNavigate();
 
+  const handlePays = (e) => {
+    const nomPays = e.target.value;
+    const trouve = paysList.find((p) => p.nom === nomPays);
+    setPaysChoisi(trouve || null);
+    setTelephone("");
+    setErreurTel("");
+  };
+
+  const validerTelephone = () => {
+    if (!telephone) return true;
+    const chiffres = telephone.replace(/\s/g, "");
+    if (!/^\d+$/.test(chiffres)) return false;
+    if (paysChoisi && chiffres.length !== paysChoisi.chiffres) return false;
+    return true;
+  };
+
+  const genererSuggestions = (pseudoBase) => {
+    const base = pseudoBase.trim();
+    return [
+      `${base}${Math.floor(Math.random() * 900) + 100}`,
+      `${base}_${Math.floor(Math.random() * 99) + 1}`,
+      `${base}.zink`,
+    ];
+  };
+
+  const verifierPseudo = async (valeur) => {
+    setErreurPseudo("");
+    setSuggestionsPseudo([]);
+    if (!valeur.trim()) return;
+    const q = query(
+      collection(db, "utilisateurs"),
+      where("pseudo", "==", valeur.trim())
+    );
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      setErreurPseudo("Ce pseudo est déjà utilisé.");
+      setSuggestionsPseudo(genererSuggestions(valeur));
+    }
+  };
+
   const handleRegister = async () => {
+    setErreur("");
+    setErreurPseudo("");
+    setErreurTel("");
+    setSuggestionsPseudo([]);
+    setChargement(true);
+
+    if (!pseudo.trim()) {
+      setErreurPseudo("Le pseudo est obligatoire.");
+      setChargement(false);
+      return;
+    }
+    if (!paysChoisi) {
+      setErreur("Choisis ton pays.");
+      setChargement(false);
+      return;
+    }
+    if (!validerTelephone()) {
+      setErreurTel(
+        `Numéro invalide. Le ${paysChoisi.nom} nécessite exactement ${paysChoisi.chiffres} chiffres.`
+      );
+      setChargement(false);
+      return;
+    }
+
+    // Vérifier pseudo unique
+    const qPseudo = query(
+      collection(db, "utilisateurs"),
+      where("pseudo", "==", pseudo.trim())
+    );
+    const snapPseudo = await getDocs(qPseudo);
+    if (!snapPseudo.empty) {
+      setErreurPseudo("Ce pseudo est déjà utilisé.");
+      setSuggestionsPseudo(genererSuggestions(pseudo));
+      setChargement(false);
+      return;
+    }
+
+    // Vérifier numéro unique
+    if (telephone) {
+      const numeroComplet = `${paysChoisi.indicatif}${telephone.replace(/\s/g, "")}`;
+      const qTel = query(
+        collection(db, "utilisateurs"),
+        where("telephone", "==", numeroComplet)
+      );
+      const snapTel = await getDocs(qTel);
+      if (!snapTel.empty) {
+        setErreurTel("Ce numéro de téléphone est déjà utilisé.");
+        setChargement(false);
+        return;
+      }
+    }
+
     try {
-      await createUserWithEmailAndPassword(auth, email, motDePasse);
+      const result = await createUserWithEmailAndPassword(auth, email, motDePasse);
+      const numeroComplet = telephone
+        ? `${paysChoisi.indicatif}${telephone.replace(/\s/g, "")}`
+        : "";
+      await setDoc(doc(db, "utilisateurs", result.user.uid), {
+        pseudo: pseudo.trim(),
+        email,
+        pays: paysChoisi.nom,
+        indicatif: paysChoisi.indicatif,
+        chiffresTel: paysChoisi.chiffres,
+        telephone: numeroComplet,
+        telephoneMasque,
+        statut: "Salut, je suis sur Zink !",
+        points: 0,
+        badges: [],
+        photoURL: "",
+        createdAt: new Date()
+      });
       navigate("/");
     } catch (e) {
-      setErreur("Erreur : vérifie ton email et mot de passe (6 caractères min).");
+      if (e.code === "auth/email-already-in-use") {
+        setErreur("Cet email est déjà utilisé par un autre compte.");
+      } else if (e.code === "auth/invalid-email") {
+        setErreur("L'adresse email n'est pas valide.");
+      } else if (e.code === "auth/weak-password") {
+        setErreur("Le mot de passe doit contenir au moins 6 caractères.");
+      } else {
+        setErreur("Une erreur est survenue. Réessaie.");
+      }
     }
+    setChargement(false);
   };
 
   return (
@@ -23,6 +151,42 @@ function Register() {
       <div className="auth-box">
         <h1 className="auth-titre">Zink</h1>
         <p className="auth-sous-titre">Crée ton compte</p>
+
+        <div>
+          <input
+            className="auth-input"
+            type="text"
+            placeholder="Pseudo (obligatoire)"
+            value={pseudo}
+            onChange={(e) => {
+              setPseudo(e.target.value);
+              setErreurPseudo("");
+              setSuggestionsPseudo([]);
+            }}
+            onBlur={() => verifierPseudo(pseudo)}
+          />
+          {erreurPseudo && (
+            <p className="auth-erreur">{erreurPseudo}</p>
+          )}
+          {suggestionsPseudo.length > 0 && (
+            <div className="suggestions-container">
+              <p className="suggestions-titre">Suggestions :</p>
+              {suggestionsPseudo.map((s) => (
+                <button
+                  key={s}
+                  className="suggestion-btn"
+                  onClick={() => {
+                    setPseudo(s);
+                    setErreurPseudo("");
+                    setSuggestionsPseudo([]);
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <input
           className="auth-input"
@@ -39,10 +203,63 @@ function Register() {
           onChange={(e) => setMotDePasse(e.target.value)}
         />
 
+        <select
+          className="auth-input"
+          value={paysChoisi?.nom || ""}
+          onChange={handlePays}
+        >
+          <option value="">-- Choisis ton pays --</option>
+          {paysList.map((p) => (
+            <option key={p.nom} value={p.nom}>{p.nom}</option>
+          ))}
+        </select>
+
+        <div>
+          <div className="tel-container">
+            <input
+              className="auth-input tel-indicatif"
+              type="text"
+              value={paysChoisi?.indicatif || ""}
+              readOnly
+              placeholder="+000"
+            />
+            <input
+              className="auth-input tel-numero"
+              type="tel"
+              placeholder={
+                paysChoisi
+                  ? `${paysChoisi.chiffres} chiffres (optionnel)`
+                  : "Numéro (optionnel)"
+              }
+              value={telephone}
+              onChange={(e) => {
+                setErreurTel("");
+                setTelephone(e.target.value);
+              }}
+            />
+          </div>
+          {erreurTel && <p className="auth-erreur">{erreurTel}</p>}
+        </div>
+
+        {telephone && (
+          <label className="auth-checkbox">
+            <input
+              type="checkbox"
+              checked={telephoneMasque}
+              onChange={(e) => setTelephoneMasque(e.target.checked)}
+            />
+            Masquer mon numéro de téléphone
+          </label>
+        )}
+
         {erreur && <p className="auth-erreur">{erreur}</p>}
 
-        <button className="auth-btn" onClick={handleRegister}>
-          S'inscrire
+        <button
+          className="auth-btn"
+          onClick={handleRegister}
+          disabled={chargement}
+        >
+          {chargement ? "Inscription..." : "S'inscrire"}
         </button>
 
         <p className="auth-lien" onClick={() => navigate("/login")}>
