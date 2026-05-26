@@ -15,6 +15,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100%;
   max-width: 480px;
   margin: 0 auto;
 }
@@ -36,10 +37,9 @@ body {
 .navbar {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   width: 100%;
-  max-width: 480px;
   display: flex;
   justify-content: space-around;
   background: #1a1a2e;
@@ -1336,4 +1336,39 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+
+@media (max-width: 480px) {
+  .app-container {
+    max-width: 100%;
+  }
+
+  .page-content {
+    padding: 16px;
+    padding-bottom: 80px;
+  }
+
+  .chat-container {
+    margin: -16px;
+    height: calc(100vh - 65px);
+  }
+
+  .conv-item {
+    padding: 12px;
+  }
+
+  .publication {
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .auth-box {
+    padding: 30px 20px;
+    border-radius: 16px;
+  }
+
+  .profil-container {
+    padding-bottom: 10px;
+  }
 }
