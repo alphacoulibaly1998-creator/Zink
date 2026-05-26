@@ -1,4 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { db, auth } from "../firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 const liens = [
   { path: "/", label: "Accueil", icon: "🏠" },
@@ -13,6 +16,25 @@ const liens = [
 function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [messagesNonLus, setMessagesNonLus] = useState(0);
+  const user = auth.currentUser;
+
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(db, "conversations"),
+      where("membres", "array-contains", user.uid)
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      let total = 0;
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        total += data.nonLu?.[user.uid] || 0;
+      });
+      setMessagesNonLus(total);
+    });
+    return () => unsub();
+  }, [user]);
 
   return (
     <nav className="navbar">
@@ -22,7 +44,12 @@ function NavBar() {
           className={`nav-btn ${location.pathname === lien.path ? "actif" : ""}`}
           onClick={() => navigate(lien.path)}
         >
-          <span className="nav-icon">{lien.icon}</span>
+          <div className="nav-icon-container">
+            <span className="nav-icon">{lien.icon}</span>
+            {lien.path === "/messages" && messagesNonLus > 0 && (
+              <span className="nav-badge">{messagesNonLus}</span>
+            )}
+          </div>
           <span className="nav-label">{lien.label}</span>
         </button>
       ))}

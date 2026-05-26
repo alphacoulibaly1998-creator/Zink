@@ -832,3 +832,508 @@ body {
   flex-direction: column;
   gap: 4px;
 }
+
+
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.conv-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.conv-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1a2e;
+  border-radius: 14px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.conv-item:hover {
+  background: #2a2a4a;
+}
+
+.conv-item.non-lu {
+  border-left: 3px solid #a855f7;
+}
+
+.conv-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.conv-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.conv-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #ff6b6b, #a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 900;
+  color: white;
+}
+
+.conv-infos {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.conv-pseudo {
+  font-weight: 700;
+  font-size: 15px;
+  color: #ffffff;
+}
+
+.conv-dernier {
+  font-size: 13px;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conv-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.conv-date {
+  font-size: 12px;
+  color: #888;
+}
+
+.conv-badge {
+  background: #a855f7;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 80px);
+  margin: -20px;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #2a2a4a;
+}
+
+.chat-retour {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.chat-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.chat-pseudo {
+  font-weight: 700;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.message-wrapper.moi {
+  align-items: flex-end;
+}
+
+.message-wrapper.autre {
+  align-items: flex-start;
+}
+
+.message {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 15px;
+  position: relative;
+}
+
+.message-moi {
+  background: linear-gradient(135deg, #ff6b6b, #a855f7);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message-autre {
+  background: #1a1a2e;
+  color: #ffffff;
+  border-bottom-left-radius: 4px;
+}
+
+.message-supprime {
+  color: #888;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.message-heure {
+  font-size: 10px;
+  opacity: 0.7;
+  display: block;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.message-photo {
+  width: 200px;
+  border-radius: 10px;
+  display: block;
+}
+
+.message-audio {
+  width: 200px;
+}
+
+.message-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.message-actions button {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.message-actions button:hover {
+  background: #2a2a4a;
+  color: #ff6b6b;
+}
+
+.chat-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #1a1a2e;
+  border-top: 1px solid #2a2a4a;
+}
+
+.chat-btn-media {
+  background: #0f0f1a;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 10px;
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.chat-btn-vocal {
+  background: #0f0f1a;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 10px;
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.chat-btn-vocal.enregistrement {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.chat-texte {
+  flex: 1;
+  background: #0f0f1a;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 15px;
+  outline: none;
+}
+
+.chat-texte:focus {
+  border-color: #a855f7;
+}
+
+.chat-btn-envoyer {
+  background: linear-gradient(90deg, #ff6b6b, #a855f7);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+
+.decouvrir-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.decouvrir-recherche {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.decouvrir-recherche .auth-input {
+  flex: 1;
+  margin: 0;
+}
+
+.decouvrir-recherche .auth-btn {
+  width: 50px;
+  padding: 14px;
+  font-size: 18px;
+}
+
+.decouvrir-resultats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.decouvrir-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1a2e;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.decouvrir-infos {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.decouvrir-btn-msg {
+  background: linear-gradient(135deg, #ff6b6b, #a855f7);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+
+.emoji-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px;
+  background: #1a1a2e;
+  border-top: 1px solid #2a2a4a;
+}
+
+.emoji-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.emoji-btn:hover {
+  background: #2a2a4a;
+}
+
+.chat-btn-emoji {
+  background: #0f0f1a;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.message-menu {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 100;
+  min-width: 200px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.message-menu button {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.message-menu button:hover {
+  background: #2a2a4a;
+}
+
+
+.conv-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.conv-item-contenu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.conv-menu-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.conv-btn-menu {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.conv-btn-menu:hover {
+  color: #ffffff;
+  background: #2a2a4a;
+}
+
+.conv-menu {
+  position: absolute;
+  right: 0;
+  top: 36px;
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 100;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.conv-menu button {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.conv-menu button:hover {
+  background: #2a2a4a;
+}
+
+
+.nav-icon-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #ff6b6b;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
