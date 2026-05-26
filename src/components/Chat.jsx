@@ -17,6 +17,9 @@ function Chat({ convId, autre, autreId, onRetour }) {
   const [mediaRecorder, setMediaRecorder] = useState(null);
  const [afficherEmojis, setAfficherEmojis] = useState(false);
   const [afficherMedia, setAfficherMedia] = useState(false);
+  const [dureeVocal, setDureeVocal] = useState(0);
+  const [pauseVocal, setPauseVocal] = useState(false);
+  const timerRef = useRef(null);
   const [menuMessage, setMenuMessage] = useState(null);
   const basRef = useRef(null);
   const user = auth.currentUser;
@@ -107,7 +110,20 @@ function Chat({ convId, autre, autreId, onRetour }) {
       const recorder = new MediaRecorder(stream);
       const chunks = [];
       recorder.ondataavailable = (e) => chunks.push(e.data);
-     recorder.onstop = async () => {
+      let annule = false;
+      recorder.onstart = () => {
+        annule = false;
+        setDureeVocal(0);
+        timerRef.current = setInterval(() => {
+          setDureeVocal((d) => d + 1);
+        }, 1000);
+      };
+      recorder.onstop = async () => {
+        clearInterval(timerRef.current);
+        setDureeVocal(0);
+        setPauseVocal(false);
+        stream.getTracks().forEach((t) => t.stop());
+        if (annule) return;
         const blob = new Blob(chunks, { type: "audio/webm" });
         const reader = new FileReader();
         reader.onloadend = async () => {
@@ -115,8 +131,8 @@ function Chat({ convId, autre, autreId, onRetour }) {
           await envoyerMessage("vocal", base64);
         };
         reader.readAsDataURL(blob);
-        stream.getTracks().forEach((t) => t.stop());
       };
+      recorder.annuler = () => { annule = true; recorder.stop(); };
       recorder.start();
       setMediaRecorder(recorder);
       setEnregistrement(true);
@@ -129,6 +145,27 @@ function Chat({ convId, autre, autreId, onRetour }) {
     mediaRecorder?.stop();
     setEnregistrement(false);
     setMediaRecorder(null);
+  };
+
+  const togglePauseVocal = () => {
+    if (!mediaRecorder) return;
+    if (pauseVocal) {
+      mediaRecorder.resume();
+      timerRef.current = setInterval(() => {
+        setDureeVocal((d) => d + 1);
+      }, 1000);
+      setPauseVocal(false);
+    } else {
+      mediaRecorder.pause();
+      clearInterval(timerRef.current);
+      setPauseVocal(true);
+    }
+  };
+
+  const formaterDuree = (secondes) => {
+    const m = Math.floor(secondes / 60).toString().padStart(2, "0");
+    const s = (secondes % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
   };
 
   const supprimerMessage = async (msg, pourTous = false) => {
@@ -321,9 +358,36 @@ function Chat({ convId, autre, autreId, onRetour }) {
         </div>
 
         {enregistrement ? (
-          <button className="chat-btn-vocal enregistrement" onClick={arreterVocal}>
-            ⏹️
-          </button>
+          <div className="vocal-recorder" onClick={(e) => e.stopPropagation()}>
+            <button className="vocal-btn-annuler" onClick={() => {
+              mediaRecorder?.annuler();
+              setEnregistrement(false);
+              setMediaRecorder(null);
+            }}>
+              ✕
+            </button>
+            <div className="vocal-ondes">
+              {!pauseVocal && (
+                <>
+                  <span className="onde"></span>
+                  <span className="onde"></span>
+                  <span className="onde"></span>
+                  <span className="onde"></span>
+                  <span className="onde"></span>
+                </>
+              )}
+              {pauseVocal && (
+                <span className="vocal-pause-txt">En pause</span>
+              )}
+            </div>
+            <span className="vocal-timer">{formaterDuree(dureeVocal)}</span>
+            <button className="vocal-btn-pause" onClick={togglePauseVocal}>
+              {pauseVocal ? "▶️" : "⏸️"}
+            </button>
+            <button className="vocal-btn-envoyer" onClick={arreterVocal}>
+              ✅
+            </button>
+          </div>
         ) : (
           <button className="chat-btn-vocal" onClick={(e) => { e.stopPropagation(); demarrerVocal(); }}>
             🎤
