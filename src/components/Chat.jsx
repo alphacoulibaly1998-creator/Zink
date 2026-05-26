@@ -15,7 +15,8 @@ function Chat({ convId, autre, autreId, onRetour }) {
   const [chargement, setChargement] = useState(false);
   const [enregistrement, setEnregistrement] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [afficherEmojis, setAfficherEmojis] = useState(false);
+ const [afficherEmojis, setAfficherEmojis] = useState(false);
+  const [afficherMedia, setAfficherMedia] = useState(false);
   const [menuMessage, setMenuMessage] = useState(null);
   const basRef = useRef(null);
   const user = auth.currentUser;
@@ -295,51 +296,40 @@ function Chat({ convId, autre, autreId, onRetour }) {
 
       <div className="chat-input" onClick={(e) => e.stopPropagation()}>
         <button
-          className="chat-btn-emoji"
-          onClick={() => setAfficherEmojis(!afficherEmojis)}
+          className="chat-btn-plus"
+          onClick={() => setAfficherEmojis(false) || setAfficherMedia(!afficherMedia)}
         >
-          😊
+          ➕
         </button>
 
-        <label className="chat-btn-media">
-          📷
+        <div className="chat-texte-container">
+          <button
+            className="chat-emoji-inline"
+            onClick={(e) => { e.stopPropagation(); setAfficherMedia(false); setAfficherEmojis(!afficherEmojis); }}
+          >
+            😊
+          </button>
           <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => envoyerMedia(e, "photo")}
-            style={{ display: "none" }}
+            className="chat-texte"
+            type="text"
+            placeholder="Écris un message..."
+            value={texte}
+            onChange={(e) => setTexte(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && envoyerMessage()}
+            onClick={(e) => e.stopPropagation()}
           />
-        </label>
-
-        <label className="chat-btn-media">
-          🎥
-          <input
-            type="file"
-            accept="video/*"
-            onChange={(e) => envoyerMedia(e, "video")}
-            style={{ display: "none" }}
-          />
-        </label>
+        </div>
 
         {enregistrement ? (
           <button className="chat-btn-vocal enregistrement" onClick={arreterVocal}>
             ⏹️
           </button>
         ) : (
-          <button className="chat-btn-vocal" onClick={demarrerVocal}>
+          <button className="chat-btn-vocal" onClick={(e) => { e.stopPropagation(); demarrerVocal(); }}>
             🎤
           </button>
         )}
 
-        <input
-          className="chat-texte"
-          type="text"
-          placeholder="Écris un message..."
-          value={texte}
-          onChange={(e) => setTexte(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && envoyerMessage()}
-          onClick={(e) => e.stopPropagation()}
-        />
         <button
           className="chat-btn-envoyer"
           onClick={() => envoyerMessage()}
@@ -348,6 +338,29 @@ function Chat({ convId, autre, autreId, onRetour }) {
           ➤
         </button>
       </div>
+
+      {afficherMedia && (
+        <div className="chat-media-panel" onClick={(e) => e.stopPropagation()}>
+          <label className="chat-media-btn">
+            📷 Photo
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => { envoyerMedia(e, "photo"); setAfficherMedia(false); }}
+              style={{ display: "none" }}
+            />
+          </label>
+          <label className="chat-media-btn">
+            🎥 Vidéo
+            <input
+              type="file"
+              accept="video/*"
+              onChange={(e) => { envoyerMedia(e, "video"); setAfficherMedia(false); }}
+              style={{ display: "none" }}
+            />
+          </label>
+        </div>
+      )}
     </div>
   );
 }
