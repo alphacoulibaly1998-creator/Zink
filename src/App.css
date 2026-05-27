@@ -1537,3 +1537,237 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
+
+
+.chat-header-infos {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.chat-statut {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chat-statut.en-ligne {
+  color: #4ade80;
+}
+
+.chat-statut.hors-ligne {
+  color: #888;
+}
+
+.message-statut {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+
+.amis-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.amis-onglets {
+  display: flex;
+  gap: 8px;
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 6px;
+}
+
+.onglet-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.onglet-btn.actif {
+  background: linear-gradient(90deg, #ff6b6b, #a855f7);
+  color: white;
+}
+
+.onglet-badge {
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.amis-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ami-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1a2e;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.ami-avatar {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.ami-avatar img,
+.ami-avatar .conv-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.ami-statut-point {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #0f0f1a;
+}
+
+.ami-statut-point.en-ligne {
+  background: #4ade80;
+}
+
+.ami-statut-point.hors-ligne {
+  background: #888;
+}
+
+.ami-infos {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.ami-statut-txt {
+  font-size: 12px;
+}
+
+.ami-statut-txt.en-ligne {
+  color: #4ade80;
+}
+
+.ami-statut-txt.hors-ligne {
+  color: #888;
+}
+
+.ami-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ami-btn-msg {
+  background: linear-gradient(135deg, #ff6b6b, #a855f7);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.ami-btn-suppr {
+  background: none;
+  border: 1px solid #ff6b6b;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #ff6b6b;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.ami-btn-accepter {
+  background: linear-gradient(135deg, #ff6b6b, #a855f7);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.ami-btn-refuser {
+  background: none;
+  border: 1px solid #ff6b6b;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #ff6b6b;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.decouvrir-btns {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.decouvrir-btn-ami {
+  background: linear-gradient(135deg, #ff6b6b, #a855f7);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.decouvrir-btn-ami.deja-ami {
+  background: #2a2a4a;
+  color: #4ade80;
+  cursor: default;
+}
+
+.decouvrir-btn-ami.en-attente {
+  background: #2a2a4a;
+  color: #888;
+  cursor: default;
+}
+
+.decouvrir-btn-ami.recu {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+}
+
+.nav-badge-amis {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #ff6b6b;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { db, auth } from "../firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc } from "firebase/firestore";
 
 const liens = [
   { path: "/", label: "Accueil", icon: "🏠" },
@@ -17,6 +17,7 @@ function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [messagesNonLus, setMessagesNonLus] = useState(0);
+  const [demandesAmis, setDemandesAmis] = useState(0);
   const user = auth.currentUser;
 
   useEffect(() => {
@@ -36,6 +37,17 @@ function NavBar() {
     return () => unsub();
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const unsub = onSnapshot(doc(db, "utilisateurs", user.uid), (snap) => {
+      if (snap.exists()) {
+        const demandes = snap.data().demandesRecues || [];
+        setDemandesAmis(demandes.length);
+      }
+    });
+    return () => unsub();
+  }, [user]);
+
   return (
     <nav className="navbar">
       {liens.map((lien) => (
@@ -48,6 +60,9 @@ function NavBar() {
             <span className="nav-icon">{lien.icon}</span>
             {lien.path === "/messages" && messagesNonLus > 0 && (
               <span className="nav-badge">{messagesNonLus}</span>
+            )}
+            {lien.path === "/amis" && demandesAmis > 0 && (
+              <span className="nav-badge">{demandesAmis}</span>
             )}
           </div>
           <span className="nav-label">{lien.label}</span>

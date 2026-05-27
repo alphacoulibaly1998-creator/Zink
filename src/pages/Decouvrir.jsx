@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
 import {
   collection, query, where, getDocs,
-  doc, setDoc, getDoc
+  doc, setDoc, getDoc, updateDoc, arrayUnion
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
@@ -11,8 +11,17 @@ function Decouvrir() {
   const [resultats, setResultats] = useState([]);
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState("");
+  const [monProfil, setMonProfil] = useState(null);
   const user = auth.currentUser;
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const charger = async () => {
+      const snap = await getDoc(doc(db, "utilisateurs", user.uid));
+      if (snap.exists()) setMonProfil(snap.data());
+    };
+    charger();
+  }, []);
 
   const chercher = async () => {
     setErreur("");
@@ -50,6 +59,31 @@ function Decouvrir() {
     setChargement(false);
   };
 
+  const getStatutRelation = (autreUser) => {
+    const amis = monProfil?.amis || [];
+    const envoyes = monProfil?.demandesEnvoyees || [];
+    const recus = monProfil?.demandesRecues || [];
+    if (amis.includes(autreUser.id)) return "ami";
+    if (envoyes.includes(autreUser.id)) return "envoye";
+    if (recus.includes(autreUser.id)) return "recu";
+    return "aucun";
+  };
+
+  const envoyerDemande = async (autreUser) => {
+    const monRef = doc(db, "utilisateurs", user.uid);
+    const autreRef = doc(db, "utilisateurs", autreUser.id);
+    await updateDoc(monRef, {
+      demandesEnvoyees: arrayUnion(autreUser.id)
+    });
+    await updateDoc(autreRef, {
+      demandesRecues: arrayUnion(user.uid)
+    });
+    setMonProfil((prev) => ({
+      ...prev,
+      demandesEnvoyees: [...(prev?.demandesEnvoyees || []), autreUser.id]
+    }));
+  };
+
   const ouvrirConversation = async (autreUser) => {
     const membres = [user.uid, autreUser.id].sort();
     const convId = membres.join("_");
@@ -64,6 +98,42 @@ function Decouvrir() {
       });
     }
     navigate("/messages");
+  };
+
+  const renderBouton = (u) => {
+    const statut = getStatutRelation(u);
+    if (statut === "ami") {
+      return (
+        <button className="decouvrir-btn-ami deja-ami">
+          ✓ Ami
+        </button>
+      );
+    }
+    if (statut === "envoye") {
+      return (
+        <button className="decouvrir-btn-ami en-attente">
+          ⏳ Envoyée
+        </button>
+      );
+    }
+    if (statut === "recu") {
+      return (
+        <button
+          className="decouvrir-btn-ami recu"
+          onClick={() => envoyerDemande(u)}
+        >
+          👥 Accepter
+        </button>
+      );
+    }
+    return (
+      <button
+        className="decouvrir-btn-ami"
+        onClick={() => envoyerDemande(u)}
+      >
+        👥 Ajouter
+      </button>
+    );
   };
 
   return (
@@ -102,12 +172,15 @@ function Decouvrir() {
               <span className="conv-pseudo">{u.pseudo}</span>
               <span className="conv-dernier">🌍 {u.pays}</span>
             </div>
-            <button
-              className="decouvrir-btn-msg"
-              onClick={() => ouvrirConversation(u)}
-            >
-              💬
-            </button>
+            <div className="decouvrir-btns">
+              {renderBouton(u)}
+              <button
+                className="decouvrir-btn-msg"
+                onClick={() => ouvrirConversation(u)}
+              >
+                💬
+              </button>
+            </div>
           </div>
         ))}
       </div>

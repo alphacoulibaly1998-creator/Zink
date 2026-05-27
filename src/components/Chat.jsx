@@ -15,15 +15,26 @@ function Chat({ convId, autre, autreId, onRetour }) {
   const [chargement, setChargement] = useState(false);
   const [enregistrement, setEnregistrement] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
- const [afficherEmojis, setAfficherEmojis] = useState(false);
+  const [afficherEmojis, setAfficherEmojis] = useState(false);
   const [afficherMedia, setAfficherMedia] = useState(false);
+  const [menuMessage, setMenuMessage] = useState(null);
   const [dureeVocal, setDureeVocal] = useState(0);
   const [pauseVocal, setPauseVocal] = useState(false);
+  const [autreEnLigne, setAutreEnLigne] = useState(false);
+  const [autreVue, setAutreVue] = useState(null);
   const timerRef = useRef(null);
-  const [menuMessage, setMenuMessage] = useState(null);
   const basRef = useRef(null);
   const user = auth.currentUser;
 
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "utilisateurs", autreId), (snap) => {
+      if (snap.exists()) {
+        setAutreEnLigne(snap.data().enLigne || false);
+        setAutreVue(snap.data().dernièreVue || null);
+      }
+    });
+    return () => unsub();
+  }, [autreId]);
   useEffect(() => {
     const q = query(
       collection(db, "conversations", convId, "messages"),
@@ -40,6 +51,20 @@ function Chat({ convId, autre, autreId, onRetour }) {
   const marquerLu = async () => {
     const ref = doc(db, "conversations", convId);
     await updateDoc(ref, { [`nonLu.${user.uid}`]: 0 });
+    const q = query(
+      collection(db, "conversations", convId, "messages"),
+      orderBy("createdAt", "asc")
+    );
+    const snap = await getDocs(q);
+    snap.docs.forEach(async (d) => {
+      const data = d.data();
+      if (data.userId !== user.uid && data.statut !== "lu") {
+        await updateDoc(
+          doc(db, "conversations", convId, "messages", d.id),
+          { statut: "lu" }
+        );
+      }
+    });
   };
 
   const envoyerMessage = async (type = "texte", contenu = "") => {
@@ -58,14 +83,15 @@ function Chat({ convId, autre, autreId, onRetour }) {
       return;
     }
 
-    const msgData = {
+const msgData = {
       userId: user.uid,
       type,
       texte: type === "texte" ? valeur : "",
       mediaUrl: type !== "texte" ? valeur : "",
       createdAt: serverTimestamp(),
       supprimePour: [],
-      supprimePourTous: false
+      supprimePourTous: false,
+      statut: "envoye"
     };
 
     await addDoc(collection(db, "conversations", convId, "messages"), msgData);
@@ -230,8 +256,8 @@ function Chat({ convId, autre, autreId, onRetour }) {
   };
 
   return (
-    <div className="chat-container" onClick={() => { setAfficherEmojis(false); setMenuMessage(null); }}>
-      <div className="chat-header">
+    <div className="chat-container">
+      <div className="chat-header" onClick={(e) => e.stopPropagation()}>
         <button className="chat-retour" onClick={onRetour}>←</button>
         <div className="chat-avatar">
           {autre?.photoURL ? (
@@ -242,10 +268,15 @@ function Chat({ convId, autre, autreId, onRetour }) {
             </div>
           )}
         </div>
-        <span className="chat-pseudo">{autre?.pseudo}</span>
+        <div className="chat-header-infos">
+          <span className="chat-pseudo">{autre?.pseudo}</span>
+          <span className={`chat-statut ${autreEnLigne ? "en-ligne" : "hors-ligne"}`}>
+            {autreEnLigne ? "● En ligne" : "● Hors ligne"}
+          </span>
+        </div>
       </div>
 
-      <div className="chat-messages">
+      <div className="chat-messages" onClick={(e) => { e.stopPropagation(); setAfficherEmojis(false); setMenuMessage(null); setAfficherMedia(false); }}>
         {messages.map((msg) => {
           const estMoi = msg.userId === user.uid;
           if (estMasque(msg)) return null;
@@ -281,7 +312,14 @@ function Chat({ convId, autre, autreId, onRetour }) {
                 ) : msg.type === "vocal" ? (
                   <audio controls src={msg.mediaUrl} className="message-audio" />
                 ) : null}
-                <span className="message-heure">{formaterHeure(msg.createdAt)}</span>
+                <span className="message-heure">
+                  {formaterHeure(msg.createdAt)}
+                  {msg.userId === user.uid && (
+                    <span className="message-statut">
+                      {msg.statut === "lu" ? " ✓✓" : msg.statut === "recu" ? " ✓✓" : " ✓"}
+                    </span>
+                  )}
+                </span>
               </div>
 
               {menuMessage === msg.id && (

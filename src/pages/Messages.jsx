@@ -1,19 +1,40 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
 import {
   collection, query, where, onSnapshot,
   getDoc, doc, deleteDoc, updateDoc
 } from "firebase/firestore";
+import { useLocation } from "react-router-dom";
 import Chat from "../components/Chat";
 
 function Messages() {
   const [conversations, setConversations] = useState([]);
-  const [convActive, setConvActive] = useState(null);
   const [chargement, setChargement] = useState(true);
   const [menuConv, setMenuConv] = useState(null);
+  const [convActiveId, setConvActiveId] = useState(null);
+  const [convActiveData, setConvActiveData] = useState(null);
+  const convActivePersist = useRef(null);
   const user = auth.currentUser;
+  const location = useLocation();
 
   useEffect(() => {
+    if (location.state?.convId && !convActivePersist.current) {
+      convActivePersist.current = {
+        id: location.state.convId,
+        autreId: location.state.autreId,
+        autre: location.state.autre
+      };
+      setConvActiveId(location.state.convId);
+      setConvActiveData({
+        id: location.state.convId,
+        autreId: location.state.autreId,
+        autre: location.state.autre
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
     const q = query(
       collection(db, "conversations"),
       where("membres", "array-contains", user.uid)
@@ -42,6 +63,18 @@ function Messages() {
     return () => unsub();
   }, []);
 
+  const ouvrirConv = (conv) => {
+    convActivePersist.current = conv;
+    setConvActiveId(conv.id);
+    setConvActiveData(conv);
+  };
+
+  const fermerConv = () => {
+    convActivePersist.current = null;
+    setConvActiveId(null);
+    setConvActiveData(null);
+  };
+
   const supprimerConversation = async (convId) => {
     setMenuConv(null);
     if (window.confirm("Supprimer cette conversation ?")) {
@@ -54,7 +87,6 @@ function Messages() {
     const userSnap = await getDoc(doc(db, "utilisateurs", user.uid));
     const bloques = userSnap.data()?.bloques || [];
     const estBloque = bloques.includes(conv.autreId);
-
     if (estBloque) {
       if (window.confirm(`Débloquer ${conv.autre?.pseudo} ?`)) {
         await updateDoc(doc(db, "utilisateurs", user.uid), {
@@ -83,13 +115,13 @@ function Messages() {
     return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
   };
 
-  if (convActive) {
+  if (convActiveId && convActiveData) {
     return (
       <Chat
-        convId={convActive.id}
-        autre={convActive.autre}
-        autreId={convActive.autreId}
-        onRetour={() => setConvActive(null)}
+        convId={convActiveData.id}
+        autre={convActiveData.autre}
+        autreId={convActiveData.autreId}
+        onRetour={fermerConv}
       />
     );
   }
@@ -114,7 +146,7 @@ function Messages() {
             >
               <div
                 className="conv-item-contenu"
-                onClick={() => setConvActive(conv)}
+                onClick={() => ouvrirConv(conv)}
               >
                 <div className="conv-avatar">
                   {conv.autre?.photoURL ? (

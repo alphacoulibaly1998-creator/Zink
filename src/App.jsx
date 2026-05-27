@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import NavBar from "./components/NavBar";
 import Accueil from "./pages/Accueil";
 import Profil from "./pages/Profil";
@@ -19,9 +20,27 @@ function App() {
   const [chargement, setChargement] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
       setUtilisateur(user);
       setChargement(false);
+
+      if (user) {
+        const ref = doc(db, "utilisateurs", user.uid);
+        await updateDoc(ref, {
+          enLigne: true,
+          dernièreVue: serverTimestamp()
+        });
+
+        const handleOffline = async () => {
+          await updateDoc(ref, {
+            enLigne: false,
+            dernièreVue: serverTimestamp()
+          });
+        };
+
+        window.addEventListener("beforeunload", handleOffline);
+        return () => window.removeEventListener("beforeunload", handleOffline);
+      }
     });
     return () => unsub();
   }, []);
