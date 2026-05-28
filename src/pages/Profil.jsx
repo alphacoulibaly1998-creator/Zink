@@ -4,6 +4,10 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
+import { IMGBB_API_KEY } from "../config";
+import axios from "axios";
+
+const AVATARS = ["🐶","🐱","🦊","🐼","🐨","🦁","🐯","🐸","🐙","🦋","🌸","⭐","🔥","🎮","🎵","🌈","💎","🚀","🎯","👑"];
 
 function Profil() {
   const [profil, setProfil] = useState(null);
@@ -12,8 +16,13 @@ function Profil() {
   const [statut, setStatut] = useState("");
   const [telephone, setTelephone] = useState("");
   const [telephoneMasque, setTelephoneMasque] = useState(false);
+  const [age, setAge] = useState("");
+  const [dateMasquee, setDateMasquee] = useState(false);
+  const [sexe, setSexe] = useState("");
   const [erreurTel, setErreurTel] = useState("");
   const [chargement, setChargement] = useState(true);
+  const [uploadPhoto, setUploadPhoto] = useState(false);
+  const [afficherAvatars, setAfficherAvatars] = useState(false);
   const navigate = useNavigate();
   const user = auth.currentUser;
 
@@ -27,6 +36,9 @@ function Profil() {
         setPseudo(data.pseudo);
         setStatut(data.statut);
         setTelephoneMasque(data.telephoneMasque);
+        setAge(data.dateNaissance || "");
+        setDateMasquee(data.dateMasquee || false);
+        setSexe(data.sexe || "");
         const numero = data.telephone || "";
         const indicatif = data.indicatif || "";
         const sansIndicatif = numero.startsWith(indicatif)
@@ -52,6 +64,37 @@ function Profil() {
     return true;
   };
 
+  const changerPhoto = async (e) => {
+    const fichier = e.target.files[0];
+    if (!fichier) return;
+    if (fichier.size > 5 * 1024 * 1024) {
+      alert("L'image ne doit pas dépasser 5MB.");
+      return;
+    }
+    setUploadPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", fichier);
+      formData.append("key", IMGBB_API_KEY);
+      const res = await axios.post("https://api.imgbb.com/1/upload", formData);
+      const photoURL = res.data.data.url;
+      await updateDoc(doc(db, "utilisateurs", user.uid), { photoURL });
+      setProfil({ ...profil, photoURL });
+    } catch {
+      alert("Erreur lors du chargement de la photo.");
+    }
+    setUploadPhoto(false);
+  };
+
+  const choisirAvatar = async (avatar) => {
+    await updateDoc(doc(db, "utilisateurs", user.uid), {
+      photoURL: "",
+      avatar
+    });
+    setProfil({ ...profil, photoURL: "", avatar });
+    setAfficherAvatars(false);
+  };
+
   const sauvegarder = async () => {
     setErreurTel("");
     if (!validerTelephone()) {
@@ -61,18 +104,43 @@ function Profil() {
       );
       return;
     }
+    if (age) {
+      const dateNaissance = new Date(age);
+      const ageCalcule = Math.floor((new Date() - dateNaissance) / (365.25 * 24 * 60 * 60 * 1000));
+      if (ageCalcule < 0 || ageCalcule > 120) {
+        alert("Date de naissance invalide.");
+        return;
+      }
+    }
     const indicatif = profil?.indicatif || "";
     const numeroComplet = telephone
       ? `${indicatif}${telephone.replace(/\s/g, "")}`
+      : "";
+    const ageCalculeFinal = age
+      ? Math.floor((new Date() - new Date(age)) / (365.25 * 24 * 60 * 60 * 1000))
       : "";
     const ref = doc(db, "utilisateurs", user.uid);
     await updateDoc(ref, {
       pseudo,
       statut,
       telephone: numeroComplet,
-      telephoneMasque
+      telephoneMasque,
+      dateNaissance: age || "",
+      dateMasquee,
+      age: ageCalculeFinal,
+      sexe
     });
-    setProfil({ ...profil, pseudo, statut, telephone: numeroComplet, telephoneMasque });
+    setProfil({
+      ...profil,
+      pseudo,
+      statut,
+      telephone: numeroComplet,
+      telephoneMasque,
+      dateNaissance: age || "",
+      dateMasquee,
+      age: ageCalculeFinal,
+      sexe
+    });
     setEdition(false);
   };
 
@@ -89,18 +157,54 @@ function Profil() {
     return profil.telephone;
   };
 
+  const afficherSexe = (s) => {
+    const map = { homme: "Homme", femme: "Femme", autre: "Autre", "non-precise": "Non précisé" };
+    return map[s] || "Non renseigné";
+  };
+
   return (
     <div className="profil-container">
       <div className="profil-header">
-        <div className="profil-avatar">
+
+        <div className="profil-photo-container">
           {profil?.photoURL ? (
-            <img src={profil.photoURL} alt="avatar" />
+            <img src={profil.photoURL} alt="avatar" className="profil-avatar" />
           ) : (
             <div className="profil-avatar-placeholder">
-              {profil?.pseudo?.[0]?.toUpperCase() || "?"}
+              {profil?.avatar || profil?.pseudo?.[0]?.toUpperCase() || "?"}
             </div>
           )}
+          <label className="profil-btn-photo">
+            {uploadPhoto ? "⏳" : "📷"}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={changerPhoto}
+              style={{ display: "none" }}
+            />
+          </label>
         </div>
+
+        <button
+          className="profil-btn-avatar"
+          onClick={() => setAfficherAvatars(!afficherAvatars)}
+        >
+          😊 Choisir un avatar
+        </button>
+
+        {afficherAvatars && (
+          <div className="avatars-grid">
+            {AVATARS.map((a) => (
+              <button
+                key={a}
+                className={`avatar-btn ${profil?.avatar === a ? "actif" : ""}`}
+                onClick={() => choisirAvatar(a)}
+              >
+                {a}
+              </button>
+            ))}
+          </div>
+        )}
 
         {edition ? (
           <input
@@ -135,6 +239,60 @@ function Profil() {
         <div className="profil-info-card">
           <span className="profil-info-label">🏆 Badges</span>
           <span className="profil-info-valeur">{profil?.badges?.length || 0}</span>
+        </div>
+      <div className="profil-info-card">
+          <span className="profil-info-label">🎂 Date de naissance</span>
+          <span className="profil-info-valeur">
+            {edition ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <input
+                  type="date"
+                  className="auth-input"
+                  value={age}
+                  max={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setAge(e.target.value)}
+                  style={{ padding: "6px" }}
+                />
+                {age && (
+                  <label className="auth-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={dateMasquee}
+                      onChange={(e) => setDateMasquee(e.target.checked)}
+                    />
+                    Masquer ma date de naissance
+                  </label>
+                )}
+              </div>
+            ) : (
+              profil?.dateMasquee
+                ? "Masquée 🔒"
+                : profil?.dateNaissance
+                ? `${new Date(profil.dateNaissance).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} (${profil.age} ans)`
+                : "Non renseigné"
+            )}
+          </span>
+        </div>
+        <div className="profil-info-card">
+          <span className="profil-info-label">👤 Sexe</span>
+          <span className="profil-info-valeur">
+            {edition ? (
+              <select
+                className="auth-input"
+                value={sexe}
+                onChange={(e) => setSexe(e.target.value)}
+                style={{ padding: "6px" }}
+              >
+                <option value="">-- Sexe --</option>
+                <option value="homme">Homme</option>
+                <option value="femme">Femme</option>
+                <option value="autre">Autre</option>
+                <option value="non-precise">Préfère ne pas préciser</option>
+              </select>
+            ) : (
+              afficherSexe(profil?.sexe)
+            )}
+          </span>
         </div>
         <div className="profil-info-card">
           <span className="profil-info-label">📱 Téléphone</span>

@@ -12,6 +12,9 @@ function Register() {
   const [paysChoisi, setPaysChoisi] = useState(null);
   const [telephone, setTelephone] = useState("");
   const [telephoneMasque, setTelephoneMasque] = useState(false);
+  const [age, setAge] = useState("");
+  const [dateMasquee, setDateMasquee] = useState(false);
+  const [sexe, setSexe] = useState("");
   const [erreur, setErreur] = useState("");
   const [erreurPseudo, setErreurPseudo] = useState("");
   const [suggestionsPseudo, setSuggestionsPseudo] = useState([]);
@@ -76,6 +79,20 @@ function Register() {
       setChargement(false);
       return;
     }
+
+   if (!age) {
+      setErreur("Entre ta date de naissance.");
+      setChargement(false);
+      return;
+    }
+    const dateNaissance = new Date(age);
+    const aujourdhui = new Date();
+    const ageCalcule = Math.floor((aujourdhui - dateNaissance) / (365.25 * 24 * 60 * 60 * 1000));
+    if (!sexe) {
+      setErreur("Choisis ton sexe.");
+      setChargement(false);
+      return;
+    }
     if (!validerTelephone()) {
       setErreurTel(
         `Numéro invalide. Le ${paysChoisi.nom} nécessite exactement ${paysChoisi.chiffres} chiffres.`
@@ -120,6 +137,10 @@ function Register() {
       await setDoc(doc(db, "utilisateurs", result.user.uid), {
         pseudo: pseudo.trim(),
         email,
+        dateNaissance: age,
+        dateMasquee: dateMasquee || false,
+        age: ageCalcule || 0,
+        sexe,
         pays: paysChoisi.nom,
         indicatif: paysChoisi.indicatif,
         chiffresTel: paysChoisi.chiffres,
@@ -212,6 +233,37 @@ function Register() {
           {paysList.map((p) => (
             <option key={p.nom} value={p.nom}>{p.nom}</option>
           ))}
+        </select>
+
+<input
+          className="auth-input"
+          type="date"
+          placeholder="Date de naissance"
+          value={age}
+          max={new Date().toISOString().split("T")[0]}
+          onChange={(e) => setAge(e.target.value)}
+        />
+        {age && (
+          <label className="auth-checkbox">
+            <input
+              type="checkbox"
+              checked={dateMasquee}
+              onChange={(e) => setDateMasquee(e.target.checked)}
+            />
+            Masquer ma date de naissance
+          </label>
+        )}
+
+        <select
+          className="auth-input"
+          value={sexe}
+          onChange={(e) => setSexe(e.target.value)}
+        >
+          <option value="">-- Sexe --</option>
+          <option value="homme">Homme</option>
+          <option value="femme">Femme</option>
+          <option value="autre">Autre</option>
+          <option value="non-precise">Préfère ne pas préciser</option>
         </select>
 
         <div>
