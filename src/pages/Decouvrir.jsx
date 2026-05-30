@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 function Decouvrir() {
   const [recherche, setRecherche] = useState("");
   const [resultats, setResultats] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState("");
   const [monProfil, setMonProfil] = useState(null);
@@ -23,40 +24,58 @@ function Decouvrir() {
     charger();
   }, []);
 
-  const chercher = async () => {
-    setErreur("");
-    setResultats([]);
-    if (!recherche.trim()) {
-      setErreur("Tape un pseudo ou un pays.");
+  useEffect(() => {
+    if (!recherche.trim() || recherche.length < 2) {
+      setSuggestions([]);
       return;
     }
-    setChargement(true);
-    try {
-      const parPseudo = query(
+    const timer = setTimeout(async () => {
+      const q = query(
         collection(db, "utilisateurs"),
         where("pseudo", ">=", recherche.trim()),
         where("pseudo", "<=", recherche.trim() + "\uf8ff")
       );
-      const parPays = query(
+      const snap = await getDocs(q);
+      const suggs = snap.docs
+        .filter((d) => d.id !== user.uid)
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .slice(0, 5);
+      setSuggestions(suggs);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [recherche]);
+
+  const chercher = async () => {
+    setErreur("");
+    setResultats([]);
+    setSuggestions([]);
+    if (!recherche.trim()) {
+      setErreur("Tape un pseudo.");
+      return;
+    }
+    setChargement(true);
+    try {
+      const q = query(
         collection(db, "utilisateurs"),
-        where("pays", "==", recherche.trim())
+        where("pseudo", ">=", recherche.trim()),
+        where("pseudo", "<=", recherche.trim() + "\uf8ff")
       );
-      const [snapPseudo, snapPays] = await Promise.all([
-        getDocs(parPseudo),
-        getDocs(parPays)
-      ]);
-      const resultatsMap = new Map();
-      [...snapPseudo.docs, ...snapPays.docs].forEach((d) => {
-        if (d.id !== user.uid) {
-          resultatsMap.set(d.id, { id: d.id, ...d.data() });
-        }
-      });
-      setResultats([...resultatsMap.values()]);
-      if (resultatsMap.size === 0) setErreur("Aucun utilisateur trouvé.");
+      const snap = await getDocs(q);
+      const res = snap.docs
+        .filter((d) => d.id !== user.uid)
+        .map((d) => ({ id: d.id, ...d.data() }));
+      setResultats(res);
+      if (res.length === 0) setErreur("Aucun utilisateur trouvé.");
     } catch (e) {
       setErreur("Erreur lors de la recherche.");
     }
     setChargement(false);
+  };
+
+  const choisirSuggestion = (u) => {
+    setRecherche(u.pseudo);
+    setSuggestions([]);
+    setResultats([u]);
   };
 
   const getStatutRelation = (autreUser) => {
@@ -72,12 +91,8 @@ function Decouvrir() {
   const envoyerDemande = async (autreUser) => {
     const monRef = doc(db, "utilisateurs", user.uid);
     const autreRef = doc(db, "utilisateurs", autreUser.id);
-    await updateDoc(monRef, {
-      demandesEnvoyees: arrayUnion(autreUser.id)
-    });
-    await updateDoc(autreRef, {
-      demandesRecues: arrayUnion(user.uid)
-    });
+    await updateDoc(monRef, { demandesEnvoyees: arrayUnion(autreUser.id) });
+    await updateDoc(autreRef, { demandesRecues: arrayUnion(user.uid) });
     setMonProfil((prev) => ({
       ...prev,
       demandesEnvoyees: [...(prev?.demandesEnvoyees || []), autreUser.id]
@@ -102,35 +117,19 @@ function Decouvrir() {
 
   const renderBouton = (u) => {
     const statut = getStatutRelation(u);
-    if (statut === "ami") {
-      return (
-        <button className="decouvrir-btn-ami deja-ami">
-          ✓ Ami
-        </button>
-      );
-    }
-    if (statut === "envoye") {
-      return (
-        <button className="decouvrir-btn-ami en-attente">
-          ⏳ Envoyée
-        </button>
-      );
-    }
-    if (statut === "recu") {
-      return (
-        <button
-          className="decouvrir-btn-ami recu"
-          onClick={() => envoyerDemande(u)}
-        >
-          👥 Accepter
-        </button>
-      );
-    }
+    if (statut === "ami") return (
+      <button className="decouvrir-btn-ami deja-ami">✓ Ami</button>
+    );
+    if (statut === "envoye") return (
+      <button className="decouvrir-btn-ami en-attente">⏳ Envoyée</button>
+    );
+    if (statut === "recu") return (
+      <button className="decouvrir-btn-ami recu" onClick={() => envoyerDemande(u)}>
+        👥 Accepter
+      </button>
+    );
     return (
-      <button
-        className="decouvrir-btn-ami"
-        onClick={() => envoyerDemande(u)}
-      >
+      <button className="decouvrir-btn-ami" onClick={() => envoyerDemande(u)}>
         👥 Ajouter
       </button>
     );
@@ -141,14 +140,33 @@ function Decouvrir() {
       <h1 className="accueil-titre">🔍 Découvrir</h1>
 
       <div className="decouvrir-recherche">
-        <input
-          className="auth-input"
-          type="text"
-          placeholder="Rechercher par pseudo ou pays..."
-          value={recherche}
-          onChange={(e) => setRecherche(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && chercher()}
-        />
+        <div className="decouvrir-input-container">
+          <input
+            className="auth-input"
+            type="text"
+            placeholder="Rechercher par pseudo..."
+            value={recherche}
+            onChange={(e) => setRecherche(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && chercher()}
+          />
+          {suggestions.length > 0 && (
+            <div className="decouvrir-suggestions">
+              {suggestions.map((u) => (
+                <div
+                  key={u.id}
+                  className="decouvrir-suggestion"
+                  onClick={() => choisirSuggestion(u)}
+                >
+                  <div className="conv-avatar-placeholder" style={{ width: 32, height: 32, fontSize: 14 }}>
+                    {u.pseudo?.[0]?.toUpperCase() || "?"}
+                  </div>
+                  <span>{u.pseudo}</span>
+                  <span className="suggestion-pays">🌍 {u.pays}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         <button className="auth-btn" onClick={chercher} disabled={chargement}>
           {chargement ? "..." : "🔍"}
         </button>

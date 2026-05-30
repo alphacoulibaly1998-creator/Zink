@@ -15,6 +15,7 @@ function Register() {
   const [age, setAge] = useState("");
   const [dateMasquee, setDateMasquee] = useState(false);
   const [sexe, setSexe] = useState("");
+  const [voirMdp, setVoirMdp] = useState(false);
   const [erreur, setErreur] = useState("");
   const [erreurPseudo, setErreurPseudo] = useState("");
   const [suggestionsPseudo, setSuggestionsPseudo] = useState([]);
@@ -216,13 +217,21 @@ function Register() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="Mot de passe (6 caractères min)"
-          value={motDePasse}
-          onChange={(e) => setMotDePasse(e.target.value)}
-        />
+        <div className="mdp-container">
+          <input
+            className="auth-input"
+            type={voirMdp ? "text" : "password"}
+            placeholder="Mot de passe (6 caractères min)"
+            value={motDePasse}
+            onChange={(e) => setMotDePasse(e.target.value)}
+          />
+          <button
+            className="mdp-oeil"
+            onClick={() => setVoirMdp(!voirMdp)}
+          >
+            {voirMdp ? "🙈" : "👁️"}
+          </button>
+        </div>
 
         <select
           className="auth-input"

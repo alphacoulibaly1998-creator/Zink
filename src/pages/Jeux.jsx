@@ -1,9 +1,9 @@
 import { useState } from "react";
-import TicTacToe from "../components/jeux/TicTacToe";
-import Puissance4 from "../components/jeux/Puissance4";
-import BatailleNavale from "../components/jeux/BatailleNavale";
-import CrazyEights from "../components/jeux/CrazyEights";
-import FlipChip from "../components/jeux/FlipChip";
+import TicTacToe from "../components/Jeux/TicTacToe";
+import Puissance4 from "../components/Jeux/Puissance4";
+import BatailleNavale from "../components/Jeux/BatailleNavale";
+import CrazyEights from "../components/Jeux/CrazyEights";
+import FlipChip from "../components/Jeux/FlipChip";
 
 const JEUX = [
   {

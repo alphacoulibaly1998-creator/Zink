@@ -1,0 +1,252 @@
+import { useState, useEffect } from "react";
+import { auth, db } from "../firebase";
+import {
+  updatePassword, updateEmail,
+  reauthenticateWithCredential,
+  EmailAuthProvider, deleteUser
+} from "firebase/auth";
+import { doc, deleteDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+
+function Parametres({ onRetour }) {
+  const [section, setSection] = useState(null);
+  const [mdpActuel, setMdpActuel] = useState("");
+  const [nouveauMdp, setNouveauMdp] = useState("");
+  const [nouvelEmail, setNouvelEmail] = useState("");
+  const [voirMdp, setVoirMdp] = useState(false);
+  const [voirNouveauMdp, setVoirNouveauMdp] = useState(false);
+ const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => setMessage(""), 3000);
+    return () => clearTimeout(timer);
+  }, [message]);
+  const [erreur, setErreur] = useState("");
+  const [chargement, setChargement] = useState(false);
+  const user = auth.currentUser;
+  const navigate = useNavigate();
+
+  const reinitialiser = () => {
+    setMdpActuel("");
+    setNouveauMdp("");
+    setNouvelEmail("");
+    setMessage("");
+    setErreur("");
+  };
+
+  const reauthenthifier = async () => {
+    const credential = EmailAuthProvider.credential(user.email, mdpActuel);
+    await reauthenticateWithCredential(user, credential);
+  };
+
+  const changerMdp = async () => {
+    setErreur("");
+    setMessage("");
+    if (!mdpActuel || !nouveauMdp) {
+      setErreur("Remplis tous les champs.");
+      return;
+    }
+    if (nouveauMdp.length < 6) {
+      setErreur("Le nouveau mot de passe doit avoir au moins 6 caractères.");
+      return;
+    }
+    setChargement(true);
+    try {
+      await reauthenthifier();
+      await updatePassword(user, nouveauMdp);
+      setMessage("✅ Mot de passe changé avec succès !");
+      reinitialiser();
+      setSection(null);
+    } catch (e) {
+      if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
+        setErreur("Mot de passe actuel incorrect.");
+      } else {
+        setErreur("Une erreur est survenue. Réessaie.");
+      }
+    }
+    setChargement(false);
+  };
+
+  const changerEmail = async () => {
+    setErreur("");
+    setMessage("");
+    if (!mdpActuel || !nouvelEmail) {
+      setErreur("Remplis tous les champs.");
+      return;
+    }
+    setChargement(true);
+    try {
+      await reauthenthifier();
+      await updateEmail(user, nouvelEmail);
+      await doc(db, "utilisateurs", user.uid);
+      setMessage("✅ Email changé avec succès !");
+      reinitialiser();
+      setSection(null);
+    } catch (e) {
+      if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
+        setErreur("Mot de passe actuel incorrect.");
+      } else if (e.code === "auth/email-already-in-use") {
+        setErreur("Cet email est déjà utilisé.");
+      } else {
+        setErreur("Une erreur est survenue. Réessaie.");
+      }
+    }
+    setChargement(false);
+  };
+
+  const supprimerCompte = async () => {
+    setErreur("");
+    if (!mdpActuel) {
+      setErreur("Entre ton mot de passe pour confirmer.");
+      return;
+    }
+    if (!window.confirm("Supprimer définitivement ton compte ? Cette action est irréversible.")) return;
+    setChargement(true);
+    try {
+      await reauthenthifier();
+      await deleteDoc(doc(db, "utilisateurs", user.uid));
+      await deleteUser(user);
+      navigate("/login");
+    } catch (e) {
+      if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
+        setErreur("Mot de passe incorrect.");
+      } else {
+        setErreur("Une erreur est survenue. Réessaie.");
+      }
+    }
+    setChargement(false);
+  };
+
+  return (
+    <div className="parametres-container">
+      <div className="jeu-header">
+        <button className="chat-retour" onClick={onRetour}>←</button>
+        <h2 className="jeu-titre">⚙️ Paramètres</h2>
+      </div>
+
+      {message && <p className="auth-succes">{message}</p>}
+
+      <div className="parametres-liste">
+
+        <div
+          className={`param-item ${section === "mdp" ? "actif" : ""}`}
+          onClick={() => { setSection(section === "mdp" ? null : "mdp"); reinitialiser(); }}
+        >
+          <span className="param-icon">🔑</span>
+          <span className="param-label">Changer le mot de passe</span>
+          <span className="param-fleche">{section === "mdp" ? "▲" : "▼"}</span>
+        </div>
+
+        {section === "mdp" && (
+          <div className="param-form">
+            <div className="mdp-container">
+              <input
+                className="auth-input"
+                type={voirMdp ? "text" : "password"}
+                placeholder="Mot de passe actuel"
+                value={mdpActuel}
+                onChange={(e) => setMdpActuel(e.target.value)}
+              />
+              <button className="mdp-oeil" onClick={() => setVoirMdp(!voirMdp)}>
+                {voirMdp ? "🙈" : "👁️"}
+              </button>
+            </div>
+            <div className="mdp-container">
+              <input
+                className="auth-input"
+                type={voirNouveauMdp ? "text" : "password"}
+                placeholder="Nouveau mot de passe"
+                value={nouveauMdp}
+                onChange={(e) => setNouveauMdp(e.target.value)}
+              />
+              <button className="mdp-oeil" onClick={() => setVoirNouveauMdp(!voirNouveauMdp)}>
+                {voirNouveauMdp ? "🙈" : "👁️"}
+              </button>
+            </div>
+            {erreur && <p className="auth-erreur">{erreur}</p>}
+            <button className="auth-btn" onClick={changerMdp} disabled={chargement}>
+              {chargement ? "..." : "💾 Sauvegarder"}
+            </button>
+          </div>
+        )}
+
+        <div
+          className={`param-item ${section === "email" ? "actif" : ""}`}
+          onClick={() => { setSection(section === "email" ? null : "email"); reinitialiser(); }}
+        >
+          <span className="param-icon">📧</span>
+          <span className="param-label">Changer l'email</span>
+          <span className="param-fleche">{section === "email" ? "▲" : "▼"}</span>
+        </div>
+
+        {section === "email" && (
+          <div className="param-form">
+            <p className="param-info">Email actuel : <strong>{user.email}</strong></p>
+            <div className="mdp-container">
+              <input
+                className="auth-input"
+                type={voirMdp ? "text" : "password"}
+                placeholder="Mot de passe actuel"
+                value={mdpActuel}
+                onChange={(e) => setMdpActuel(e.target.value)}
+              />
+              <button className="mdp-oeil" onClick={() => setVoirMdp(!voirMdp)}>
+                {voirMdp ? "🙈" : "👁️"}
+              </button>
+            </div>
+            <input
+              className="auth-input"
+              type="email"
+              placeholder="Nouvel email"
+              value={nouvelEmail}
+              onChange={(e) => setNouvelEmail(e.target.value)}
+            />
+            {erreur && <p className="auth-erreur">{erreur}</p>}
+            <button className="auth-btn" onClick={changerEmail} disabled={chargement}>
+              {chargement ? "..." : "💾 Sauvegarder"}
+            </button>
+          </div>
+        )}
+
+        <div
+          className={`param-item danger ${section === "supprimer" ? "actif" : ""}`}
+          onClick={() => { setSection(section === "supprimer" ? null : "supprimer"); reinitialiser(); }}
+        >
+          <span className="param-icon">🗑️</span>
+          <span className="param-label">Supprimer mon compte</span>
+          <span className="param-fleche">{section === "supprimer" ? "▲" : "▼"}</span>
+        </div>
+
+        {section === "supprimer" && (
+          <div className="param-form">
+            <p className="param-info danger-txt">⚠️ Cette action est irréversible !</p>
+            <div className="mdp-container">
+              <input
+                className="auth-input"
+                type={voirMdp ? "text" : "password"}
+                placeholder="Confirme ton mot de passe"
+                value={mdpActuel}
+                onChange={(e) => setMdpActuel(e.target.value)}
+              />
+              <button className="mdp-oeil" onClick={() => setVoirMdp(!voirMdp)}>
+                {voirMdp ? "🙈" : "👁️"}
+              </button>
+            </div>
+            {erreur && <p className="auth-erreur">{erreur}</p>}
+            <button
+              className="profil-btn-deconnexion"
+              onClick={supprimerCompte}
+              disabled={chargement}
+            >
+              {chargement ? "..." : "🗑️ Supprimer définitivement"}
+            </button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+export default Parametres;

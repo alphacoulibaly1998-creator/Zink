@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 function Login() {
   const [identifiant, setIdentifiant] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
+  const [voirMdp, setVoirMdp] = useState(false);
   const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(false);
   const navigate = useNavigate();
@@ -24,7 +25,6 @@ function Login() {
     try {
       let emailAUtiliser = identifiant.trim();
 
-      // Si c'est pas un email, on cherche le numéro dans Firestore
       if (!identifiant.includes("@")) {
         const numero = identifiant.replace(/\s/g, "");
         const q = query(
@@ -65,13 +65,22 @@ function Login() {
           value={identifiant}
           onChange={(e) => setIdentifiant(e.target.value)}
         />
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="Mot de passe"
-          value={motDePasse}
-          onChange={(e) => setMotDePasse(e.target.value)}
-        />
+
+        <div className="mdp-container">
+          <input
+            className="auth-input"
+            type={voirMdp ? "text" : "password"}
+            placeholder="Mot de passe"
+            value={motDePasse}
+            onChange={(e) => setMotDePasse(e.target.value)}
+          />
+          <button
+            className="mdp-oeil"
+            onClick={() => setVoirMdp(!voirMdp)}
+          >
+            {voirMdp ? "🙈" : "👁️"}
+          </button>
+        </div>
 
         {erreur && <p className="auth-erreur">{erreur}</p>}
 

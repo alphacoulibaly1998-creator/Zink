@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
 import { IMGBB_API_KEY } from "../config";
 import axios from "axios";
+import Parametres from "./Parametres";
 
 const AVATARS = ["🐶","🐱","🦊","🐼","🐨","🦁","🐯","🐸","🐙","🦋","🌸","⭐","🔥","🎮","🎵","🌈","💎","🚀","🎯","👑"];
 
@@ -23,6 +24,7 @@ function Profil() {
   const [chargement, setChargement] = useState(true);
   const [uploadPhoto, setUploadPhoto] = useState(false);
   const [afficherAvatars, setAfficherAvatars] = useState(false);
+  const [afficherParametres, setAfficherParametres] = useState(false);
   const navigate = useNavigate();
   const user = auth.currentUser;
 
@@ -150,6 +152,7 @@ function Profil() {
   };
 
   if (chargement) return <div className="chargement">Chargement...</div>;
+if (afficherParametres) return <Parametres onRetour={() => setAfficherParametres(false)} />;
 
   const afficherTelephone = () => {
     if (!profil?.telephone) return "Non renseigné";
@@ -164,6 +167,15 @@ function Profil() {
 
   return (
     <div className="profil-container">
+      <div className="profil-top">
+        <h1 className="accueil-titre">👤 Profil</h1>
+        <button
+          className="profil-btn-parametres"
+          onClick={() => setAfficherParametres(true)}
+        >
+          ⚙️
+        </button>
+      </div>
       <div className="profil-header">
 
         <div className="profil-photo-container">
