@@ -2399,3 +2399,156 @@ body {
   border-radius: 10px;
   padding: 10px;
 }
+
+
+.attaques-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.attaques-envoyer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.attaques-titre {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.attaques-vide {
+  color: #888;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+.attaques-amis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.attaque-ami-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1a1a2e;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.attaque-ami-btn:hover {
+  border-color: #a855f7;
+}
+
+.attaque-ami-btn.actif {
+  border-color: #a855f7;
+  background: #2a2a4a;
+}
+
+.attaques-sons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.attaque-son-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #1a1a2e;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 14px 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.attaque-son-btn:hover {
+  border-color: #ff6b6b;
+  background: #2a2a4a;
+}
+
+.attaque-son-btn.actif {
+  border-color: #ff6b6b;
+  background: #2a2a4a;
+}
+
+.son-icon {
+  font-size: 28px;
+}
+
+.son-nom {
+  font-size: 12px;
+  color: #888;
+}
+
+.attaques-message {
+  text-align: center;
+  color: #4ade80;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.attaques-recues {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attaque-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1a2e;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.attaque-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.attaque-infos {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 2px;
+}
+
+.attaque-auteur {
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.attaque-son {
+  color: #a855f7;
+  font-size: 13px;
+}
+
+.attaque-date {
+  color: #888;
+  font-size: 12px;
+}
+
+.attaque-rejouer {
+  background: linear-gradient(135deg, #ff6b6b, #a855f7);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}

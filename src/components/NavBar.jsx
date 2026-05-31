@@ -18,6 +18,7 @@ function NavBar() {
   const location = useLocation();
   const [messagesNonLus, setMessagesNonLus] = useState(0);
   const [demandesAmis, setDemandesAmis] = useState(0);
+  const [attaquesNonLues, setAttaquesNonLues] = useState(0);
   const user = auth.currentUser;
 
   useEffect(() => {
@@ -48,6 +49,19 @@ function NavBar() {
     return () => unsub();
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(db, "attaques"),
+      where("cibleId", "==", user.uid),
+      where("lu", "==", false)
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      setAttaquesNonLues(snap.docs.length);
+    });
+    return () => unsub();
+  }, [user]);
+
   return (
     <nav className="navbar">
       {liens.map((lien) => (
@@ -64,6 +78,11 @@ function NavBar() {
             {lien.path === "/amis" && demandesAmis > 0 && (
               <span className="nav-badge">{demandesAmis}</span>
             )}
+
+            {lien.path === "/attaques" && attaquesNonLues > 0 && (
+              <span className="nav-badge">{attaquesNonLues}</span>
+            )}
+            
           </div>
           <span className="nav-label">{lien.label}</span>
         </button>
