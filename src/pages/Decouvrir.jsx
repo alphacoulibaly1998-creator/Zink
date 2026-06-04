@@ -30,17 +30,28 @@ function Decouvrir() {
       return;
     }
     const timer = setTimeout(async () => {
-      const q = query(
+      const rechercheLower = recherche.trim().toLowerCase();
+      const q1 = query(
+        collection(db, "utilisateurs"),
+        where("pseudoLower", ">=", rechercheLower),
+        where("pseudoLower", "<=", rechercheLower + "\uf8ff")
+      );
+      const q2 = query(
         collection(db, "utilisateurs"),
         where("pseudo", ">=", recherche.trim()),
         where("pseudo", "<=", recherche.trim() + "\uf8ff")
       );
-      const snap = await getDocs(q);
-      const suggs = snap.docs
-        .filter((d) => d.id !== user.uid)
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .slice(0, 5);
-      setSuggestions(suggs);
+      const q3 = query(
+        collection(db, "utilisateurs"),
+        where("pseudo", ">=", rechercheLower),
+        where("pseudo", "<=", rechercheLower + "\uf8ff")
+      );
+      const [snap1, snap2, snap3] = await Promise.all([getDocs(q1), getDocs(q2), getDocs(q3)]);
+      const map = new Map();
+      [...snap1.docs, ...snap2.docs, ...snap3.docs].forEach((d) => {
+        if (d.id !== user.uid) map.set(d.id, { id: d.id, ...d.data() });
+      });
+      setSuggestions([...map.values()].slice(0, 5));
     }, 300);
     return () => clearTimeout(timer);
   }, [recherche]);
@@ -55,15 +66,28 @@ function Decouvrir() {
     }
     setChargement(true);
     try {
-      const q = query(
+      const rechercheLower = recherche.trim().toLowerCase();
+      const q1 = query(
+        collection(db, "utilisateurs"),
+        where("pseudoLower", ">=", rechercheLower),
+        where("pseudoLower", "<=", rechercheLower + "\uf8ff")
+      );
+      const q2 = query(
         collection(db, "utilisateurs"),
         where("pseudo", ">=", recherche.trim()),
         where("pseudo", "<=", recherche.trim() + "\uf8ff")
       );
-      const snap = await getDocs(q);
-      const res = snap.docs
-        .filter((d) => d.id !== user.uid)
-        .map((d) => ({ id: d.id, ...d.data() }));
+      const q3 = query(
+        collection(db, "utilisateurs"),
+        where("pseudo", ">=", rechercheLower),
+        where("pseudo", "<=", rechercheLower + "\uf8ff")
+      );
+      const [snap1, snap2, snap3] = await Promise.all([getDocs(q1), getDocs(q2), getDocs(q3)]);
+      const map = new Map();
+      [...snap1.docs, ...snap2.docs, ...snap3.docs].forEach((d) => {
+        if (d.id !== user.uid) map.set(d.id, { id: d.id, ...d.data() });
+      });
+      const res = [...map.values()];
       setResultats(res);
       if (res.length === 0) setErreur("Aucun utilisateur trouvé.");
     } catch (e) {

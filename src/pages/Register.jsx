@@ -75,6 +75,14 @@ function Register() {
       setChargement(false);
       return;
     }
+
+    const mdpRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!mdpRegex.test(motDePasse)) {
+      setErreur("Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.");
+      setChargement(false);
+      return;
+    }
+
     if (!paysChoisi) {
       setErreur("Choisis ton pays.");
       setChargement(false);
@@ -137,6 +145,7 @@ function Register() {
         : "";
       await setDoc(doc(db, "utilisateurs", result.user.uid), {
         pseudo: pseudo.trim(),
+        pseudoLower: pseudo.trim().toLowerCase(),
         email,
         dateNaissance: age,
         dateMasquee: dateMasquee || false,
@@ -221,7 +230,7 @@ function Register() {
           <input
             className="auth-input"
             type={voirMdp ? "text" : "password"}
-            placeholder="Mot de passe (6 caractères min)"
+            placeholder="Mot de passe (8 car. min, 1 majuscule, 1 chiffre)"
             value={motDePasse}
             onChange={(e) => setMotDePasse(e.target.value)}
           />
@@ -244,14 +253,16 @@ function Register() {
           ))}
         </select>
 
-<input
-          className="auth-input"
-          type="date"
-          placeholder="Date de naissance"
-          value={age}
-          max={new Date().toISOString().split("T")[0]}
-          onChange={(e) => setAge(e.target.value)}
-        />
+<div className="auth-label-group">
+          <label className="auth-label">🎂 Date de naissance</label>
+          <input
+            className="auth-input"
+            type="date"
+            value={age}
+            max={new Date().toISOString().split("T")[0]}
+            onChange={(e) => setAge(e.target.value)}
+          />
+        </div>
         {age && (
           <label className="auth-checkbox">
             <input

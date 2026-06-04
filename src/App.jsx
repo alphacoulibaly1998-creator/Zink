@@ -13,6 +13,7 @@ import Decouvrir from "./pages/Decouvrir";
 import AttaquesSonores from "./pages/AttaquesSonores";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import MotDePasseOublie from "./pages/MotDePasseOublie";
 import "./App.css";
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
           <Routes>
             <Route path="/login" element={!utilisateur ? <Login /> : <Navigate to="/" />} />
             <Route path="/register" element={!utilisateur ? <Register /> : <Navigate to="/" />} />
+           <Route path="/mot-de-passe-oublie" element={!utilisateur ? <MotDePasseOublie /> : <Navigate to="/" />} />
             <Route path="/" element={utilisateur ? <Accueil /> : <Navigate to="/login" />} />
             <Route path="/profil" element={utilisateur ? <Profil /> : <Navigate to="/login" />} />
             <Route path="/amis" element={utilisateur ? <Amis /> : <Navigate to="/login" />} />

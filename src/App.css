@@ -2552,3 +2552,17 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
+
+
+.auth-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-label {
+  color: #888;
+  font-size: 13px;
+  font-weight: 600;
+  padding-left: 4px;
+}

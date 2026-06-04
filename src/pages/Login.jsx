@@ -10,10 +10,18 @@ function Login() {
   const [voirMdp, setVoirMdp] = useState(false);
   const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(false);
+  const [tentatives, setTentatives] = useState(0);
+  const [bloque, setBloque] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     setErreur("");
+
+    if (bloque) {
+      setErreur("Trop de tentatives. Réessaie dans 5 minutes.");
+      return;
+    }
+
     setChargement(true);
 
     if (!identifiant.trim() || !motDePasse.trim()) {
@@ -44,7 +52,18 @@ function Login() {
       navigate("/");
     } catch (e) {
       if (e.code === "auth/user-not-found" || e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
-        setErreur("Email, numéro ou mot de passe incorrect.");
+        const nouvellesTentatives = tentatives + 1;
+        setTentatives(nouvellesTentatives);
+        if (nouvellesTentatives >= 5) {
+          setBloque(true);
+          setErreur("Trop de tentatives (5/5). Réessaie dans 5 minutes.");
+          setTimeout(() => {
+            setBloque(false);
+            setTentatives(0);
+          }, 5 * 60 * 1000);
+        } else {
+          setErreur(`Email, numéro ou mot de passe incorrect. (${nouvellesTentatives}/5 tentatives)`);
+        }
       } else {
         setErreur("Une erreur est survenue. Réessaie.");
       }
@@ -94,6 +113,9 @@ function Login() {
 
         <p className="auth-lien" onClick={() => navigate("/register")}>
           Pas encore de compte ? <span>Inscris-toi</span>
+        </p>
+        <p className="auth-lien" onClick={() => navigate("/mot-de-passe-oublie")}>
+          Mot de passe oublié ? <span>Réinitialiser</span>
         </p>
       </div>
     </div>
