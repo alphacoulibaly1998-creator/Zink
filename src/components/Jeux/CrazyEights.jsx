@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
 
 const COULEURS = ["♠", "♥", "♦", "♣"];
@@ -22,6 +22,7 @@ const carteCompatible = (carte, dessus) => {
 
 function CrazyEights({ onRetour }) {
   const [jeu, setJeu] = useState(creerJeu());
+  const partieId = useRef(Date.now().toString());
   const [mainJ1, setMainJ1] = useState([]);
   const [mainJ2, setMainJ2] = useState([]);
   const [pile, setPile] = useState([]);
@@ -150,7 +151,7 @@ function CrazyEights({ onRetour }) {
         </button>
       )}
 
-      <ChatJeu jeuId="crazyeights" />
+      <ChatJeu jeuId="crazyeights" partieId={partieId.current} />
     </div>
   );
 }

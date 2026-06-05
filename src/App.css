@@ -2566,3 +2566,47 @@ body {
   font-weight: 600;
   padding-left: 4px;
 }
+
+
+.chat-apercu-media {
+  position: relative;
+  padding: 8px 16px;
+  background: #1a1a2e;
+  border-top: 1px solid #2a2a4a;
+}
+
+.chat-apercu-media img,
+.chat-apercu-media video {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.chat-apercu-suppr {
+  position: absolute;
+  top: 4px;
+  right: 12px;
+  background: rgba(0,0,0,0.6);
+  border: none;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+
+.message-media-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.message-legende {
+  font-size: 14px;
+  color: #ffffff;
+  margin: 0;
+  padding: 0 2px;
+}

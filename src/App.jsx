@@ -39,8 +39,26 @@ function App() {
           });
         };
 
+        const handleVisibility = async () => {
+          if (document.visibilityState === "hidden") {
+            await updateDoc(ref, {
+              enLigne: false,
+              dernièreVue: serverTimestamp()
+            });
+          } else {
+            await updateDoc(ref, {
+              enLigne: true,
+              dernièreVue: serverTimestamp()
+            });
+          }
+        };
+
         window.addEventListener("beforeunload", handleOffline);
-        return () => window.removeEventListener("beforeunload", handleOffline);
+        document.addEventListener("visibilitychange", handleVisibility);
+        return () => {
+          window.removeEventListener("beforeunload", handleOffline);
+          document.removeEventListener("visibilitychange", handleVisibility);
+        };
       }
     });
     return () => unsub();

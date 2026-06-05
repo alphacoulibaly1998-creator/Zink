@@ -20,7 +20,7 @@ function MotDePasseOublie() {
     setChargement(true);
     try {
       await sendPasswordResetEmail(auth, email.trim());
-      setMessage("✅ Email de réinitialisation envoyé ! Vérifie ta boîte mail.");
+      setMessage("✅ Email envoyé ! Vérifie ta boîte mail et tes spams.");
     } catch (e) {
       if (e.code === "auth/user-not-found") {
         setErreur("Aucun compte trouvé avec cet email.");

@@ -47,8 +47,9 @@ function Parametres({ onRetour }) {
       setErreur("Remplis tous les champs.");
       return;
     }
-    if (nouveauMdp.length < 6) {
-      setErreur("Le nouveau mot de passe doit avoir au moins 6 caractères.");
+    const mdpRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!mdpRegex.test(nouveauMdp)) {
+      setErreur("Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.");
       return;
     }
     setChargement(true);
@@ -75,19 +76,30 @@ function Parametres({ onRetour }) {
       setErreur("Remplis tous les champs.");
       return;
     }
+    if (nouvelEmail === user.email) {
+      setErreur("C'est déjà ton email actuel.");
+      return;
+    }
     setChargement(true);
     try {
       await reauthenthifier();
       await updateEmail(user, nouvelEmail);
-      await doc(db, "utilisateurs", user.uid);
+      await updateDoc(doc(db, "utilisateurs", user.uid), {
+        email: nouvelEmail
+      });
       setMessage("✅ Email changé avec succès !");
-      reinitialiser();
+      setMdpActuel("");
+      setNouvelEmail("");
       setSection(null);
     } catch (e) {
       if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
         setErreur("Mot de passe actuel incorrect.");
       } else if (e.code === "auth/email-already-in-use") {
-        setErreur("Cet email est déjà utilisé.");
+        setErreur("Cet email est déjà utilisé par un autre compte.");
+      } else if (e.code === "auth/invalid-email") {
+        setErreur("L'adresse email n'est pas valide.");
+      } else if (e.code === "auth/requires-recent-login") {
+        setErreur("Session expirée. Déconnecte-toi et reconnecte-toi avant de changer l'email.");
       } else {
         setErreur("Une erreur est survenue. Réessaie.");
       }

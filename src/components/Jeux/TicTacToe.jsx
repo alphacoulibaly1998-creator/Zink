@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
 
 const gagnant = (cases) => {
@@ -19,7 +19,7 @@ function TicTacToe({ onRetour }) {
   const [cases, setCases] = useState(Array(9).fill(null));
   const [joueur, setJoueur] = useState("X");
   const [scores, setScores] = useState({ X: 0, O: 0 });
-
+  const partieId = useRef(Date.now().toString());
   const winner = gagnant(cases);
   const plein = cases.every(Boolean);
 
@@ -86,7 +86,7 @@ function TicTacToe({ onRetour }) {
         </button>
       )}
 
-      <ChatJeu jeuId="tictactoe" />
+      <ChatJeu jeuId="tictactoe" partieId={partieId.current} />
     </div>
   );
 }

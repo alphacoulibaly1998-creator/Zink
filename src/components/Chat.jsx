@@ -18,6 +18,9 @@ function Chat({ convId, autre, autreId, onRetour }) {
   const [afficherEmojis, setAfficherEmojis] = useState(false);
   const [afficherMedia, setAfficherMedia] = useState(false);
   const [menuMessage, setMenuMessage] = useState(null);
+  const [mediaEnAttente, setMediaEnAttente] = useState(null);
+  const [typeMediaEnAttente, setTypeMediaEnAttente] = useState(null);
+  const [apercuMedia, setApercuMedia] = useState(null);
   const [dureeVocal, setDureeVocal] = useState(0);
   const [pauseVocal, setPauseVocal] = useState(false);
   const [autreEnLigne, setAutreEnLigne] = useState(false);
@@ -110,24 +113,86 @@ const msgData = {
     setChargement(false);
   };
 
-  const envoyerMedia = async (e, type) => {
+  const selectionnerMedia = (e, type) => {
     const fichier = e.target.files[0];
     if (!fichier) return;
-    if (type === "video" && fichier.size > 50 * 1024 * 1024) {
-      alert("La vidéo ne doit pas dépasser 50MB.");
+    if (type === "video" && fichier.size > 45 * 1024 * 1024) {
+      alert("La vidéo ne doit pas dépasser 45MB.");
       return;
     }
+    if (type === "photo" && fichier.size > 5 * 1024 * 1024) {
+      alert("La photo ne doit pas dépasser 5MB.");
+      return;
+    }
+    setMediaEnAttente(fichier);
+    setTypeMediaEnAttente(type);
+    setApercuMedia(URL.createObjectURL(fichier));
+    setAfficherMedia(false);
+  };
+
+  const envoyerMediaAvecTexte = async () => {
+    if (!mediaEnAttente && !texte.trim()) return;
     setChargement(true);
     try {
-      const formData = new FormData();
-      formData.append("image", fichier);
-      formData.append("key", IMGBB_API_KEY);
-      const res = await axios.post("https://api.imgbb.com/1/upload", formData);
-      await envoyerMessage(type, res.data.data.url);
+      if (mediaEnAttente && typeMediaEnAttente === "video") {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          await envoyerMessageFusionne("video", reader.result, texte.trim());
+        };
+        reader.readAsDataURL(mediaEnAttente);
+      } else if (mediaEnAttente && typeMediaEnAttente === "photo") {
+        const formData = new FormData();
+        formData.append("image", mediaEnAttente);
+        formData.append("key", IMGBB_API_KEY);
+        const res = await axios.post("https://api.imgbb.com/1/upload", formData);
+        await envoyerMessageFusionne("photo", res.data.data.url, texte.trim());
+      } else {
+        await envoyerMessage("texte");
+      }
+      setMediaEnAttente(null);
+      setApercuMedia(null);
+      setTypeMediaEnAttente(null);
     } catch {
-      alert(`Erreur lors de l'envoi.`);
+      alert("Erreur lors de l'envoi.");
     }
     setChargement(false);
+  };
+
+  const envoyerMessageFusionne = async (type, mediaUrl, legende) => {
+    const user = auth.currentUser;
+    const autreSnap = await getDoc(doc(db, "utilisateurs", autreId));
+    const bloquesParlAutre = autreSnap.data()?.bloques || [];
+    const monSnap = await getDoc(doc(db, "utilisateurs", user.uid));
+    const mesBlockes = monSnap.data()?.bloques || [];
+
+    if (bloquesParlAutre.includes(user.uid) || mesBlockes.includes(autreId)) {
+      alert("Impossible d'envoyer un message à cet utilisateur.");
+      return;
+    }
+
+    const msgData = {
+      userId: user.uid,
+      type,
+      texte: legende || "",
+      mediaUrl,
+      createdAt: serverTimestamp(),
+      supprimePour: [],
+      supprimePourTous: false,
+      statut: "envoye"
+    };
+
+    await addDoc(collection(db, "conversations", convId, "messages"), msgData);
+    const convRef = doc(db, "conversations", convId);
+    const convSnap = await getDoc(convRef);
+    const nonLuActuel = convSnap.data()?.nonLu?.[autreId] || 0;
+    await updateDoc(convRef, {
+      dernierMessage: {
+        texte: legende || (type === "photo" ? "📷 Photo" : "🎥 Vidéo"),
+        createdAt: new Date()
+      },
+      [`nonLu.${autreId}`]: nonLuActuel + 1
+    });
+    setTexte("");
   };
 
   const demarrerVocal = async () => {
@@ -306,9 +371,15 @@ const msgData = {
                 ) : msg.type === "texte" ? (
                   <span>{msg.texte}</span>
                 ) : msg.type === "photo" ? (
-                  <img src={msg.mediaUrl} alt="photo" className="message-photo" />
+                  <div className="message-media-container">
+                    <img src={msg.mediaUrl} alt="photo" className="message-photo" />
+                    {msg.texte && <p className="message-legende">{msg.texte}</p>}
+                  </div>
                 ) : msg.type === "video" ? (
-                  <video controls src={msg.mediaUrl} className="message-photo" />
+                  <div className="message-media-container">
+                    <video controls src={msg.mediaUrl} className="message-photo" />
+                    {msg.texte && <p className="message-legende">{msg.texte}</p>}
+                  </div>
                 ) : msg.type === "vocal" ? (
                   <audio controls src={msg.mediaUrl} className="message-audio" />
                 ) : null}
@@ -369,6 +440,25 @@ const msgData = {
         </div>
       )}
 
+{apercuMedia && (
+        <div className="chat-apercu-media" onClick={(e) => e.stopPropagation()}>
+          {typeMediaEnAttente === "photo" ? (
+            <img src={apercuMedia} alt="aperçu" />
+          ) : (
+            <video src={apercuMedia} controls />
+          )}
+          <button
+            className="chat-apercu-suppr"
+            onClick={() => {
+              setMediaEnAttente(null);
+              setApercuMedia(null);
+              setTypeMediaEnAttente(null);
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
       <div className="chat-input" onClick={(e) => e.stopPropagation()}>
         <button
           className="chat-btn-plus"
@@ -434,7 +524,7 @@ const msgData = {
 
         <button
           className="chat-btn-envoyer"
-          onClick={() => envoyerMessage()}
+          onClick={() => mediaEnAttente ? envoyerMediaAvecTexte() : envoyerMessage()}
           disabled={chargement}
         >
           ➤
@@ -448,7 +538,7 @@ const msgData = {
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => { envoyerMedia(e, "photo"); setAfficherMedia(false); }}
+              onChange={(e) => selectionnerMedia(e, "photo")}
               style={{ display: "none" }}
             />
           </label>
@@ -457,7 +547,7 @@ const msgData = {
             <input
               type="file"
               accept="video/*"
-              onChange={(e) => { envoyerMedia(e, "video"); setAfficherMedia(false); }}
+              onChange={(e) => selectionnerMedia(e, "video")}
               style={{ display: "none" }}
             />
           </label>

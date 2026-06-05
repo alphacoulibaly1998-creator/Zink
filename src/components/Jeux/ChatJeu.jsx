@@ -5,17 +5,18 @@ import {
   onSnapshot, query, orderBy, getDoc, doc
 } from "firebase/firestore";
 
-function ChatJeu({ jeuId }) {
+function ChatJeu({ jeuId, partieId }) {
   const [messages, setMessages] = useState([]);
   const [texte, setTexte] = useState("");
   const [ouvert, setOuvert] = useState(false);
   const basRef = useRef(null);
   const user = auth.currentUser;
+  const chatId = `${jeuId}_${partieId || "global"}`;
 
   useEffect(() => {
     if (!ouvert) return;
     const q = query(
-      collection(db, "chatsJeux", jeuId, "messages"),
+      collection(db, "chatsJeux", chatId, "messages"),
       orderBy("createdAt", "asc")
     );
     const unsub = onSnapshot(q, (snap) => {
@@ -23,13 +24,13 @@ function ChatJeu({ jeuId }) {
       setTimeout(() => basRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     });
     return () => unsub();
-  }, [ouvert, jeuId]);
+  }, [ouvert, chatId]);
 
   const envoyer = async () => {
     if (!texte.trim()) return;
     const snap = await getDoc(doc(db, "utilisateurs", user.uid));
     const pseudo = snap.exists() ? snap.data().pseudo : "Joueur";
-    await addDoc(collection(db, "chatsJeux", jeuId, "messages"), {
+    await addDoc(collection(db, "chatsJeux", chatId, "messages"), {
       userId: user.uid,
       pseudo,
       texte: texte.trim(),
@@ -50,6 +51,11 @@ function ChatJeu({ jeuId }) {
       {ouvert && (
         <div className="chat-jeu-contenu">
           <div className="chat-jeu-messages">
+            {messages.length === 0 && (
+              <p style={{ color: "#888", fontSize: "13px", textAlign: "center" }}>
+                Aucun message pour cette partie
+              </p>
+            )}
             {messages.map((m) => (
               <div
                 key={m.id}

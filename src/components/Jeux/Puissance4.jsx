@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
 
 const COLS = 7;
@@ -31,6 +31,7 @@ function Puissance4({ onRetour }) {
   const [joueur, setJoueur] = useState(1);
   const [winner, setWinner] = useState(null);
   const [scores, setScores] = useState({ 1: 0, 2: 0 });
+  const partieId = useRef(Date.now().toString());
 
   const jouer = (col) => {
     if (winner) return;
@@ -99,7 +100,7 @@ function Puissance4({ onRetour }) {
         </button>
       )}
 
-      <ChatJeu jeuId="puissance4" />
+      <ChatJeu jeuId="puissance4" partieId={partieId.current} />
     </div>
   );
 }

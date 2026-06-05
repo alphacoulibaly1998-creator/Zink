@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
 
 const TAILLE = 10;
@@ -35,6 +35,7 @@ const placerBateauxAuto = () => {
 
 function BatailleNavale({ onRetour }) {
   const [phase, setPhase] = useState("jeu");
+  const partieId = useRef(Date.now().toString());
   const [grilleJ1] = useState(placerBateauxAuto());
   const [grilleJ2] = useState(placerBateauxAuto());
   const [tirsJ1, setTirsJ1] = useState(creerGrille());
@@ -113,7 +114,7 @@ function BatailleNavale({ onRetour }) {
         </button>
       )}
 
-      <ChatJeu jeuId="bataillenavale" />
+      <ChatJeu jeuId="bataillenavale" partieId={partieId.current} />
     </div>
   );
 }

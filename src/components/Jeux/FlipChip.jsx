@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
 
 const TAILLE = 6;
@@ -43,6 +43,7 @@ function FlipChip({ onRetour }) {
   const [joueur, setJoueur] = useState("noir");
   const [scores, setScores] = useState({ noir: 0, blanc: 0 });
   const [winner, setWinner] = useState(null);
+  const partieId = useRef(Date.now().toString());
 
   const jouer = (r, c) => {
     if (winner || grille[r][c]) return;
@@ -113,7 +114,7 @@ function FlipChip({ onRetour }) {
         </button>
       )}
 
-      <ChatJeu jeuId="flipchip" />
+      <ChatJeu jeuId="flipchip" partieId={partieId.current} />
     </div>
   );
 }
