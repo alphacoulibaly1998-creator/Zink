@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
@@ -146,7 +146,14 @@ function Profil() {
     setEdition(false);
   };
 
-  const deconnexion = async () => {
+ const deconnexion = async () => {
+    try {
+      const ref = doc(db, "utilisateurs", user.uid);
+      await updateDoc(ref, {
+        enLigne: false,
+        dernièreVue: serverTimestamp()
+      });
+    } catch (e) {}
     await signOut(auth);
     navigate("/login");
   };

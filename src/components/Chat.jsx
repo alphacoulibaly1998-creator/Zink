@@ -135,19 +135,12 @@ const msgData = {
     setChargement(true);
     try {
       if (mediaEnAttente && typeMediaEnAttente === "video") {
-        try {
-          const formData = new FormData();
-          formData.append("image", mediaEnAttente);
-          formData.append("key", IMGBB_API_KEY);
-          const res = await axios.post("https://api.imgbb.com/1/upload", formData);
-          await envoyerMessageFusionne("video", res.data.data.url, texte.trim());
-        } catch {
-          const reader = new FileReader();
-          reader.onloadend = async () => {
-            await envoyerMessageFusionne("video", reader.result, texte.trim());
-          };
-          reader.readAsDataURL(mediaEnAttente);
-        }
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64 = reader.result;
+          await envoyerMessageFusionne("video", base64, texte.trim());
+        };
+        reader.readAsDataURL(mediaEnAttente);
       } else if (mediaEnAttente && typeMediaEnAttente === "photo") {
         const formData = new FormData();
         formData.append("image", mediaEnAttente);
@@ -182,7 +175,8 @@ const msgData = {
       userId: user.uid,
       type,
       texte: legende || "",
-      mediaUrl,
+      mediaUrl: type === "video" ? "" : mediaUrl,
+      videoData: type === "video" ? mediaUrl : "",
       createdAt: serverTimestamp(),
       supprimePour: [],
       supprimePourTous: false,
@@ -385,7 +379,7 @@ const msgData = {
                   </div>
                 ) : msg.type === "video" ? (
                   <div className="message-media-container">
-                    <video controls src={msg.mediaUrl} className="message-photo" />
+                    <video controls src={msg.videoData || msg.mediaUrl} className="message-photo" />
                     {msg.texte && <p className="message-legende">{msg.texte}</p>}
                   </div>
                 ) : msg.type === "vocal" ? (
