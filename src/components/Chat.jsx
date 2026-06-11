@@ -135,11 +135,19 @@ const msgData = {
     setChargement(true);
     try {
       if (mediaEnAttente && typeMediaEnAttente === "video") {
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          await envoyerMessageFusionne("video", reader.result, texte.trim());
-        };
-        reader.readAsDataURL(mediaEnAttente);
+        try {
+          const formData = new FormData();
+          formData.append("image", mediaEnAttente);
+          formData.append("key", IMGBB_API_KEY);
+          const res = await axios.post("https://api.imgbb.com/1/upload", formData);
+          await envoyerMessageFusionne("video", res.data.data.url, texte.trim());
+        } catch {
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            await envoyerMessageFusionne("video", reader.result, texte.trim());
+          };
+          reader.readAsDataURL(mediaEnAttente);
+        }
       } else if (mediaEnAttente && typeMediaEnAttente === "photo") {
         const formData = new FormData();
         formData.append("image", mediaEnAttente);

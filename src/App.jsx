@@ -59,6 +59,15 @@ function App() {
           window.removeEventListener("beforeunload", handleOffline);
           document.removeEventListener("visibilitychange", handleVisibility);
         };
+      } else {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          const ref = doc(db, "utilisateurs", currentUser.uid);
+          await updateDoc(ref, {
+            enLigne: false,
+            dernièreVue: serverTimestamp()
+          });
+        }
       }
     });
     return () => unsub();

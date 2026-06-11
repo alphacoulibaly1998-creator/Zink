@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import {
-  updatePassword, updateEmail,
+  updatePassword, verifyBeforeUpdateEmail,
   reauthenticateWithCredential,
   EmailAuthProvider, deleteUser
 } from "firebase/auth";
@@ -83,11 +83,8 @@ function Parametres({ onRetour }) {
     setChargement(true);
     try {
       await reauthenthifier();
-      await updateEmail(user, nouvelEmail);
-      await updateDoc(doc(db, "utilisateurs", user.uid), {
-        email: nouvelEmail
-      });
-      setMessage("✅ Email changé avec succès !");
+      await verifyBeforeUpdateEmail(user, nouvelEmail);
+      setMessage("✅ Un email de vérification a été envoyé à " + nouvelEmail + ". Vérifie ta boîte mail pour confirmer le changement.");
       setMdpActuel("");
       setNouvelEmail("");
       setSection(null);
