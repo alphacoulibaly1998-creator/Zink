@@ -5,6 +5,7 @@ import {
   query, orderBy, doc, updateDoc, getDoc, setDoc, getDocs
 } from "firebase/firestore";
 import { IMGBB_API_KEY } from "../config";
+import { supabase } from "../supabase";
 import axios from "axios";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","😭","😱","🤔","👍","❤️","🔥","🎉","💯","🙏","😴","🤣","😊","🥺","😅","💪","🎮","👀","💬","✨","🌍","🎵","🍕","😋","🤩","👋"];
@@ -135,12 +136,22 @@ const msgData = {
     setChargement(true);
     try {
       if (mediaEnAttente && typeMediaEnAttente === "video") {
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          const base64 = reader.result;
-          await envoyerMessageFusionne("video", base64, texte.trim());
-        };
-        reader.readAsDataURL(mediaEnAttente);
+        try {
+          const nomFichier = `video_${Date.now()}.mp4`;
+          const { data, error } = await supabase.storage
+            .from("zink")
+            .upload(nomFichier, mediaEnAttente, {
+              contentType: mediaEnAttente.type,
+              upsert: true
+            });
+          if (error) throw error;
+          const { data: urlData } = supabase.storage
+            .from("zink")
+            .getPublicUrl(nomFichier);
+          await envoyerMessageFusionne("video", urlData.publicUrl, texte.trim());
+        } catch (e) {
+          alert("Erreur lors de l'envoi de la vidéo : " + e.message);
+        }
       } else if (mediaEnAttente && typeMediaEnAttente === "photo") {
         const formData = new FormData();
         formData.append("image", mediaEnAttente);
