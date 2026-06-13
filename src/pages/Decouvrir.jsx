@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
+import ProfilPublic from "./ProfilPublic";
 import {
   collection, query, where, getDocs,
   doc, setDoc, getDoc, updateDoc, arrayUnion
@@ -13,6 +14,7 @@ function Decouvrir() {
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState("");
   const [monProfil, setMonProfil] = useState(null);
+  const [profilOuvert, setProfilOuvert] = useState(null);
   const user = auth.currentUser;
   const navigate = useNavigate();
 
@@ -96,10 +98,11 @@ function Decouvrir() {
     setChargement(false);
   };
 
-  const choisirSuggestion = (u) => {
-    setRecherche(u.pseudo);
+ const choisirSuggestion = async (u) => {
+    setRecherche("");
     setSuggestions([]);
-    setResultats([u]);
+    setErreur("");
+    setProfilOuvert(u.id);
   };
 
   const getStatutRelation = (autreUser) => {
@@ -159,6 +162,13 @@ function Decouvrir() {
     );
   };
 
+  if (profilOuvert) return (
+    <ProfilPublic
+      userId={profilOuvert}
+      onRetour={() => setProfilOuvert(null)}
+    />
+  );
+
   return (
     <div className="decouvrir-container">
       <h1 className="accueil-titre">🔍 Découvrir</h1>
@@ -201,7 +211,11 @@ function Decouvrir() {
       <div className="decouvrir-resultats">
         {resultats.map((u) => (
           <div key={u.id} className="decouvrir-user">
-            <div className="conv-avatar">
+            <div
+              className="conv-avatar"
+              onClick={() => setProfilOuvert(u.id)}
+              style={{ cursor: "pointer" }}
+            >
               {u.photoURL ? (
                 <img src={u.photoURL} alt="avatar" />
               ) : (
@@ -210,7 +224,11 @@ function Decouvrir() {
                 </div>
               )}
             </div>
-            <div className="decouvrir-infos">
+            <div
+              className="decouvrir-infos"
+              onClick={() => setProfilOuvert(u.id)}
+              style={{ cursor: "pointer" }}
+            >
               <span className="conv-pseudo">{u.pseudo}</span>
               <span className="conv-dernier">🌍 {u.pays}</span>
             </div>

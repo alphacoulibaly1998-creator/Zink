@@ -10,7 +10,7 @@ import axios from "axios";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","😭","😱","🤔","👍","❤️","🔥","🎉","💯","🙏","😴","🤣","😊","🥺","😅","💪","🎮","👀","💬","✨","🌍","🎵","🍕","😋","🤩","👋"];
 
-function Chat({ convId, autre, autreId, onRetour }) {
+function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
   const [messages, setMessages] = useState([]);
   const [texte, setTexte] = useState("");
   const [chargement, setChargement] = useState(false);
@@ -337,7 +337,11 @@ const msgData = {
     <div className="chat-container">
       <div className="chat-header" onClick={(e) => e.stopPropagation()}>
         <button className="chat-retour" onClick={onRetour}>←</button>
-        <div className="chat-avatar">
+        <div
+          className="chat-avatar"
+          onClick={() => onVoirProfil && onVoirProfil(autreId)}
+          style={{ cursor: "pointer" }}
+        >
           {autre?.photoURL ? (
             <img src={autre.photoURL} alt="avatar" />
           ) : (
@@ -346,7 +350,11 @@ const msgData = {
             </div>
           )}
         </div>
-        <div className="chat-header-infos">
+        <div
+          className="chat-header-infos"
+          onClick={() => onVoirProfil && onVoirProfil(autreId)}
+          style={{ cursor: "pointer" }}
+        >
           <span className="chat-pseudo">{autre?.pseudo}</span>
           <span className={`chat-statut ${autreEnLigne ? "en-ligne" : "hors-ligne"}`}>
             {autreEnLigne ? "● En ligne" : "● Hors ligne"}

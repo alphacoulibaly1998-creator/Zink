@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
+import ProfilPublic from "./ProfilPublic";
 import {
   doc, getDoc, collection, query, where,
   onSnapshot, updateDoc, arrayUnion, arrayRemove
@@ -11,6 +12,8 @@ function Amis() {
   const [demandes, setDemandes] = useState([]);
   const [onglet, setOnglet] = useState("amis");
   const [chargement, setChargement] = useState(true);
+  const [profilOuvert, setProfilOuvert] = useState(null);
+  const [menuAmi, setMenuAmi] = useState(null);
   const user = auth.currentUser;
   const navigate = useNavigate();
 
@@ -98,6 +101,13 @@ function Amis() {
 
   if (chargement) return <div className="chargement">Chargement...</div>;
 
+  if (profilOuvert) return (
+    <ProfilPublic
+      userId={profilOuvert}
+      onRetour={() => setProfilOuvert(null)}
+    />
+  );
+
   return (
     <div className="amis-container">
       <h1 className="accueil-titre">👥 Amis</h1>
@@ -127,7 +137,11 @@ function Amis() {
           ) : (
             amis.map((ami) => (
               <div key={ami.id} className="ami-item">
-                <div className="ami-avatar">
+                <div
+                  className="ami-avatar"
+                  onClick={() => setProfilOuvert(ami.id)}
+                  style={{ cursor: "pointer" }}
+                >
                   {ami.photoURL ? (
                     <img src={ami.photoURL} alt="avatar" />
                   ) : (
@@ -137,25 +151,64 @@ function Amis() {
                   )}
                   <span className={`ami-statut-point ${ami.enLigne ? "en-ligne" : "hors-ligne"}`} />
                 </div>
-                <div className="ami-infos">
+                <div
+                  className="ami-infos"
+                  onClick={() => setProfilOuvert(ami.id)}
+                  style={{ cursor: "pointer" }}
+                >
                   <span className="conv-pseudo">{ami.pseudo}</span>
                   <span className={`ami-statut-txt ${ami.enLigne ? "en-ligne" : "hors-ligne"}`}>
                     {ami.enLigne ? "En ligne" : "Hors ligne"}
                   </span>
                 </div>
                 <div className="ami-actions">
-                  <button
-                    className="ami-btn-msg"
-                    onClick={() => ouvrirChat(ami.id)}
-                  >
-                    💬
-                  </button>
-                  <button
-                    className="ami-btn-suppr"
-                    onClick={() => supprimerAmi(ami.id)}
-                  >
-                    ✕
-                  </button>
+                  <div className="pub-menu-container">
+                    <button
+                      className="pub-btn-menu"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuAmi(menuAmi === ami.id ? null : ami.id);
+                      }}
+                    >
+                      ⋯
+                    </button>
+                    {menuAmi === ami.id && (
+                      <div className="pub-menu" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => {
+                          setMenuAmi(null);
+                          ouvrirChat(ami.id);
+                        }}>
+                          💬 Envoyer un message
+                        </button>
+                        <button onClick={() => {
+                          setMenuAmi(null);
+                          supprimerAmi(ami.id);
+                        }}>
+                          👥 Retirer des amis
+                        </button>
+                        <button onClick={async () => {
+                          setMenuAmi(null);
+                          const { getDoc: gd, updateDoc: ud, doc: d, arrayUnion: au } = await import("firebase/firestore");
+                          const snap = await gd(d(db, "utilisateurs", user.uid));
+                          const bloques = snap.data()?.bloques || [];
+                          if (window.confirm(`Bloquer ${ami.pseudo} ?`)) {
+                            await ud(d(db, "utilisateurs", user.uid), {
+                              bloques: au(ami.id)
+                            });
+                            alert(`${ami.pseudo} a été bloqué.`);
+                          }
+                        }}>
+                          🚫 Bloquer
+                        </button>
+                        <button className="menu-suppr" onClick={() => {
+                          setMenuAmi(null);
+                          alert(`${ami.pseudo} a été signalé.`);
+                        }}>
+                          🚩 Signaler
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))

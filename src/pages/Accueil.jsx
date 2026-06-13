@@ -3,10 +3,12 @@ import { db } from "../firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import NouvellePublication from "../components/NouvellePublication";
 import Publication from "../components/Publication";
+import ProfilPublic from "./ProfilPublic";
 
 function Accueil() {
   const [publications, setPublications] = useState([]);
   const [chargement, setChargement] = useState(true);
+  const [profilOuvert, setProfilOuvert] = useState(null);
 
   useEffect(() => {
     const q = query(
@@ -24,6 +26,13 @@ function Accueil() {
     setPublications((prev) => prev.filter((p) => p.id !== id));
   };
 
+  if (profilOuvert) return (
+    <ProfilPublic
+      userId={profilOuvert}
+      onRetour={() => setProfilOuvert(null)}
+    />
+  );
+  
   return (
     <div className="accueil">
       <h1 className="accueil-titre">🏠 Zink</h1>
@@ -39,10 +48,11 @@ function Accueil() {
         <div className="feed">
           {publications.map((pub) => (
             <Publication
-              key={pub.id}
-              pub={pub}
-              onSupprime={handleSupprime}
-            />
+            key={pub.id}
+            pub={pub}
+            onSupprime={handleSupprime}
+            onVoirProfil={(userId) => setProfilOuvert(userId)}
+          />
           ))}
         </div>
       )}

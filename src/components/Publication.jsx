@@ -6,8 +6,8 @@ import {
   query, orderBy, onSnapshot, serverTimestamp
 } from "firebase/firestore";
 
-function Publication({ pub, onSupprime }) {
-  const [auteur, setAuteur] = useState(null);
+function Publication({ pub, onSupprime, onVoirProfil }) {
+ const [auteur, setAuteur] = useState(null);
   const [commentaire, setCommentaire] = useState("");
   const [commentaires, setCommentaires] = useState([]);
   const [afficherCommentaires, setAfficherCommentaires] = useState(false);
@@ -178,7 +178,11 @@ function Publication({ pub, onSupprime }) {
   return (
     <div className="publication">
       <div className="pub-header">
-        <div className="pub-avatar">
+        <div
+          className="pub-avatar"
+          onClick={() => pub.userId !== user.uid && onVoirProfil && onVoirProfil(pub.userId)}
+          style={{ cursor: pub.userId !== user.uid ? "pointer" : "default" }}
+        >
           {auteur?.photoURL ? (
             <img src={auteur.photoURL} alt="avatar" />
           ) : (
@@ -188,7 +192,13 @@ function Publication({ pub, onSupprime }) {
           )}
         </div>
         <div className="pub-infos">
-          <span className="pub-pseudo">{auteur?.pseudo || "..."}</span>
+          <span
+            className="pub-pseudo"
+            onClick={() => pub.userId !== user.uid && onVoirProfil && onVoirProfil(pub.userId)}
+            style={{ cursor: pub.userId !== user.uid ? "pointer" : "default" }}
+          >
+            {auteur?.pseudo || "..."}
+          </span>
           <span className="pub-date">{formaterDate(pub.createdAt)}</span>
         </div>
 
@@ -317,7 +327,13 @@ function Publication({ pub, onSupprime }) {
               ) : (
                 <div className="commentaire">
                   <div className="commentaire-contenu">
-                    <span className="commentaire-pseudo">{c.pseudo}</span>
+                <span
+                  className="commentaire-pseudo"
+                  onClick={() => c.userId !== user.uid && onVoirProfil && onVoirProfil(c.userId)}
+                  style={{ cursor: c.userId !== user.uid ? "pointer" : "default" }}
+                >
+                  {c.pseudo}
+                </span>
                     <span className="commentaire-texte">
                       {c.texte}
                       {c.modifie && (

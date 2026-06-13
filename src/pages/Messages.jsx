@@ -6,6 +6,7 @@ import {
 } from "firebase/firestore";
 import { useLocation } from "react-router-dom";
 import Chat from "../components/Chat";
+import ProfilPublic from "./ProfilPublic";
 
 function Messages() {
   const [conversations, setConversations] = useState([]);
@@ -14,6 +15,7 @@ function Messages() {
   const [convActiveId, setConvActiveId] = useState(null);
   const [convActiveData, setConvActiveData] = useState(null);
   const convActivePersist = useRef(null);
+  const [profilOuvert, setProfilOuvert] = useState(null);
   const user = auth.currentUser;
   const location = useLocation();
 
@@ -115,6 +117,13 @@ function Messages() {
     return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
   };
 
+  if (profilOuvert) return (
+    <ProfilPublic
+      userId={profilOuvert}
+      onRetour={() => setProfilOuvert(null)}
+    />
+  );
+
   if (convActiveId && convActiveData) {
     return (
       <Chat
@@ -122,6 +131,7 @@ function Messages() {
         autre={convActiveData.autre}
         autreId={convActiveData.autreId}
         onRetour={fermerConv}
+        onVoirProfil={(userId) => setProfilOuvert(userId)}
       />
     );
   }
