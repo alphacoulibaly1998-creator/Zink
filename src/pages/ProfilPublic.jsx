@@ -49,19 +49,25 @@ function ProfilPublic({ userId, onRetour }) {
     }));
   };
 
+  const accepterDemande = async () => {
+    await updateDoc(doc(db, "utilisateurs", user.uid), {
+      amis: arrayUnion(userId),
+      demandesRecues: arrayRemove(userId)
+    });
+    await updateDoc(doc(db, "utilisateurs", userId), {
+      amis: arrayUnion(user.uid),
+      demandesEnvoyees: arrayRemove(user.uid)
+    });
+    setMonProfil((prev) => ({
+      ...prev,
+      amis: [...(prev?.amis || []), userId],
+      demandesRecues: (prev?.demandesRecues || []).filter((id) => id !== userId)
+    }));
+  };
+
   const ouvrirChat = async () => {
     const membres = [user.uid, userId].sort();
     const convId = membres.join("_");
-    const convRef = doc(db, "conversations", convId);
-    const convSnap = await getDoc(convRef);
-    if (!convSnap.exists()) {
-      await setDoc(convRef, {
-        membres,
-        dernierMessage: { texte: "", createdAt: new Date() },
-        nonLu: { [user.uid]: 0, [userId]: 0 },
-        createdAt: new Date()
-      });
-    }
     navigate("/messages", {
       state: {
         convId,
@@ -193,8 +199,8 @@ function ProfilPublic({ userId, onRetour }) {
           {statut === "envoye" && (
             <button className="decouvrir-btn-ami en-attente">⏳ Demande envoyée</button>
           )}
-          {statut === "recu" && (
-            <button className="decouvrir-btn-ami recu" onClick={envoyerDemande}>
+           {statut === "recu" && (
+            <button className="decouvrir-btn-ami recu" onClick={accepterDemande}>
               👥 Accepter
             </button>
           )}

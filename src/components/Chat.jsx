@@ -52,8 +52,10 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
     return () => unsub();
   }, [convId]);
 
-  const marquerLu = async () => {
+ const marquerLu = async () => {
     const ref = doc(db, "conversations", convId);
+    const convSnapshot = await getDoc(ref);
+    if (!convSnapshot.exists()) return;
     await updateDoc(ref, { [`nonLu.${user.uid}`]: 0 });
     const q = query(
       collection(db, "conversations", convId, "messages"),
@@ -71,6 +73,19 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
     });
   };
 
+  const assurerConversationExiste = async () => {
+    const convRef = doc(db, "conversations", convId);
+    const convSnap = await getDoc(convRef);
+    if (!convSnap.exists()) {
+      await setDoc(convRef, {
+        membres: [user.uid, autreId].sort(),
+        dernierMessage: { texte: "", createdAt: new Date() },
+        nonLu: { [user.uid]: 0, [autreId]: 0 },
+        createdAt: new Date()
+      });
+    }
+  };
+
   const envoyerMessage = async (type = "texte", contenu = "") => {
     const valeur = type === "texte" ? texte.trim() : contenu;
     if (!valeur) return;
@@ -86,6 +101,8 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
       setChargement(false);
       return;
     }
+
+    await assurerConversationExiste();
 
 const msgData = {
       userId: user.uid,
@@ -181,6 +198,8 @@ const msgData = {
       alert("Impossible d'envoyer un message à cet utilisateur.");
       return;
     }
+
+    await assurerConversationExiste();
 
     const msgData = {
       userId: user.uid,
