@@ -656,7 +656,14 @@ body {
   gap: 4px;
   z-index: 100;
   min-width: 200px;
+  max-height: 250px;
+  overflow-y: auto;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.pub-menu.vers-haut {
+  top: auto;
+  bottom: 36px;
 }
 
 .pub-menu button {
@@ -711,8 +718,9 @@ body {
   position: relative;
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
+  text-align: left;
 }
 
 .commentaire-contenu {
@@ -720,6 +728,8 @@ body {
   flex-direction: column;
   gap: 2px;
   flex: 1;
+  text-align: left;
+  align-items: flex-start;
 }
 
 .commentaire-btn-menu {

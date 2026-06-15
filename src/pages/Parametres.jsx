@@ -5,7 +5,7 @@ import {
   reauthenticateWithCredential,
   EmailAuthProvider, deleteUser
 } from "firebase/auth";
-import { doc, deleteDoc } from "firebase/firestore";
+import { doc, deleteDoc, getDoc, updateDoc, arrayRemove } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 function Parametres({ onRetour }) {
@@ -24,8 +24,33 @@ function Parametres({ onRetour }) {
   }, [message]);
   const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(false);
+  const [bloques, setBloques] = useState([]);
   const user = auth.currentUser;
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const chargerBloques = async () => {
+      const snap = await getDoc(doc(db, "utilisateurs", user.uid));
+      if (!snap.exists()) return;
+      const bloquesIds = snap.data().bloques || [];
+      const bloquesData = await Promise.all(
+        bloquesIds.map(async (id) => {
+          const s = await getDoc(doc(db, "utilisateurs", id));
+          return s.exists() ? { id, ...s.data() } : null;
+        })
+      );
+      setBloques(bloquesData.filter(Boolean));
+    };
+    chargerBloques();
+  }, []);
+
+  const debloquer = async (autreId, pseudo) => {
+    if (!window.confirm(`Débloquer ${pseudo} ?`)) return;
+    await updateDoc(doc(db, "utilisateurs", user.uid), {
+      bloques: arrayRemove(autreId)
+    });
+    setBloques((prev) => prev.filter((b) => b.id !== autreId));
+  };
 
   const reinitialiser = () => {
     setMdpActuel("");
@@ -250,6 +275,37 @@ function Parametres({ onRetour }) {
             >
               {chargement ? "..." : "🗑️ Supprimer définitivement"}
             </button>
+          </div>
+        )}
+
+        <div
+          className={`param-item ${section === "bloques" ? "actif" : ""}`}
+          onClick={() => setSection(section === "bloques" ? null : "bloques")}
+        >
+          <span className="param-icon">🚫</span>
+          <span className="param-label">Personnes bloquées</span>
+          <span className="param-fleche">{section === "bloques" ? "▲" : "▼"}</span>
+        </div>
+
+        {section === "bloques" && (
+          <div className="param-form">
+            {bloques.length === 0 ? (
+              <p className="param-info">Aucune personne bloquée.</p>
+            ) : (
+              bloques.map((b) => (
+                <div key={b.id} className="ami-item">
+                  <div className="conv-avatar-placeholder" style={{ width: 40, height: 40 }}>
+                    {b.avatar || b.pseudo?.[0]?.toUpperCase() || "?"}
+                  </div>
+                  <div className="ami-infos">
+                    <span className="conv-pseudo">{b.pseudo}</span>
+                  </div>
+                  <button className="ami-btn-suppr" onClick={() => debloquer(b.id, b.pseudo)}>
+                    Débloquer
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         )}
 

@@ -122,15 +122,20 @@ function ProfilPublic({ userId, onRetour }) {
       }));
       alert(`${profil?.pseudo} a été débloqué.`);
     } else {
-      if (!window.confirm(`Bloquer ${profil?.pseudo} ?`)) return;
+      if (!window.confirm(`Bloquer ${profil?.pseudo} ? Il sera retiré de tes amis.`)) return;
       await updateDoc(doc(db, "utilisateurs", user.uid), {
-        bloques: arrayUnion(userId)
+        bloques: arrayUnion(userId),
+        amis: arrayRemove(userId)
+      });
+      await updateDoc(doc(db, "utilisateurs", userId), {
+        amis: arrayRemove(user.uid)
       });
       setMonProfil((prev) => ({
         ...prev,
-        bloques: [...(prev?.bloques || []), userId]
+        bloques: [...(prev?.bloques || []), userId],
+        amis: (prev?.amis || []).filter((id) => id !== userId)
       }));
-      alert(`${profil?.pseudo} a été bloqué.`);
+      alert(`${profil?.pseudo} a été bloqué et retiré de tes amis.`);
     }
   };
 

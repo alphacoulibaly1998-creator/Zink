@@ -167,13 +167,21 @@ function Amis() {
                       className="pub-btn-menu"
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (menuAmi !== ami.id) {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const espaceEnBas = window.innerHeight - rect.bottom;
+                          e.currentTarget.dataset.versHaut = espaceEnBas < 250 ? "true" : "false";
+                        }
                         setMenuAmi(menuAmi === ami.id ? null : ami.id);
                       }}
                     >
                       ⋯
                     </button>
                     {menuAmi === ami.id && (
-                      <div className="pub-menu" onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className={`pub-menu ${document.activeElement?.dataset?.versHaut === "true" ? "vers-haut" : ""}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <button onClick={() => {
                           setMenuAmi(null);
                           ouvrirChat(ami.id);
@@ -188,14 +196,16 @@ function Amis() {
                         </button>
                         <button onClick={async () => {
                           setMenuAmi(null);
-                          const { getDoc: gd, updateDoc: ud, doc: d, arrayUnion: au } = await import("firebase/firestore");
-                          const snap = await gd(d(db, "utilisateurs", user.uid));
-                          const bloques = snap.data()?.bloques || [];
-                          if (window.confirm(`Bloquer ${ami.pseudo} ?`)) {
+                          const { updateDoc: ud, doc: d, arrayUnion: au, arrayRemove: ar } = await import("firebase/firestore");
+                          if (window.confirm(`Bloquer ${ami.pseudo} ? Il sera retiré de tes amis.`)) {
                             await ud(d(db, "utilisateurs", user.uid), {
-                              bloques: au(ami.id)
+                              bloques: au(ami.id),
+                              amis: ar(ami.id)
                             });
-                            alert(`${ami.pseudo} a été bloqué.`);
+                            await ud(d(db, "utilisateurs", ami.id), {
+                              amis: ar(user.uid)
+                            });
+                            alert(`${ami.pseudo} a été bloqué et retiré de tes amis.`);
                           }
                         }}>
                           🚫 Bloquer
