@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
-import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
 import { IMGBB_API_KEY } from "../config";
 import axios from "axios";
 import Parametres from "./Parametres";
+import Notifications from "./Notifications";
 
 const AVATARS = ["🐶","🐱","🦊","🐼","🐨","🦁","🐯","🐸","🐙","🦋","🌸","⭐","🔥","🎮","🎵","🌈","💎","🚀","🎯","👑"];
 
@@ -25,9 +26,23 @@ function Profil() {
   const [uploadPhoto, setUploadPhoto] = useState(false);
   const [afficherAvatars, setAfficherAvatars] = useState(false);
   const [afficherParametres, setAfficherParametres] = useState(false);
+  const [afficherNotifications, setAfficherNotifications] = useState(false);
+  const [nbNotifs, setNbNotifs] = useState(0);
   const navigate = useNavigate();
   const user = auth.currentUser;
 
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(db, "notifications"),
+      where("cibleId", "==", user.uid),
+      where("lu", "==", false)
+    );
+    const unsub = onSnapshot(q, (snap) => {
+      setNbNotifs(snap.docs.length);
+    });
+    return () => unsub();
+  }, []);
   useEffect(() => {
     const chargerProfil = async () => {
       const ref = doc(db, "utilisateurs", user.uid);
@@ -160,7 +175,7 @@ function Profil() {
 
   if (chargement) return <div className="chargement">Chargement...</div>;
 if (afficherParametres) return <Parametres onRetour={() => setAfficherParametres(false)} />;
-
+if (afficherNotifications) return <Notifications onRetour={() => setAfficherNotifications(false)} />;
   const afficherTelephone = () => {
     if (!profil?.telephone) return "Non renseigné";
     if (telephoneMasque) return "Masqué 🔒";
@@ -176,12 +191,26 @@ if (afficherParametres) return <Parametres onRetour={() => setAfficherParametres
     <div className="profil-container">
       <div className="profil-top">
         <h1 className="accueil-titre">👤 Profil</h1>
-        <button
-          className="profil-btn-parametres"
-          onClick={() => setAfficherParametres(true)}
-        >
-          ⚙️
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            className="profil-btn-parametres"
+            style={{ position: "relative" }}
+            onClick={() => setAfficherNotifications(true)}
+          >
+            🔔
+            {nbNotifs > 0 && (
+              <span className="nav-badge" style={{ top: -6, right: -6 }}>
+                {nbNotifs}
+              </span>
+            )}
+          </button>
+          <button
+            className="profil-btn-parametres"
+            onClick={() => setAfficherParametres(true)}
+          >
+            ⚙️
+          </button>
+        </div>
       </div>
       <div className="profil-header">
 

@@ -3,6 +3,7 @@ import { db, auth } from "../firebase";
 import {
   doc, getDoc, updateDoc, arrayUnion, arrayRemove, setDoc
 } from "firebase/firestore";
+import { creerNotification } from "../notifications";
 import { useNavigate } from "react-router-dom";
 
 function ProfilPublic({ userId, onRetour }) {
@@ -43,6 +44,7 @@ function ProfilPublic({ userId, onRetour }) {
     await updateDoc(doc(db, "utilisateurs", userId), {
       demandesRecues: arrayUnion(user.uid)
     });
+    await creerNotification(userId, user.uid, "demande_ami");
     setMonProfil((prev) => ({
       ...prev,
       demandesEnvoyees: [...(prev?.demandesEnvoyees || []), userId]

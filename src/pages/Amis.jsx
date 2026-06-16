@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
-import ProfilPublic from "./ProfilPublic";
 import {
   doc, getDoc, collection, query, where,
   onSnapshot, updateDoc, arrayUnion, arrayRemove
 } from "firebase/firestore";
+import { creerNotification } from "../notifications";
 import { useNavigate } from "react-router-dom";
 
 function Amis() {
@@ -13,6 +13,7 @@ function Amis() {
   const [onglet, setOnglet] = useState("amis");
   const [chargement, setChargement] = useState(true);
   const [profilOuvert, setProfilOuvert] = useState(null);
+  const profilOuvertRef = useRef(null);
   const [menuAmi, setMenuAmi] = useState(null);
   const user = auth.currentUser;
   const navigate = useNavigate();
@@ -57,6 +58,7 @@ function Amis() {
       amis: arrayUnion(user.uid),
       demandesEnvoyees: arrayRemove(user.uid)
     });
+    await creerNotification(autreId, user.uid, "ami_accepte");
   };
 
   const refuserDemande = async (autreId) => {
@@ -99,14 +101,17 @@ function Amis() {
     });
   };
 
-  if (chargement) return <div className="chargement">Chargement...</div>;
-
-  if (profilOuvert) return (
+  if (profilOuvertRef.current) return (
     <ProfilPublic
-      userId={profilOuvert}
-      onRetour={() => setProfilOuvert(null)}
+      userId={profilOuvertRef.current}
+      onRetour={() => {
+        profilOuvertRef.current = null;
+        setProfilOuvert(null);
+      }}
     />
   );
+
+  if (chargement) return <div className="chargement">Chargement...</div>;
 
   return (
     <div className="amis-container">
@@ -139,7 +144,7 @@ function Amis() {
               <div key={ami.id} className="ami-item">
                 <div
                   className="ami-avatar"
-                  onClick={() => setProfilOuvert(ami.id)}
+                  onClick={() => { profilOuvertRef.current = ami.id; setProfilOuvert(ami.id); }}
                   style={{ cursor: "pointer" }}
                 >
                   {ami.photoURL ? (
@@ -153,7 +158,7 @@ function Amis() {
                 </div>
                 <div
                   className="ami-infos"
-                  onClick={() => setProfilOuvert(ami.id)}
+                  onClick={() => { profilOuvertRef.current = ami.id; setProfilOuvert(ami.id); }}
                   style={{ cursor: "pointer" }}
                 >
                   <span className="conv-pseudo">{ami.pseudo}</span>
@@ -235,7 +240,11 @@ function Amis() {
           ) : (
             demandes.map((d) => (
               <div key={d.id} className="ami-item">
-                <div className="ami-avatar">
+                <div
+                  className="ami-avatar"
+                  onClick={() => { profilOuvertRef.current = d.id; setProfilOuvert(d.id); }}
+                  style={{ cursor: "pointer" }}
+                >
                   {d.photoURL ? (
                     <img src={d.photoURL} alt="avatar" />
                   ) : (
@@ -244,7 +253,11 @@ function Amis() {
                     </div>
                   )}
                 </div>
-                <div className="ami-infos">
+                <div
+                  className="ami-infos"
+                  onClick={() => { profilOuvertRef.current = d.id; setProfilOuvert(d.id); }}
+                  style={{ cursor: "pointer" }}
+                >
                   <span className="conv-pseudo">{d.pseudo}</span>
                   <span className="conv-dernier">🌍 {d.pays}</span>
                 </div>

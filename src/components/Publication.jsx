@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
+import { creerNotification } from "../notifications";
 import {
   doc, updateDoc, arrayUnion, arrayRemove,
   deleteDoc, getDoc, addDoc, collection,
@@ -59,12 +60,13 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const toggleLike = async () => {
+ const toggleLike = async () => {
     const ref = doc(db, "publications", pub.id);
     if (aLike) {
       await updateDoc(ref, { likes: arrayRemove(user.uid) });
     } else {
       await updateDoc(ref, { likes: arrayUnion(user.uid) });
+      await creerNotification(pub.userId, user.uid, "like", { pubId: pub.id });
     }
   };
 
@@ -81,6 +83,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     await updateDoc(doc(db, "publications", pub.id), {
       nbCommentaires: (pub.nbCommentaires || 0) + 1
     });
+    await creerNotification(pub.userId, user.uid, "commentaire", { pubId: pub.id });
     setCommentaire("");
   };
 

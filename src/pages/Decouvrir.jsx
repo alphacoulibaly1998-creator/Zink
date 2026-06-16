@@ -5,6 +5,7 @@ import {
   collection, query, where, getDocs,
   doc, setDoc, getDoc, updateDoc, arrayUnion
 } from "firebase/firestore";
+import { creerNotification } from "../notifications";
 import { useNavigate } from "react-router-dom";
 
 function Decouvrir() {
@@ -120,6 +121,7 @@ function Decouvrir() {
     const autreRef = doc(db, "utilisateurs", autreUser.id);
     await updateDoc(monRef, { demandesEnvoyees: arrayUnion(autreUser.id) });
     await updateDoc(autreRef, { demandesRecues: arrayUnion(user.uid) });
+    await creerNotification(autreUser.id, user.uid, "demande_ami");
     setMonProfil((prev) => ({
       ...prev,
       demandesEnvoyees: [...(prev?.demandesEnvoyees || []), autreUser.id]
