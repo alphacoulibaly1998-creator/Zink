@@ -18,6 +18,8 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
   const [texteEdition, setTexteEdition] = useState("");
   const [pubEnEdition, setPubEnEdition] = useState(false);
   const [texteEditionPub, setTexteEditionPub] = useState("");
+ const [reponseA, setReponseA] = useState(null);
+  const [voirTousCommentaires, setVoirTousCommentaires] = useState(false);
   const menuRef = useRef(null);
   const user = auth.currentUser;
   const aLike = pub.likes?.includes(user.uid);
@@ -78,6 +80,8 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
       userId: user.uid,
       pseudo,
       texte: commentaire.trim(),
+      reponseA: reponseA ? { id: reponseA.id, pseudo: reponseA.pseudo } : null,
+      likes: [],
       createdAt: serverTimestamp()
     });
     await updateDoc(doc(db, "publications", pub.id), {
@@ -85,6 +89,18 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     });
     await creerNotification(pub.userId, user.uid, "commentaire", { pubId: pub.id });
     setCommentaire("");
+    setReponseA(null);
+  };
+
+  const likerCommentaire = async (c) => {
+    const ref = doc(db, "publications", pub.id, "commentaires", c.id);
+    const aLike = c.likes?.includes(user.uid);
+    if (aLike) {
+      await updateDoc(ref, { likes: arrayRemove(user.uid) });
+    } else {
+      await updateDoc(ref, { likes: arrayUnion(user.uid) });
+      await creerNotification(c.userId, user.uid, "like_commentaire", { pubId: pub.id });
+    }
   };
 
   const supprimerCommentaire = async (c) => {
@@ -307,7 +323,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
 
       {afficherCommentaires && (
         <div className="pub-commentaires">
-          {commentaires.map((c) => (
+          {(voirTousCommentaires ? commentaires : commentaires.slice(0, 2)).map((c) => (
             <div key={c.id} className="commentaire-wrapper">
               {commentaireEnEdition === c.id ? (
                 <div className="commentaire-edition">
@@ -337,12 +353,34 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                 >
                   {c.pseudo}
                 </span>
+                {c.reponseA && (
+                  <span className="commentaire-reponse-a">
+                    ↩️ {c.reponseA.pseudo}
+                  </span>
+                )}
                     <span className="commentaire-texte">
                       {c.texte}
                       {c.modifie && (
                         <span className="commentaire-modifie"> (modifié)</span>
                       )}
                     </span>
+                <div className="commentaire-actions">
+                  <button
+                    className={`commentaire-like-btn ${c.likes?.includes(user.uid) ? "like-actif" : ""}`}
+                    onClick={() => likerCommentaire(c)}
+                  >
+                    {c.likes?.includes(user.uid) ? "❤️" : "🤍"} {c.likes?.length || 0}
+                  </button>
+                  <button
+                    className="commentaire-repondre-btn"
+                    onClick={() => {
+                      setReponseA(c);
+                      setCommentaire(`@${c.pseudo} `);
+                    }}
+                  >
+                    💬 Répondre
+                  </button>
+                </div>
                   </div>
                   <button
                     className="commentaire-btn-menu"
@@ -384,10 +422,26 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
               )}
             </div>
           ))}
+          {commentaires.length > 2 && (
+            <button
+              className="voir-plus-commentaires"
+              onClick={() => setVoirTousCommentaires(!voirTousCommentaires)}
+            >
+              {voirTousCommentaires
+                ? "Masquer les commentaires"
+                : `Voir les ${commentaires.length - 2} autres commentaires`}
+            </button>
+          )}
+          {reponseA && (
+            <div className="commentaire-reponse-preview">
+              <span>↩️ Répondre à {reponseA.pseudo}</span>
+              <button onClick={() => { setReponseA(null); setCommentaire(""); }}>✕</button>
+            </div>
+          )}
           <div className="commentaire-input">
             <input
               type="text"
-              placeholder="Ajoute un commentaire..."
+              placeholder={reponseA ? `Répondre à ${reponseA.pseudo}...` : "Ajoute un commentaire..."}
               value={commentaire}
               onChange={(e) => setCommentaire(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && envoyerCommentaire()}
