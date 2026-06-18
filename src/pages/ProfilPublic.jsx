@@ -4,13 +4,20 @@ import {
   doc, getDoc, updateDoc, arrayUnion, arrayRemove, setDoc
 } from "firebase/firestore";
 import { creerNotification } from "../notifications";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-function ProfilPublic({ userId, onRetour }) {
+function ProfilPublic({ userId: userIdProp, onRetour }) {
   const [profil, setProfil] = useState(null);
   const [monProfil, setMonProfil] = useState(null);
   const [chargement, setChargement] = useState(true);
   const [menuOuvert, setMenuOuvert] = useState(false);
+  useEffect(() => {
+    const handleClick = () => setMenuOuvert(false);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+  const { userId: userIdParam } = useParams();
+  const userId = userIdProp || userIdParam;
   const user = auth.currentUser;
   const navigate = useNavigate();
 
@@ -154,7 +161,7 @@ function ProfilPublic({ userId, onRetour }) {
   return (
     <div className="profil-container">
       <div className="jeu-header">
-        <button className="chat-retour" onClick={onRetour}>←</button>
+        <button className="chat-retour" onClick={onRetour || (() => navigate(-1))}>←</button>
         <h2 className="jeu-titre">👤 Profil</h2>
         <div className="pub-menu-container">
           <button

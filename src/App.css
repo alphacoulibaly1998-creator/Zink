@@ -906,6 +906,8 @@ body {
   flex-direction: column;
   flex: 1;
   overflow: hidden;
+  text-align: left;
+  align-items: flex-start;
 }
 
 .conv-pseudo {
@@ -1261,6 +1263,16 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+}
+
+.conv-item-contenu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
+  min-width: 0;
 }
 
 .conv-item-contenu {
@@ -1634,6 +1646,7 @@ body {
   background: #1a1a2e;
   border-radius: 14px;
   padding: 14px;
+  width: 100%;
 }
 
 .ami-avatar {
@@ -1674,6 +1687,8 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1;
+  text-align: left;
+  align-items: flex-start;
 }
 
 .ami-statut-txt {

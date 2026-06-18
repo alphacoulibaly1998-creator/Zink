@@ -12,11 +12,14 @@ function Amis() {
   const [demandes, setDemandes] = useState([]);
   const [onglet, setOnglet] = useState("amis");
   const [chargement, setChargement] = useState(true);
-  const [profilOuvert, setProfilOuvert] = useState(null);
-  const profilOuvertRef = useRef(null);
   const [menuAmi, setMenuAmi] = useState(null);
-  const user = auth.currentUser;
   const navigate = useNavigate();
+  useEffect(() => {
+    const handleClick = () => setMenuAmi(null);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+  const user = auth.currentUser;
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "utilisateurs", user.uid), async (snap) => {
@@ -101,15 +104,6 @@ function Amis() {
     });
   };
 
-  if (profilOuvertRef.current) return (
-    <ProfilPublic
-      userId={profilOuvertRef.current}
-      onRetour={() => {
-        profilOuvertRef.current = null;
-        setProfilOuvert(null);
-      }}
-    />
-  );
 
   if (chargement) return <div className="chargement">Chargement...</div>;
 
@@ -144,7 +138,7 @@ function Amis() {
               <div key={ami.id} className="ami-item">
                 <div
                   className="ami-avatar"
-                  onClick={() => { profilOuvertRef.current = ami.id; setProfilOuvert(ami.id); }}
+                  onClick={() => navigate(`/profil/${ami.id}`)}
                   style={{ cursor: "pointer" }}
                 >
                   {ami.photoURL ? (
@@ -158,7 +152,7 @@ function Amis() {
                 </div>
                 <div
                   className="ami-infos"
-                  onClick={() => { profilOuvertRef.current = ami.id; setProfilOuvert(ami.id); }}
+                  onClick={() => navigate(`/profil/${ami.id}`)}
                   style={{ cursor: "pointer" }}
                 >
                   <span className="conv-pseudo">{ami.pseudo}</span>
@@ -242,7 +236,7 @@ function Amis() {
               <div key={d.id} className="ami-item">
                 <div
                   className="ami-avatar"
-                  onClick={() => { profilOuvertRef.current = d.id; setProfilOuvert(d.id); }}
+                  onClick={() => navigate(`/profil/${d.id}`)}
                   style={{ cursor: "pointer" }}
                 >
                   {d.photoURL ? (
@@ -255,7 +249,7 @@ function Amis() {
                 </div>
                 <div
                   className="ami-infos"
-                  onClick={() => { profilOuvertRef.current = d.id; setProfilOuvert(d.id); }}
+                  onClick={() => navigate(`/profil/${d.id}`)}
                   style={{ cursor: "pointer" }}
                 >
                   <span className="conv-pseudo">{d.pseudo}</span>

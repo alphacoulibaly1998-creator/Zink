@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
-import ProfilPublic from "./ProfilPublic";
 import {
   collection, query, where, getDocs,
   doc, setDoc, getDoc, updateDoc, arrayUnion
@@ -15,7 +14,6 @@ function Decouvrir() {
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState("");
   const [monProfil, setMonProfil] = useState(null);
-  const [profilOuvert, setProfilOuvert] = useState(null);
   const user = auth.currentUser;
   const navigate = useNavigate();
 
@@ -103,7 +101,7 @@ function Decouvrir() {
     setRecherche("");
     setSuggestions([]);
     setErreur("");
-    setProfilOuvert(u.id);
+    navigate(`/profil/${u.id}`);
   };
 
   const getStatutRelation = (autreUser) => {
@@ -164,12 +162,6 @@ function Decouvrir() {
     );
   };
 
-  if (profilOuvert) return (
-    <ProfilPublic
-      userId={profilOuvert}
-      onRetour={() => setProfilOuvert(null)}
-    />
-  );
 
   return (
     <div className="decouvrir-container">
@@ -215,7 +207,7 @@ function Decouvrir() {
           <div key={u.id} className="decouvrir-user">
             <div
               className="conv-avatar"
-              onClick={() => setProfilOuvert(u.id)}
+              onClick={() => navigate(`/profil/${u.id}`)}
               style={{ cursor: "pointer" }}
             >
               {u.photoURL ? (
@@ -228,7 +220,7 @@ function Decouvrir() {
             </div>
             <div
               className="decouvrir-infos"
-              onClick={() => setProfilOuvert(u.id)}
+              onClick={() => navigate(`/profil/${u.id}`)}
               style={{ cursor: "pointer" }}
             >
               <span className="conv-pseudo">{u.pseudo}</span>

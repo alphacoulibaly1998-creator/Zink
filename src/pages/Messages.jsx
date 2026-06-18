@@ -4,20 +4,24 @@ import {
   collection, query, where, onSnapshot,
   getDoc, doc, deleteDoc, updateDoc
 } from "firebase/firestore";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Chat from "../components/Chat";
-import ProfilPublic from "./ProfilPublic";
 
 function Messages() {
   const [conversations, setConversations] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [menuConv, setMenuConv] = useState(null);
+  useEffect(() => {
+    const handleClick = () => setMenuConv(null);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
   const [convActiveId, setConvActiveId] = useState(null);
   const [convActiveData, setConvActiveData] = useState(null);
   const convActivePersist = useRef(null);
-  const [profilOuvert, setProfilOuvert] = useState(null);
   const user = auth.currentUser;
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (location.state?.convId && !convActivePersist.current) {
@@ -117,12 +121,6 @@ function Messages() {
     return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
   };
 
-  if (profilOuvert) return (
-    <ProfilPublic
-      userId={profilOuvert}
-      onRetour={() => setProfilOuvert(null)}
-    />
-  );
 
   if (convActiveId && convActiveData) {
     return (
@@ -131,7 +129,7 @@ function Messages() {
         autre={convActiveData.autre}
         autreId={convActiveData.autreId}
         onRetour={fermerConv}
-        onVoirProfil={(userId) => setProfilOuvert(userId)}
+        onVoirProfil={(userId) => navigate(`/profil/${userId}`)}
       />
     );
   }

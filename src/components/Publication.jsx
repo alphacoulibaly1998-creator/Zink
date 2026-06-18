@@ -20,7 +20,18 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
   const [texteEditionPub, setTexteEditionPub] = useState("");
  const [reponseA, setReponseA] = useState(null);
   const [voirTousCommentaires, setVoirTousCommentaires] = useState(false);
+  const [menuReponse, setMenuReponse] = useState(null);
+  const [reponseEnEdition, setReponseEnEdition] = useState(null);
+  const [texteEditionReponse, setTexteEditionReponse] = useState("");
   const menuRef = useRef(null);
+  useEffect(() => {
+    const handleClick = () => {
+      setMenuCommentaire(null);
+      setMenuReponse(null);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
   const user = auth.currentUser;
   const aLike = pub.likes?.includes(user.uid);
 
@@ -380,7 +391,74 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                   >
                     💬 Répondre
                   </button>
+                  <div className="pub-menu-container">
+                    <button
+                      className="commentaire-btn-menu"
+                      onClick={() => setMenuReponse(menuReponse === c.id ? null : c.id)}
+                    >
+                      ⋯
+                    </button>
+                    {menuReponse === c.id && (
+                      <div className="commentaire-menu">
+                        {c.userId === user.uid && (
+                          <>
+                            <button onClick={() => {
+                              setReponseEnEdition(c.id);
+                              setTexteEditionReponse(c.texte);
+                              setMenuReponse(null);
+                            }}>
+                              ✏️ Modifier
+                            </button>
+                            <button
+                              className="menu-suppr"
+                              onClick={() => {
+                                setMenuReponse(null);
+                                supprimerCommentaire(c);
+                              }}
+                            >
+                              🗑️ Supprimer
+                            </button>
+                          </>
+                        )}
+                        {c.userId !== user.uid && (
+                          <button onClick={() => {
+                            setMenuReponse(null);
+                            alert("Commentaire signalé. Merci !");
+                          }}>
+                            🚩 Signaler
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {reponseEnEdition === c.id && (
+                  <div className="commentaire-edition">
+                    <input
+                      type="text"
+                      value={texteEditionReponse}
+                      onChange={(e) => setTexteEditionReponse(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === "Enter") {
+                          await updateDoc(
+                            doc(db, "publications", pub.id, "commentaires", c.id),
+                            { texte: texteEditionReponse.trim(), modifie: true }
+                          );
+                          setReponseEnEdition(null);
+                        }
+                      }}
+                      autoFocus
+                    />
+                    <button onClick={async () => {
+                      await updateDoc(
+                        doc(db, "publications", pub.id, "commentaires", c.id),
+                        { texte: texteEditionReponse.trim(), modifie: true }
+                      );
+                      setReponseEnEdition(null);
+                    }}>✓</button>
+                    <button onClick={() => setReponseEnEdition(null)}>✕</button>
+                  </div>
+                )}
                   </div>
                   <button
                     className="commentaire-btn-menu"

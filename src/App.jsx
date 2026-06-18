@@ -11,6 +11,7 @@ import Messages from "./pages/Messages";
 import Jeux from "./pages/Jeux";
 import Decouvrir from "./pages/Decouvrir";
 import AttaquesSonores from "./pages/AttaquesSonores";
+import ProfilPublic from "./pages/ProfilPublic";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MotDePasseOublie from "./pages/MotDePasseOublie";
@@ -90,6 +91,7 @@ function App() {
             <Route path="/jeux" element={utilisateur ? <Jeux /> : <Navigate to="/login" />} />
             <Route path="/decouvrir" element={utilisateur ? <Decouvrir /> : <Navigate to="/login" />} />
             <Route path="/attaques" element={utilisateur ? <AttaquesSonores /> : <Navigate to="/login" />} />
+            <Route path="/profil/:userId" element={utilisateur ? <ProfilPublic /> : <Navigate to="/login" />} />
           </Routes>
         </div>
         {utilisateur && <NavBar />}

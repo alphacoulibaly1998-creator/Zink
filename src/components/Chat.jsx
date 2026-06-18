@@ -19,6 +19,15 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
   const [afficherEmojis, setAfficherEmojis] = useState(false);
   const [afficherMedia, setAfficherMedia] = useState(false);
   const [menuMessage, setMenuMessage] = useState(null);
+  useEffect(() => {
+    const handleClick = () => {
+      setMenuMessage(null);
+      setAfficherEmojis(false);
+      setAfficherMedia(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
   const [mediaEnAttente, setMediaEnAttente] = useState(null);
   const [typeMediaEnAttente, setTypeMediaEnAttente] = useState(null);
   const [apercuMedia, setApercuMedia] = useState(null);
