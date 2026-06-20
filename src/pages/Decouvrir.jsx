@@ -1,19 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
 import {
-  collection, query, where, getDocs,
+  collection, query, where, getDocs, limit,
   doc, setDoc, getDoc, updateDoc, arrayUnion
 } from "firebase/firestore";
 import { creerNotification } from "../notifications";
 import { useNavigate } from "react-router-dom";
 
-function Decouvrir() {
+function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
   const [recherche, setRecherche] = useState("");
   const [resultats, setResultats] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState("");
   const [monProfil, setMonProfil] = useState(null);
+  const [chargementSuggestions, setChargementSuggestions] = useState(!suggestionsGlobales);
   const user = auth.currentUser;
   const navigate = useNavigate();
 
@@ -24,6 +25,44 @@ function Decouvrir() {
     };
     charger();
   }, []);
+
+  useEffect(() => {
+    const chargerSuggestions = async () => {
+      if (!monProfil || suggestionsGlobales) {
+        setChargementSuggestions(false);
+        return;
+      }
+      setChargementSuggestions(true);
+      try {
+        const amis = monProfil?.amis || [];
+        const q = query(collection(db, "utilisateurs"), limit(30));
+        const snap = await getDocs(q);
+        const tous = snap.docs
+          .filter((d) => d.id !== user.uid && !amis.includes(d.id))
+          .map((d) => ({ id: d.id, ...d.data() }));
+        const melanges = tous.sort(() => Math.random() - 0.5).slice(0, 6);
+        setSuggestionsGlobales(melanges);
+      } catch (e) {}
+      setChargementSuggestions(false);
+    };
+    chargerSuggestions();
+  }, [monProfil]);
+
+  const chargerPlusSuggestions = async () => {
+    setChargementSuggestions(true);
+    try {
+      const amis = monProfil?.amis || [];
+      const dejaAffiches = (suggestionsGlobales || []).map((s) => s.id);
+      const q = query(collection(db, "utilisateurs"), limit(50));
+      const snap = await getDocs(q);
+      const tous = snap.docs
+        .filter((d) => d.id !== user.uid && !amis.includes(d.id) && !dejaAffiches.includes(d.id))
+        .map((d) => ({ id: d.id, ...d.data() }));
+      const melanges = tous.sort(() => Math.random() - 0.5).slice(0, 6);
+      setSuggestionsGlobales(melanges.length > 0 ? melanges : suggestionsGlobales);
+    } catch (e) {}
+    setChargementSuggestions(false);
+  };
 
   useEffect(() => {
     if (!recherche.trim() || recherche.length < 2) {
@@ -201,6 +240,54 @@ function Decouvrir() {
       </div>
 
       {erreur && <p className="auth-erreur">{erreur}</p>}
+
+      {!recherche.trim() && resultats.length === 0 && (
+        <div className="decouvrir-suggestions-section">
+          <p className="attaques-titre">✨ Suggestions pour toi</p>
+          {chargementSuggestions ? (
+            <div className="chargement">Chargement...</div>
+          ) : (
+            <>
+              <div className="decouvrir-resultats">
+                {(suggestionsGlobales || []).map((u) => (
+                  <div key={u.id} className="decouvrir-user">
+                    <div
+                      className="conv-avatar"
+                      onClick={() => navigate(`/profil/${u.id}`)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {u.photoURL ? (
+                        <img src={u.photoURL} alt="avatar" />
+                      ) : (
+                        <div className="conv-avatar-placeholder">
+                          {u.pseudo?.[0]?.toUpperCase() || "?"}
+                        </div>
+                      )}
+                    </div>
+                    <div
+                      className="decouvrir-infos"
+                      onClick={() => navigate(`/profil/${u.id}`)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <span className="conv-pseudo">{u.pseudo}</span>
+                      <span className="conv-dernier">🌍 {u.pays}</span>
+                    </div>
+                    <div className="decouvrir-btns">
+                      {renderBouton(u)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                className="voir-plus-commentaires"
+                onClick={chargerPlusSuggestions}
+              >
+                🔄 Voir d'autres suggestions
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="decouvrir-resultats">
         {resultats.map((u) => (

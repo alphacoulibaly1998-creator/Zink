@@ -2854,3 +2854,9 @@ body {
 .voir-plus-commentaires:hover {
   color: #ff6b6b;
 }
+
+.decouvrir-suggestions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

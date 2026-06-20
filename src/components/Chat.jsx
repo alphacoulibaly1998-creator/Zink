@@ -20,7 +20,9 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
   const [afficherMedia, setAfficherMedia] = useState(false);
   const [menuMessage, setMenuMessage] = useState(null);
   useEffect(() => {
-    const handleClick = () => {
+    const handleClick = (e) => {
+      if (e.target.closest(".emoji-panel") || e.target.closest(".chat-btn-emoji") || e.target.closest(".chat-emoji-inline")) return;
+      if (e.target.closest(".chat-media-panel") || e.target.closest(".chat-btn-plus")) return;
       setMenuMessage(null);
       setAfficherEmojis(false);
       setAfficherMedia(false);

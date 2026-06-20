@@ -20,6 +20,7 @@ import "./App.css";
 function App() {
   const [utilisateur, setUtilisateur] = useState(null);
   const [chargement, setChargement] = useState(true);
+  const [suggestionsGlobales, setSuggestionsGlobales] = useState(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -89,7 +90,7 @@ function App() {
             <Route path="/amis" element={utilisateur ? <Amis /> : <Navigate to="/login" />} />
             <Route path="/messages" element={utilisateur ? <Messages /> : <Navigate to="/login" />} />
             <Route path="/jeux" element={utilisateur ? <Jeux /> : <Navigate to="/login" />} />
-            <Route path="/decouvrir" element={utilisateur ? <Decouvrir /> : <Navigate to="/login" />} />
+            <Route path="/decouvrir" element={utilisateur ? <Decouvrir suggestionsGlobales={suggestionsGlobales} setSuggestionsGlobales={setSuggestionsGlobales} /> : <Navigate to="/login" />} />
             <Route path="/attaques" element={utilisateur ? <AttaquesSonores /> : <Navigate to="/login" />} />
             <Route path="/profil/:userId" element={utilisateur ? <ProfilPublic /> : <Navigate to="/login" />} />
           </Routes>
