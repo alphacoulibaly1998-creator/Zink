@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
+import { enregistrerPartie } from "../../jeuxStats";
+import { auth } from "../../firebase";
 
 const COLS = 7;
 const ROWS = 6;
@@ -43,6 +45,8 @@ function Puissance4({ onRetour }) {
         if (verifierGagnant(newGrille, joueur)) {
           setWinner(joueur);
           setScores((s) => ({ ...s, [joueur]: s[joueur] + 1 }));
+          const user = auth.currentUser;
+          if (user) enregistrerPartie(user.uid, "puissance4", true);
         } else {
           setJoueur(joueur === 1 ? 2 : 1);
         }

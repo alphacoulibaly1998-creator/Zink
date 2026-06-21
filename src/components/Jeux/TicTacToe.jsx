@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
+import { enregistrerPartie } from "../../jeuxStats";
+import { auth } from "../../firebase";
 
 const gagnant = (cases) => {
   const lignes = [
@@ -31,6 +33,11 @@ function TicTacToe({ onRetour }) {
     const w = gagnant(newCases);
     if (w) {
       setScores((s) => ({ ...s, [w]: s[w] + 1 }));
+      const user = auth.currentUser;
+      if (user) enregistrerPartie(user.uid, "tictactoe", true);
+    } else if (newCases.every(Boolean)) {
+      const user = auth.currentUser;
+      if (user) enregistrerPartie(user.uid, "tictactoe", false);
     } else {
       setJoueur(joueur === "X" ? "O" : "X");
     }

@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
+import { enregistrerPartie } from "../../jeuxStats";
+import { auth } from "../../firebase";
 
 const TAILLE = 6;
 
@@ -55,7 +57,11 @@ function FlipChip({ onRetour }) {
     if (vide === 0) {
       const w = noirCount > blancCount ? "noir" : blancCount > noirCount ? "blanc" : "égalité";
       setWinner(w);
-      if (w !== "égalité") setScores((s) => ({ ...s, [w]: s[w] + 1 }));
+      if (w !== "égalité") {
+        setScores((s) => ({ ...s, [w]: s[w] + 1 }));
+        const user = auth.currentUser;
+        if (user) enregistrerPartie(user.uid, "flipchip", true);
+      }
     } else {
       setJoueur(joueur === "noir" ? "blanc" : "noir");
     }

@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
+import { enregistrerPartie } from "../../jeuxStats";
+import { auth } from "../../firebase";
 
 const COULEURS = ["♠", "♥", "♦", "♣"];
 const VALEURS = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
@@ -60,10 +62,20 @@ function CrazyEights({ onRetour }) {
 
     if (joueur === 1) {
       setMainJ1(main);
-      if (main.length === 0) { setWinner(1); return; }
+      if (main.length === 0) {
+        setWinner(1);
+        const user = auth.currentUser;
+        if (user) enregistrerPartie(user.uid, "crazyeights", true);
+        return;
+      }
     } else {
       setMainJ2(main);
-      if (main.length === 0) { setWinner(2); return; }
+      if (main.length === 0) {
+        setWinner(2);
+        const user = auth.currentUser;
+        if (user) enregistrerPartie(user.uid, "crazyeights", true);
+        return;
+      }
     }
 
     setPile(nouvPile);

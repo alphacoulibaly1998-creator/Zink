@@ -8,6 +8,7 @@ import { IMGBB_API_KEY } from "../config";
 import axios from "axios";
 import Parametres from "./Parametres";
 import Notifications from "./Notifications";
+import { BADGES_INFO } from "../jeuxStats";
 
 const AVATARS = ["🐶","🐱","🦊","🐼","🐨","🦁","🐯","🐸","🐙","🦋","🌸","⭐","🔥","🎮","🎵","🌈","💎","🚀","🎯","👑"];
 
@@ -288,6 +289,42 @@ if (afficherNotifications) return <Notifications onRetour={() => setAfficherNoti
           <span className="profil-info-label">🏆 Badges</span>
           <span className="profil-info-valeur">{profil?.badges?.length || 0}</span>
         </div>
+        <div className="profil-info-card">
+          <span className="profil-info-label">🔥 Série actuelle</span>
+          <span className="profil-info-valeur">{profil?.serieVictoires || 0}</span>
+        </div>
+      </div>
+
+      {profil?.badges?.length > 0 && (
+        <div className="badges-section">
+          <p className="attaques-titre">🏆 Tes badges</p>
+          <div className="badges-grid">
+            {(() => {
+              const badges = [...profil.badges];
+              const seriesPossedees = badges.filter((b) => b.startsWith("serie_"));
+              if (seriesPossedees.length > 1) {
+                const ordre = ["serie_10", "serie_6", "serie_3"];
+                const meilleureSerie = ordre.find((s) => seriesPossedees.includes(s));
+                const aSupprimer = seriesPossedees.filter((s) => s !== meilleureSerie);
+                return badges.filter((b) => !aSupprimer.includes(b));
+              }
+              return badges;
+            })().map((badgeId) => {
+              const badge = BADGES_INFO[badgeId];
+              if (!badge) return null;
+              return (
+                <div key={badgeId} className="badge-card">
+                  <span className="badge-icon">{badge.icon}</span>
+                  <span className="badge-nom">{badge.nom}</span>
+                  <span className="badge-desc">{badge.description}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="profil-infos" style={{ display: "none" }}>
       <div className="profil-info-card">
           <span className="profil-info-label">🎂 Date de naissance</span>
           <span className="profil-info-valeur">

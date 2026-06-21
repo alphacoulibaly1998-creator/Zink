@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
+import { enregistrerPartie } from "../../jeuxStats";
+import { auth } from "../../firebase";
 
 const TAILLE = 10;
 const BATEAUX = [5, 4, 3, 3, 2];
@@ -65,7 +67,12 @@ function BatailleNavale({ onRetour }) {
       newTirs[r][c] = grilleJ2[r][c] === "bateau" ? "touche" : "rate";
       setTirsJ1(newTirs);
       const { total, touches } = compterBateaux(grilleJ2, newTirs);
-      if (touches === total) { setWinner(1); return; }
+      if (touches === total) {
+        setWinner(1);
+        const user = auth.currentUser;
+        if (user) enregistrerPartie(user.uid, "bataillenavale", true);
+        return;
+      }
       setJoueur(2);
     } else {
       if (tirsJ2[r][c]) return;
@@ -73,7 +80,12 @@ function BatailleNavale({ onRetour }) {
       newTirs[r][c] = grilleJ1[r][c] === "bateau" ? "touche" : "rate";
       setTirsJ2(newTirs);
       const { total, touches } = compterBateaux(grilleJ1, newTirs);
-      if (touches === total) { setWinner(2); return; }
+      if (touches === total) {
+        setWinner(2);
+        const user = auth.currentUser;
+        if (user) enregistrerPartie(user.uid, "bataillenavale", true);
+        return;
+      }
       setJoueur(1);
     }
   };
