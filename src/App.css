@@ -2160,6 +2160,11 @@ body {
 
 .fc-case.vide:hover { background: #2a2a4a; }
 
+.fc-case {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 /* Chat Jeu */
 .chat-jeu {
   margin-top: 8px;
@@ -2898,4 +2903,51 @@ body {
 .badge-desc {
   font-size: 10px;
   color: #888;
+}
+
+.jeu-btn-regles {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all 0.2s;
+}
+
+.jeu-btn-regles:hover {
+  border-color: #a855f7;
+}
+
+.jeu-regles {
+  background: #1a1a2e;
+  border: 1px solid #a855f7;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jeu-regles p {
+  color: #dddddd;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.jeu-regles strong {
+  color: #a855f7;
+}
+
+.jeu-btn-fermer-regles {
+  background: linear-gradient(90deg, #ff6b6b, #a855f7);
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
 }

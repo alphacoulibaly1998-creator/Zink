@@ -25,6 +25,7 @@ const carteCompatible = (carte, dessus) => {
 function CrazyEights({ onRetour }) {
   const [jeu, setJeu] = useState(creerJeu());
   const partieId = useRef(Date.now().toString());
+  const [afficherRegles, setAfficherRegles] = useState(false);
   const [mainJ1, setMainJ1] = useState([]);
   const [mainJ2, setMainJ2] = useState([]);
   const [pile, setPile] = useState([]);
@@ -124,7 +125,19 @@ function CrazyEights({ onRetour }) {
       <div className="jeu-header">
         <button className="chat-retour" onClick={onRetour}>←</button>
         <h2 className="jeu-titre">🃏 Crazy Eights</h2>
+        <button className="jeu-btn-regles" onClick={() => setAfficherRegles(!afficherRegles)}>❓</button>
       </div>
+
+      {afficherRegles && (
+        <div className="jeu-regles">
+          <p><strong>🎯 Objectif :</strong> Être le premier à se débarrasser de toutes ses cartes.</p>
+          <p><strong>👥 Joueurs :</strong> 2 joueurs, 7 cartes chacun au départ.</p>
+          <p><strong>▶️ Comment jouer :</strong> Pose une carte qui a la même couleur (♠♥♦♣) ou la même valeur que la carte du dessus.</p>
+          <p><strong>🃏 Les 8 :</strong> Les 8 sont des jokers — ils peuvent être posés sur n'importe quelle carte !</p>
+          <p><strong>🔄 Piocher :</strong> Si tu n'as pas de carte jouable, clique sur "Piocher" pour prendre une carte.</p>
+          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>Compris !</button>
+        </div>
+      )}
 
       <div className="ce-statut">
         {winner

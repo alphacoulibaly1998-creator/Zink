@@ -22,6 +22,7 @@ function TicTacToe({ onRetour }) {
   const [joueur, setJoueur] = useState("X");
   const [scores, setScores] = useState({ X: 0, O: 0 });
   const partieId = useRef(Date.now().toString());
+  const [afficherRegles, setAfficherRegles] = useState(false);
   const winner = gagnant(cases);
   const plein = cases.every(Boolean);
 
@@ -53,7 +54,21 @@ function TicTacToe({ onRetour }) {
       <div className="jeu-header">
         <button className="chat-retour" onClick={onRetour}>←</button>
         <h2 className="jeu-titre">⭕ Tic Tac Toe</h2>
+        <button className="jeu-btn-regles" onClick={() => setAfficherRegles(!afficherRegles)}>
+          ❓
+        </button>
       </div>
+
+      {afficherRegles && (
+        <div className="jeu-regles">
+          <p><strong>🎯 Objectif :</strong> Aligne 3 symboles identiques (X ou O) en ligne, colonne ou diagonale avant ton adversaire.</p>
+          <p><strong>👥 Joueurs :</strong> 2 joueurs sur le même appareil, à tour de rôle.</p>
+          <p><strong>▶️ Comment jouer :</strong> Clique sur une case vide pour y placer ton symbole.</p>
+          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>
+            Compris !
+          </button>
+        </div>
+      )}
 
       <div className="jeu-scores">
         <div className={`score-card ${joueur === "X" && !winner ? "actif" : ""}`}>

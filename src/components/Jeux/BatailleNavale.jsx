@@ -38,6 +38,7 @@ const placerBateauxAuto = () => {
 function BatailleNavale({ onRetour }) {
   const [phase, setPhase] = useState("jeu");
   const partieId = useRef(Date.now().toString());
+  const [afficherRegles, setAfficherRegles] = useState(false);
   const [grilleJ1] = useState(placerBateauxAuto());
   const [grilleJ2] = useState(placerBateauxAuto());
   const [tirsJ1, setTirsJ1] = useState(creerGrille());
@@ -98,7 +99,19 @@ function BatailleNavale({ onRetour }) {
       <div className="jeu-header">
         <button className="chat-retour" onClick={onRetour}>←</button>
         <h2 className="jeu-titre">🚢 Bataille Navale</h2>
+        <button className="jeu-btn-regles" onClick={() => setAfficherRegles(!afficherRegles)}>❓</button>
       </div>
+
+      {afficherRegles && (
+        <div className="jeu-regles">
+          <p><strong>🎯 Objectif :</strong> Coule tous les bateaux ennemis avant que l'adversaire ne coule les tiens.</p>
+          <p><strong>👥 Joueurs :</strong> 2 joueurs à tour de rôle. Les bateaux sont placés automatiquement.</p>
+          <p><strong>▶️ Comment jouer :</strong> Clique sur une case de la grille pour tirer. 💥 = touché, 💧 = raté.</p>
+          <p><strong>🚢 Bateaux :</strong> 5 bateaux cachés de tailles 5, 4, 3, 3 et 2 cases.</p>
+          <p><strong>⚠️ Note :</strong> En mode local, chaque joueur voit la grille de tir de l'adversaire à son tour.</p>
+          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>Compris !</button>
+        </div>
+      )}
 
       <div className="bn-statut">
         {winner

@@ -34,6 +34,7 @@ function Puissance4({ onRetour }) {
   const [winner, setWinner] = useState(null);
   const [scores, setScores] = useState({ 1: 0, 2: 0 });
   const partieId = useRef(Date.now().toString());
+  const [afficherRegles, setAfficherRegles] = useState(false);
 
   const jouer = (col) => {
     if (winner) return;
@@ -66,7 +67,18 @@ function Puissance4({ onRetour }) {
       <div className="jeu-header">
         <button className="chat-retour" onClick={onRetour}>←</button>
         <h2 className="jeu-titre">🔴 Puissance 4</h2>
+        <button className="jeu-btn-regles" onClick={() => setAfficherRegles(!afficherRegles)}>❓</button>
       </div>
+
+      {afficherRegles && (
+        <div className="jeu-regles">
+          <p><strong>🎯 Objectif :</strong> Aligne 4 jetons de ta couleur horizontalement, verticalement ou en diagonale.</p>
+          <p><strong>👥 Joueurs :</strong> 🔴 Joueur 1 vs 🟡 Joueur 2, à tour de rôle.</p>
+          <p><strong>▶️ Comment jouer :</strong> Clique sur une colonne pour y faire tomber ton jeton. Le jeton tombe tout en bas de la colonne.</p>
+          <p><strong>⚠️ Attention :</strong> Bloque aussi les alignements de ton adversaire !</p>
+          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>Compris !</button>
+        </div>
+      )}
 
       <div className="jeu-scores">
         <div className={`score-card ${joueur === 1 && !winner ? "actif" : ""}`}>
