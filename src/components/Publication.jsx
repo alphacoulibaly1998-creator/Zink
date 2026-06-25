@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
 import { creerNotification } from "../notifications";
+import { useNavigate } from "react-router-dom";
 import {
   doc, updateDoc, arrayUnion, arrayRemove,
   deleteDoc, getDoc, addDoc, collection,
@@ -19,13 +20,15 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
   const [pubEnEdition, setPubEnEdition] = useState(false);
   const [texteEditionPub, setTexteEditionPub] = useState("");
  const [reponseA, setReponseA] = useState(null);
+ const navigate = useNavigate();
   const [voirTousCommentaires, setVoirTousCommentaires] = useState(false);
   const [menuReponse, setMenuReponse] = useState(null);
   const [reponseEnEdition, setReponseEnEdition] = useState(null);
   const [texteEditionReponse, setTexteEditionReponse] = useState("");
   const menuRef = useRef(null);
   useEffect(() => {
-    const handleClick = () => {
+    const handleClick = (e) => {
+      if (e.target.closest(".commentaire-menu")) return;
       setMenuCommentaire(null);
       setMenuReponse(null);
     };
@@ -136,9 +139,9 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     setTexteEdition("");
   };
 
-  const signalerCommentaire = () => {
+  const signalerCommentaire = (commentaireId) => {
     setMenuCommentaire(null);
-    alert("Commentaire signalé. Merci pour ton retour !");
+    navigate(`/signalement?type=commentaire&cibleId=${commentaireId}`);
   };
 
   const supprimer = async () => {
@@ -180,7 +183,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
 
   const signaler = () => {
     setMenuOuvert(false);
-    alert("Publication signalée. Merci pour ton retour !");
+    navigate(`/signalement?type=publication&cibleId=${pub.id}`);
   };
 
   const partager = async () => {
@@ -423,7 +426,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                         {c.userId !== user.uid && (
                           <button onClick={() => {
                             setMenuReponse(null);
-                            alert("Commentaire signalé. Merci !");
+                            navigate(`/signalement?type=commentaire&cibleId=${c.id}`);
                           }}>
                             🚩 Signaler
                           </button>
@@ -490,7 +493,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                         </>
                       )}
                       {c.userId !== user.uid && (
-                        <button onClick={signalerCommentaire}>
+                        <button onClick={() => signalerCommentaire(c.id)}>
                           🚩 Signaler
                         </button>
                       )}
@@ -528,6 +531,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
           </div>
         </div>
       )}
+    
     </div>
   );
 }

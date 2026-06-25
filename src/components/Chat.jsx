@@ -5,6 +5,7 @@ import {
   query, orderBy, doc, updateDoc, getDoc, setDoc, getDocs
 } from "firebase/firestore";
 import { IMGBB_API_KEY } from "../config";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
 import axios from "axios";
 
@@ -23,6 +24,7 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
     const handleClick = (e) => {
       if (e.target.closest(".emoji-panel") || e.target.closest(".chat-btn-emoji") || e.target.closest(".chat-emoji-inline")) return;
       if (e.target.closest(".chat-media-panel") || e.target.closest(".chat-btn-plus")) return;
+      if (e.target.closest(".message-menu")) return;
       setMenuMessage(null);
       setAfficherEmojis(false);
       setAfficherMedia(false);
@@ -39,6 +41,7 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
   const [autreVue, setAutreVue] = useState(null);
   const timerRef = useRef(null);
   const basRef = useRef(null);
+  const navigate = useNavigate();
   const user = auth.currentUser;
 
   useEffect(() => {
@@ -349,7 +352,7 @@ const msgData = {
 
   const signalerMessage = (msg) => {
     setMenuMessage(null);
-    alert("Message signalé. Merci pour ton retour !");
+    navigate(`/signalement?type=message&cibleId=${msg.id}`);
   };
 
   const formaterHeure = (timestamp) => {
@@ -604,6 +607,7 @@ const msgData = {
           </label>
         </div>
       )}
+    
     </div>
   );
 }

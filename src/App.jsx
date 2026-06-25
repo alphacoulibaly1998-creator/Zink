@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import React from "react";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
@@ -15,7 +16,10 @@ import ProfilPublic from "./pages/ProfilPublic";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MotDePasseOublie from "./pages/MotDePasseOublie";
+import PageSignalement from "./pages/PageSignalement";
 import "./App.css";
+
+export const SignalementContext = React.createContext(null);
 
 function App() {
   const [utilisateur, setUtilisateur] = useState(null);
@@ -78,6 +82,7 @@ function App() {
   if (chargement) return <div className="chargement">Chargement...</div>;
 
   return (
+    <SignalementContext.Provider value={null}>
     <BrowserRouter>
       <div className="app-container">
         <div className="page-content">
@@ -93,11 +98,14 @@ function App() {
             <Route path="/decouvrir" element={utilisateur ? <Decouvrir suggestionsGlobales={suggestionsGlobales} setSuggestionsGlobales={setSuggestionsGlobales} /> : <Navigate to="/login" />} />
             <Route path="/attaques" element={utilisateur ? <AttaquesSonores /> : <Navigate to="/login" />} />
             <Route path="/profil/:userId" element={utilisateur ? <ProfilPublic /> : <Navigate to="/login" />} />
+            <Route path="/signalement" element={utilisateur ? <PageSignalement /> : <Navigate to="/login" />} />
           </Routes>
         </div>
         {utilisateur && <NavBar />}
       </div>
+      
     </BrowserRouter>
+    </SignalementContext.Provider>
   );
 }
 

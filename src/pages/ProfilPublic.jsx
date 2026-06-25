@@ -12,7 +12,10 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
   const [chargement, setChargement] = useState(true);
   const [menuOuvert, setMenuOuvert] = useState(false);
   useEffect(() => {
-    const handleClick = () => setMenuOuvert(false);
+    const handleClick = (e) => {
+      if (e.target.closest(".pub-menu-container")) return;
+      setMenuOuvert(false);
+    };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
@@ -97,7 +100,9 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
   };
 
   const signalerProfil = () => {
-    alert(`Profil de ${profil?.pseudo} signalé. Merci pour ton retour !`);
+    console.log("signalerProfil appelé", userId);
+    setMenuOuvert(false);
+    navigate(`/signalement?type=profil&cibleId=${userId}`);
   };
 
   const retirerAmi = async () => {
@@ -263,6 +268,7 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
           </span>
         </div>
       </div>
+    
     </div>
   );
 }
