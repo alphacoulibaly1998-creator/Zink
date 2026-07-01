@@ -3055,3 +3055,68 @@ body {
   flex-direction: column;
   gap: 16px;
 }
+
+.jeu-mode-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jeu-mode-titre {
+  color: #888;
+  font-size: 15px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.jeu-mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  background: #1a1a2e;
+  border: 2px solid #2a2a4a;
+  border-radius: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.jeu-mode-btn span {
+  font-size: 12px;
+  color: #888;
+  font-weight: 400;
+}
+
+.jeu-mode-btn:hover {
+  border-color: #a855f7;
+  background: #2a2a4a;
+}
+
+.jeu-mode-btn.facile {
+  border-color: #4ade80;
+}
+
+.jeu-mode-btn.facile:hover {
+  background: #1a2e1a;
+}
+
+.jeu-mode-btn.normal {
+  border-color: #f59e0b;
+}
+
+.jeu-mode-btn.normal:hover {
+  background: #2e2a1a;
+}
+
+.jeu-mode-btn.expert {
+  border-color: #ff6b6b;
+}
+
+.jeu-mode-btn.expert:hover {
+  background: #2e1a1a;
+}
