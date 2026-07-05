@@ -458,6 +458,24 @@ const msgData = {
                     <video controls src={msg.videoData || msg.mediaUrl} className="message-photo" />
                     {msg.texte && <p className="message-legende">{msg.texte}</p>}
                   </div>
+                ) : msg.type === "publication_partagee" ? (
+                  <div
+                    className="message-pub-partagee"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/");
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <p className="message-pub-label">📸 Publication de {msg.pubAuteur}</p>
+                    {msg.pubImage && (
+                      <img src={msg.pubImage} alt="publication" className="message-photo" />
+                    )}
+                    {msg.pubDescription && (
+                      <p className="message-legende">{msg.pubDescription}</p>
+                    )}
+                    <span style={{ color: "#a855f7", fontSize: "12px" }}>Voir sur Zink →</span>
+                  </div>
                 ) : msg.type === "vocal" ? (
                   <audio controls src={msg.mediaUrl} className="message-audio" />
                 ) : null}

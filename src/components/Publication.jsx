@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   doc, updateDoc, arrayUnion, arrayRemove,
   deleteDoc, getDoc, addDoc, collection,
-  query, orderBy, onSnapshot, serverTimestamp
+  query, orderBy, onSnapshot, serverTimestamp, setDoc
 } from "firebase/firestore";
 
 function Publication({ pub, onSupprime, onVoirProfil }) {
@@ -20,6 +20,8 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
   const [pubEnEdition, setPubEnEdition] = useState(false);
   const [texteEditionPub, setTexteEditionPub] = useState("");
  const [reponseA, setReponseA] = useState(null);
+ const [partagerOuvert, setPartagerOuvert] = useState(false);
+  const [mesAmis, setMesAmis] = useState([]);
  const navigate = useNavigate();
   const [voirTousCommentaires, setVoirTousCommentaires] = useState(false);
   const [menuReponse, setMenuReponse] = useState(null);
@@ -199,6 +201,58 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     }
   };
 
+  const chargerAmis = async () => {
+    const snap = await getDoc(doc(db, "utilisateurs", user.uid));
+    if (!snap.exists()) return;
+    const amisIds = snap.data().amis || [];
+    const amisData = await Promise.all(
+      amisIds.map(async (id) => {
+        const s = await getDoc(doc(db, "utilisateurs", id));
+        return s.exists() ? { id, ...s.data() } : null;
+      })
+    );
+    setMesAmis(amisData.filter(Boolean));
+  };
+
+  const ouvrirPartage = () => {
+    chargerAmis();
+    setPartagerOuvert(true);
+  };
+
+  const partagerVersAmi = async (ami) => {
+    const membres = [user.uid, ami.id].sort();
+    const convId = membres.join("_");
+    const convRef = doc(db, "conversations", convId);
+    const convSnap = await getDoc(convRef);
+    if (!convSnap.exists()) {
+      await setDoc(convRef, {
+        membres,
+        dernierMessage: { texte: "", createdAt: new Date() },
+        nonLu: { [user.uid]: 0, [ami.id]: 0 },
+        createdAt: new Date()
+      });
+    }
+    await addDoc(collection(db, "conversations", convId, "messages"), {
+      userId: user.uid,
+      type: "publication_partagee",
+      texte: "",
+      pubId: pub.id,
+      pubAuteur: auteur?.pseudo || "Inconnu",
+      pubDescription: pub.description || "",
+      pubImage: pub.imageUrl || "",
+      createdAt: serverTimestamp(),
+      supprimePour: [],
+      supprimePourTous: false,
+      statut: "envoye"
+    });
+    await updateDoc(convRef, {
+      dernierMessage: { texte: "📸 Publication partagée", createdAt: new Date() },
+      [`nonLu.${ami.id}`]: (convSnap.data()?.nonLu?.[ami.id] || 0) + 1
+    });
+    setPartagerOuvert(false);
+    alert(`Publication partagée à ${ami.pseudo} !`);
+  };
+
   const formaterDate = (timestamp) => {
     if (!timestamp) return "";
     const date = timestamp.toDate();
@@ -332,6 +386,9 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
         </button>
         <button className="pub-btn-partager" onClick={partager}>
           🔗 Partager
+        </button>
+        <button className="pub-btn-partager" onClick={ouvrirPartage}>
+          📤 Envoyer
         </button>
       </div>
 
@@ -532,6 +589,36 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
         </div>
       )}
     
+    {partagerOuvert && (
+        <div className="partage-overlay" onClick={() => setPartagerOuvert(false)}>
+          <div className="partage-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="partage-header">
+              <h3>Envoyer à un ami</h3>
+              <button onClick={() => setPartagerOuvert(false)}>✕</button>
+            </div>
+            <div className="partage-liste">
+              {mesAmis.length === 0 ? (
+                <p style={{ color: "#888", textAlign: "center", padding: "20px" }}>
+                  Tu n'as pas encore d'amis à qui partager.
+                </p>
+              ) : (
+                mesAmis.map((ami) => (
+                  <div
+                    key={ami.id}
+                    className="partage-ami"
+                    onClick={() => partagerVersAmi(ami)}
+                  >
+                    <div className="conv-avatar-placeholder" style={{ width: 40, height: 40 }}>
+                      {ami.avatar || ami.pseudo?.[0]?.toUpperCase() || "?"}
+                    </div>
+                    <span>{ami.pseudo}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
