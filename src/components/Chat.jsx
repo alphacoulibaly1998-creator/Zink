@@ -410,21 +410,29 @@ const msgData = {
             >
               <div
                 className={`message ${estMoi ? "message-moi" : "message-autre"}`}
-                onPointerDown={() => {
+                onTouchStart={(e) => {
                   longPress.current = false;
                   appuiLongTimer.current = setTimeout(() => {
                     longPress.current = true;
                     setMenuMessage(msg.id);
                   }, 500);
                 }}
-                onPointerUp={() => clearTimeout(appuiLongTimer.current)}
-                onPointerCancel={() => clearTimeout(appuiLongTimer.current)}
-                onPointerMove={() => clearTimeout(appuiLongTimer.current)}
+                onTouchEnd={() => clearTimeout(appuiLongTimer.current)}
+                onTouchMove={() => clearTimeout(appuiLongTimer.current)}
+                onTouchCancel={() => clearTimeout(appuiLongTimer.current)}
+                onMouseDown={() => {
+                  longPress.current = false;
+                  appuiLongTimer.current = setTimeout(() => {
+                    longPress.current = true;
+                    setMenuMessage(msg.id);
+                  }, 500);
+                }}
+                onMouseUp={() => clearTimeout(appuiLongTimer.current)}
+                onMouseLeave={() => clearTimeout(appuiLongTimer.current)}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (longPress.current) {
                     longPress.current = false;
-                    return;
                   }
                 }}
               >
