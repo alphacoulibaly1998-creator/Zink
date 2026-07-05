@@ -20,17 +20,20 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
   const [afficherEmojis, setAfficherEmojis] = useState(false);
   const [afficherMedia, setAfficherMedia] = useState(false);
   const [menuMessage, setMenuMessage] = useState(null);
+  const appuiLongTimer = useRef(null);
+  const longPress = useRef(false);
   useEffect(() => {
     const handleClick = (e) => {
       if (e.target.closest(".emoji-panel") || e.target.closest(".chat-btn-emoji") || e.target.closest(".chat-emoji-inline")) return;
       if (e.target.closest(".chat-media-panel") || e.target.closest(".chat-btn-plus")) return;
       if (e.target.closest(".message-menu")) return;
+      if (e.target.closest(".message")) return;
       setMenuMessage(null);
       setAfficherEmojis(false);
       setAfficherMedia(false);
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
   }, []);
   const [mediaEnAttente, setMediaEnAttente] = useState(null);
   const [typeMediaEnAttente, setTypeMediaEnAttente] = useState(null);
@@ -407,9 +410,22 @@ const msgData = {
             >
               <div
                 className={`message ${estMoi ? "message-moi" : "message-autre"}`}
+                onPointerDown={() => {
+                  longPress.current = false;
+                  appuiLongTimer.current = setTimeout(() => {
+                    longPress.current = true;
+                    setMenuMessage(msg.id);
+                  }, 500);
+                }}
+                onPointerUp={() => clearTimeout(appuiLongTimer.current)}
+                onPointerCancel={() => clearTimeout(appuiLongTimer.current)}
+                onPointerMove={() => clearTimeout(appuiLongTimer.current)}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setMenuMessage(menuMessage === msg.id ? null : msg.id);
+                  if (longPress.current) {
+                    longPress.current = false;
+                    return;
+                  }
                 }}
               >
               {msg.supprimePourTous && !msg.supprimePour?.includes(user.uid) ? (

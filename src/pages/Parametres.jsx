@@ -7,6 +7,11 @@ import {
 } from "firebase/auth";
 import { doc, deleteDoc, getDoc, updateDoc, arrayRemove } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import APropos from "./APropos";
+import Admin from "./Admin";
+import { auth as authAdmin } from "../firebase";
+
+const EMAIL_ADMIN = "alphacoulibaly1998@gmail.com";
 
 function Parametres({ onRetour }) {
   const [section, setSection] = useState(null);
@@ -16,6 +21,10 @@ function Parametres({ onRetour }) {
   const [voirMdp, setVoirMdp] = useState(false);
   const [voirNouveauMdp, setVoirNouveauMdp] = useState(false);
  const [message, setMessage] = useState("");
+ const [afficherAPropos, setAfficherAPropos] = useState(false);
+  const [afficherAdmin, setAfficherAdmin] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [feedbackEnvoye, setFeedbackEnvoye] = useState(false);
 
   useEffect(() => {
     if (!message) return;
@@ -151,6 +160,9 @@ function Parametres({ onRetour }) {
     }
     setChargement(false);
   };
+
+  if (afficherAPropos) return <APropos onRetour={() => setAfficherAPropos(false)} />;
+  if (afficherAdmin) return <Admin onRetour={() => setAfficherAdmin(false)} />;
 
   return (
     <div className="parametres-container">
@@ -306,6 +318,75 @@ function Parametres({ onRetour }) {
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        <div
+          className="param-item"
+          onClick={() => setSection(section === "feedback" ? null : "feedback")}
+        >
+          <span className="param-icon">💬</span>
+          <span className="param-label">Envoyer un feedback</span>
+          <span className="param-fleche">{section === "feedback" ? "▲" : "▼"}</span>
+        </div>
+
+        {section === "feedback" && (
+          <div className="param-form">
+            {feedbackEnvoye ? (
+              <p className="auth-succes">✅ Merci pour ton retour !</p>
+            ) : (
+              <>
+                <p className="param-info">
+                  Dis-nous ce que tu penses de Zink, un bug rencontré,
+                  ou une idée d'amélioration.
+                </p>
+                <textarea
+                  className="pub-textarea"
+                  placeholder="Ton message..."
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  rows={4}
+                />
+                <button
+                  className="auth-btn"
+                  onClick={async () => {
+                    if (!feedback.trim()) return;
+                    const { addDoc, collection: col, serverTimestamp: ts } = await import("firebase/firestore");
+                    await addDoc(col(db, "feedbacks"), {
+                      userId: user.uid,
+                      email: user.email,
+                      message: feedback.trim(),
+                      createdAt: ts()
+                    });
+                    setFeedback("");
+                    setFeedbackEnvoye(true);
+                  }}
+                  disabled={!feedback.trim()}
+                >
+                  📤 Envoyer
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        <div
+          className="param-item"
+          onClick={() => setAfficherAPropos(true)}
+        >
+          <span className="param-icon">ℹ️</span>
+          <span className="param-label">À propos de Zink</span>
+          <span className="param-fleche">→</span>
+        </div>
+
+        {authAdmin.currentUser?.email === EMAIL_ADMIN && (
+          <div
+            className="param-item"
+            onClick={() => setAfficherAdmin(true)}
+          >
+            <span className="param-icon">🛠️</span>
+            <span className="param-label">Admin</span>
+            <span className="param-fleche">→</span>
           </div>
         )}
 

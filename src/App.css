@@ -3120,3 +3120,74 @@ body {
 .jeu-mode-btn.expert:hover {
   background: #2e1a1a;
 }
+
+.apropos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.apropos-logo {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.apropos-slogan {
+  color: #888;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.apropos-infos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.apropos-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1a1a2e;
+  border-radius: 14px;
+  padding: 14px 18px;
+}
+
+.apropos-label {
+  color: #888;
+  font-size: 14px;
+}
+
+.apropos-valeur {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.apropos-lien {
+  color: #a855f7;
+  text-decoration: none;
+}
+
+.apropos-description {
+  background: #1a1a2e;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.apropos-description p {
+  color: #dddddd;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.apropos-footer {
+  text-align: center;
+  padding-top: 10px;
+}
+
+.apropos-footer p {
+  color: #666;
+  font-size: 12px;
+}
