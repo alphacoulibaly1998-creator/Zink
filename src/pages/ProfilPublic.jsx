@@ -11,6 +11,7 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
   const [monProfil, setMonProfil] = useState(null);
   const [chargement, setChargement] = useState(true);
   const [menuOuvert, setMenuOuvert] = useState(false);
+  const [menuOuvertVersHaut, setMenuOuvertVersHaut] = useState(false);
   useEffect(() => {
     const handleClick = (e) => {
       if (e.target.closest(".pub-menu-container")) return;
@@ -171,12 +172,19 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
         <div className="pub-menu-container">
           <button
             className="pub-btn-menu"
-            onClick={() => setMenuOuvert(!menuOuvert)}
+            onClick={(e) => {
+              if (!menuOuvert) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const espaceEnBas = window.innerHeight - rect.bottom;
+                setMenuOuvertVersHaut(espaceEnBas < 250);
+              }
+              setMenuOuvert(!menuOuvert);
+            }}
           >
             ⋯
           </button>
           {menuOuvert && (
-            <div className="pub-menu">
+            <div className={`pub-menu ${menuOuvertVersHaut ? "vers-haut" : ""}`}>
               <button onClick={() => { partagerProfil(); setMenuOuvert(false); }}>
                 🔗 Partager le profil
               </button>

@@ -20,6 +20,7 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
   const [afficherEmojis, setAfficherEmojis] = useState(false);
   const [afficherMedia, setAfficherMedia] = useState(false);
   const [menuMessage, setMenuMessage] = useState(null);
+  const [menuMessageVersHaut, setMenuMessageVersHaut] = useState(false);
   const appuiLongTimer = useRef(null);
   const longPress = useRef(false);
   useEffect(() => {
@@ -412,18 +413,24 @@ const msgData = {
                 className={`message ${estMoi ? "message-moi" : "message-autre"}`}
                 onTouchStart={(e) => {
                   longPress.current = false;
+                  const target = e.currentTarget;
                   appuiLongTimer.current = setTimeout(() => {
                     longPress.current = true;
+                    const rect = target.getBoundingClientRect();
+                    setMenuMessageVersHaut(window.innerHeight - rect.bottom < 250);
                     setMenuMessage(msg.id);
                   }, 500);
                 }}
                 onTouchEnd={() => clearTimeout(appuiLongTimer.current)}
                 onTouchMove={() => clearTimeout(appuiLongTimer.current)}
                 onTouchCancel={() => clearTimeout(appuiLongTimer.current)}
-                onMouseDown={() => {
+                onMouseDown={(e) => {
                   longPress.current = false;
+                  const target = e.currentTarget;
                   appuiLongTimer.current = setTimeout(() => {
                     longPress.current = true;
+                    const rect = target.getBoundingClientRect();
+                    setMenuMessageVersHaut(window.innerHeight - rect.bottom < 250);
                     setMenuMessage(msg.id);
                   }, 500);
                 }}
@@ -433,6 +440,12 @@ const msgData = {
                   e.stopPropagation();
                   if (longPress.current) {
                     longPress.current = false;
+                  }
+                }}
+                ref={(el) => {
+                  if (el && menuMessage === msg.id && menuMessageVersHaut === undefined) {
+                    const rect = el.getBoundingClientRect();
+                    const espaceEnBas = window.innerHeight - rect.bottom;
                   }
                 }}
               >
@@ -490,7 +503,7 @@ const msgData = {
               </div>
 
               {menuMessage === msg.id && (
-                <div className="message-menu" onClick={(e) => e.stopPropagation()}>
+                <div className={`message-menu ${menuMessageVersHaut ? "vers-haut" : ""}`} onClick={(e) => e.stopPropagation()}>
                   {msg.supprimePourTous ? (
                     <button onClick={() => supprimerMessage(msg, false)}>
                       🗑️ Supprimer pour moi

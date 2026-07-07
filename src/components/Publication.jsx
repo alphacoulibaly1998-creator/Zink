@@ -14,6 +14,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
   const [commentaires, setCommentaires] = useState([]);
   const [afficherCommentaires, setAfficherCommentaires] = useState(false);
   const [menuOuvert, setMenuOuvert] = useState(false);
+  const [menuOuvertVersHaut, setMenuOuvertVersHaut] = useState(false);
   const [menuCommentaire, setMenuCommentaire] = useState(null);
   const [commentaireEnEdition, setCommentaireEnEdition] = useState(null);
   const [texteEdition, setTexteEdition] = useState("");
@@ -25,12 +26,14 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
  const navigate = useNavigate();
   const [voirTousCommentaires, setVoirTousCommentaires] = useState(false);
   const [menuReponse, setMenuReponse] = useState(null);
+  const [menuReponseVersHaut, setMenuReponseVersHaut] = useState(false);
   const [reponseEnEdition, setReponseEnEdition] = useState(null);
   const [texteEditionReponse, setTexteEditionReponse] = useState("");
   const menuRef = useRef(null);
   useEffect(() => {
     const handleClick = (e) => {
       if (e.target.closest(".commentaire-menu")) return;
+      if (e.target.closest(".commentaire-btn-menu")) return;
       setMenuCommentaire(null);
       setMenuReponse(null);
     };
@@ -292,12 +295,19 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
         <div className="pub-menu-container" ref={menuRef}>
           <button
             className="pub-btn-menu"
-            onClick={() => setMenuOuvert(!menuOuvert)}
+            onClick={(e) => {
+              if (!menuOuvert) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const espaceEnBas = window.innerHeight - rect.bottom;
+                setMenuOuvertVersHaut(espaceEnBas < 250);
+              }
+              setMenuOuvert(!menuOuvert);
+            }}
           >
             ⋯
           </button>
           {menuOuvert && (
-            <div className="pub-menu">
+            <div className={`pub-menu ${menuOuvertVersHaut ? "vers-haut" : ""}`}>
               {pub.imageUrl && (
                 <button onClick={enregistrerPhoto}>
                   💾 Enregistrer la photo
@@ -454,12 +464,19 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                   <div className="pub-menu-container">
                     <button
                       className="commentaire-btn-menu"
-                      onClick={() => setMenuReponse(menuReponse === c.id ? null : c.id)}
+                      onClick={(e) => {
+                        if (menuReponse !== c.id) {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const espaceEnBas = window.innerHeight - rect.bottom;
+                          setMenuReponseVersHaut(espaceEnBas < 200);
+                        }
+                        setMenuReponse(menuReponse === c.id ? null : c.id);
+                      }}
                     >
                       ⋯
                     </button>
                     {menuReponse === c.id && (
-                      <div className="commentaire-menu">
+                      <div className={`commentaire-menu ${menuReponseVersHaut ? "vers-haut" : ""}`}>
                         {c.userId === user.uid && (
                           <>
                             <button onClick={() => {
@@ -520,18 +537,22 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                   </div>
                 )}
                   </div>
+                  <div className="pub-menu-container">
                   <button
                     className="commentaire-btn-menu"
-                    onClick={() =>
-                      setMenuCommentaire(
-                        menuCommentaire === c.id ? null : c.id
-                      )
-                    }
+                    onClick={(e) => {
+                      if (menuCommentaire !== c.id) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const espaceEnBas = window.innerHeight - rect.bottom;
+                        setMenuOuvertVersHaut(espaceEnBas < 200);
+                      }
+                      setMenuCommentaire(menuCommentaire === c.id ? null : c.id);
+                    }}
                   >
                     ⋯
                   </button>
                   {menuCommentaire === c.id && (
-                    <div className="commentaire-menu">
+                    <div className={`commentaire-menu ${menuOuvertVersHaut ? "vers-haut" : ""}`}>
                       {c.userId === user.uid && (
                         <>
                           <button onClick={() => {
@@ -556,6 +577,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                       )}
                     </div>
                   )}
+                  </div>
                 </div>
               )}
             </div>

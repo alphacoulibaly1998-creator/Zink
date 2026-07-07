@@ -11,6 +11,7 @@ function Messages() {
   const [conversations, setConversations] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [menuConv, setMenuConv] = useState(null);
+  const [menuConvVersHaut, setMenuConvVersHaut] = useState(false);
   useEffect(() => {
     const handleClick = () => setMenuConv(null);
     document.addEventListener("mousedown", handleClick);
@@ -188,6 +189,11 @@ function Messages() {
                   className="conv-btn-menu"
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (menuConv !== conv.id) {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const espaceEnBas = window.innerHeight - rect.bottom;
+                      setMenuConvVersHaut(espaceEnBas < 250);
+                    }
                     setMenuConv(menuConv === conv.id ? null : conv.id);
                   }}
                 >
@@ -195,7 +201,7 @@ function Messages() {
                 </button>
                 {menuConv === conv.id && (
                   <div
-                    className="conv-menu"
+                    className={`conv-menu ${menuConvVersHaut ? "vers-haut" : ""}`}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <button onClick={() => supprimerConversation(conv.id)}>
