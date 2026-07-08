@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { auth, db } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
@@ -140,6 +140,7 @@ function Register() {
 
     try {
       const result = await createUserWithEmailAndPassword(auth, email, motDePasse);
+      await sendEmailVerification(result.user);
       const numeroComplet = telephone
         ? `${paysChoisi.indicatif}${telephone.replace(/\s/g, "")}`
         : "";

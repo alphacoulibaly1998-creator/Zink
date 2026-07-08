@@ -17,11 +17,18 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MotDePasseOublie from "./pages/MotDePasseOublie";
 import PageSignalement from "./pages/PageSignalement";
+import VerifierEmail from "./pages/VerifierEmail";
 import Parametres from "./pages/Parametres";
 import Notifications from "./pages/Notifications";
 import "./App.css";
 
 export const SignalementContext = React.createContext(null);
+
+const routeProtegee = (utilisateur, element) => {
+  if (!utilisateur) return <Navigate to="/login" />;
+  if (!utilisateur.emailVerified) return <Navigate to="/verifier-email" />;
+  return element;
+};
 
 function App() {
   const [utilisateur, setUtilisateur] = useState(null);
@@ -91,23 +98,24 @@ function App() {
           <Routes>
             <Route path="/login" element={!utilisateur ? <Login /> : <Navigate to="/" />} />
             <Route path="/register" element={!utilisateur ? <Register /> : <Navigate to="/" />} />
+            <Route path="/verifier-email" element={utilisateur && !utilisateur.emailVerified ? <VerifierEmail /> : <Navigate to="/" />} />
            <Route path="/mot-de-passe-oublie" element={!utilisateur ? <MotDePasseOublie /> : <Navigate to="/" />} />
-            <Route path="/" element={utilisateur ? <Accueil /> : <Navigate to="/login" />} />
-            <Route path="/profil" element={utilisateur ? <Profil /> : <Navigate to="/login" />} />
-            <Route path="/amis" element={utilisateur ? <Amis /> : <Navigate to="/login" />} />
-            <Route path="/messages" element={utilisateur ? <Messages /> : <Navigate to="/login" />} />
-            <Route path="/messages/:convId" element={utilisateur ? <Messages /> : <Navigate to="/login" />} />
-            <Route path="/jeux" element={utilisateur ? <Jeux /> : <Navigate to="/login" />} />
-            <Route path="/decouvrir" element={utilisateur ? <Decouvrir suggestionsGlobales={suggestionsGlobales} setSuggestionsGlobales={setSuggestionsGlobales} /> : <Navigate to="/login" />} />
-            <Route path="/attaques" element={utilisateur ? <AttaquesSonores /> : <Navigate to="/login" />} />
-            <Route path="/profil/:userId" element={utilisateur ? <ProfilPublic /> : <Navigate to="/login" />} />
-            <Route path="/signalement" element={utilisateur ? <PageSignalement /> : <Navigate to="/login" />} />
-            <Route path="/parametres" element={utilisateur ? <Parametres /> : <Navigate to="/login" />} />
-            <Route path="/notifications" element={utilisateur ? <Notifications /> : <Navigate to="/login" />} />
+            <Route path="/" element={utilisateur ? (utilisateur.emailVerified ? <Accueil /> : <Navigate to="/verifier-email" />) : <Navigate to="/login" />} />
+            <Route path="/profil" element={routeProtegee(utilisateur, <Profil />)} />
+            <Route path="/amis" element={routeProtegee(utilisateur, <Amis />)} />
+            <Route path="/messages" element={routeProtegee(utilisateur, <Messages />)} />
+            <Route path="/messages/:convId" element={routeProtegee(utilisateur, <Messages />)} />
+            <Route path="/jeux" element={routeProtegee(utilisateur, <Jeux />)} />
+            <Route path="/decouvrir" element={routeProtegee(utilisateur, <Decouvrir suggestionsGlobales={suggestionsGlobales} setSuggestionsGlobales={setSuggestionsGlobales} />)} />
+            <Route path="/attaques" element={routeProtegee(utilisateur, <AttaquesSonores />)} />
+            <Route path="/profil/:userId" element={routeProtegee(utilisateur, <ProfilPublic />)} />
+            <Route path="/signalement" element={routeProtegee(utilisateur, <PageSignalement />)} />
+            <Route path="/parametres" element={routeProtegee(utilisateur, <Parametres />)} />
+            <Route path="/notifications" element={routeProtegee(utilisateur, <Notifications />)} />
             <Route path="/messages/:convId" element={utilisateur ? <Messages /> : <Navigate to="/login" />} />
           </Routes>
         </div>
-        {utilisateur && <NavBar />}
+        {utilisateur && utilisateur.emailVerified && <NavBar />}
       </div>
       
     </BrowserRouter>
