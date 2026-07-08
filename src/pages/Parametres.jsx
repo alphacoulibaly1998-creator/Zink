@@ -13,7 +13,7 @@ import { auth as authAdmin } from "../firebase";
 
 const EMAIL_ADMIN = "alphacoulibaly1998@gmail.com";
 
-function Parametres({ onRetour }) {
+function Parametres() {
   const [section, setSection] = useState(null);
   const [mdpActuel, setMdpActuel] = useState("");
   const [nouveauMdp, setNouveauMdp] = useState("");
@@ -167,7 +167,7 @@ function Parametres({ onRetour }) {
   return (
     <div className="parametres-container">
       <div className="jeu-header">
-        <button className="chat-retour" onClick={onRetour}>←</button>
+        <button className="chat-retour" onClick={() => navigate(-1)}>←</button>
         <h2 className="jeu-titre">⚙️ Paramètres</h2>
       </div>
 

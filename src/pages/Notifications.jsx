@@ -7,7 +7,7 @@ import {
 import ProfilPublic from "./ProfilPublic";
 import { useNavigate } from "react-router-dom";
 
-function Notifications({ onRetour }) {
+function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [profilOuvert, setProfilOuvert] = useState(null);
@@ -107,7 +107,7 @@ function Notifications({ onRetour }) {
   return (
     <div className="notifs-container">
       <div className="jeu-header">
-        <button className="chat-retour" onClick={onRetour}>←</button>
+        <button className="chat-retour" onClick={() => navigate(-1)}>←</button>
         <h2 className="jeu-titre">🔔 Notifications</h2>
         {notifications.length > 0 && (
           <button className="notif-tout-lu" onClick={marquerToutLu}>

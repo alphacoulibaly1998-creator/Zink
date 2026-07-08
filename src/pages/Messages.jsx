@@ -4,7 +4,7 @@ import {
   collection, query, where, onSnapshot,
   getDoc, doc, deleteDoc, updateDoc
 } from "firebase/firestore";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Chat from "../components/Chat";
 
 function Messages() {
@@ -17,28 +17,51 @@ function Messages() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
-  const [convActiveId, setConvActiveId] = useState(null);
+  const { convId: convIdParam } = useParams();
   const [convActiveData, setConvActiveData] = useState(null);
-  const convActivePersist = useRef(null);
   const user = auth.currentUser;
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (location.state?.convId && !convActivePersist.current) {
-      convActivePersist.current = {
-        id: location.state.convId,
-        autreId: location.state.autreId,
-        autre: location.state.autre
-      };
-      setConvActiveId(location.state.convId);
+    if (location.state?.convId) {
       setConvActiveData({
         id: location.state.convId,
         autreId: location.state.autreId,
         autre: location.state.autre
       });
+      navigate(`/messages/${location.state.convId}`, { replace: true, state: null });
+    } else if (convIdParam) {
+      const chargerConv = async () => {
+        const { getDoc, doc } = await import("firebase/firestore");
+        const convSnap = await getDoc(doc(db, "conversations", convIdParam));
+        if (convSnap.exists()) {
+          const data = convSnap.data();
+          const autreId = data.membres.find((m) => m !== user.uid);
+          const autreSnap = await getDoc(doc(db, "utilisateurs", autreId));
+          setConvActiveData({
+            id: convIdParam,
+            autreId,
+            autre: autreSnap.exists() ? autreSnap.data() : { pseudo: "Inconnu" }
+          });
+        } else {
+          const ids = convIdParam.split("_");
+          const autreId = ids.find((id) => id !== user.uid);
+          if (autreId) {
+            const autreSnap = await getDoc(doc(db, "utilisateurs", autreId));
+            if (autreSnap.exists()) {
+              setConvActiveData({
+                id: convIdParam,
+                autreId,
+                autre: autreSnap.data()
+              });
+            }
+          }
+        }
+      };
+      chargerConv();
     }
-  }, []);
+  }, [convIdParam]);
 
   useEffect(() => {
     if (!user) return;
@@ -71,15 +94,13 @@ function Messages() {
   }, []);
 
   const ouvrirConv = (conv) => {
-    convActivePersist.current = conv;
-    setConvActiveId(conv.id);
     setConvActiveData(conv);
+    navigate(`/messages/${conv.id}`);
   };
 
   const fermerConv = () => {
-    convActivePersist.current = null;
-    setConvActiveId(null);
     setConvActiveData(null);
+    navigate("/messages");
   };
 
   const supprimerConversation = async (convId) => {
@@ -123,7 +144,7 @@ function Messages() {
   };
 
 
-  if (convActiveId && convActiveData) {
+  if (convIdParam && convActiveData) {
     return (
       <Chat
         convId={convActiveData.id}

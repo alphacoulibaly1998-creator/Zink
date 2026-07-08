@@ -168,17 +168,9 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
   const ouvrirConversation = async (autreUser) => {
     const membres = [user.uid, autreUser.id].sort();
     const convId = membres.join("_");
-    const convRef = doc(db, "conversations", convId);
-    const convSnap = await getDoc(convRef);
-    if (!convSnap.exists()) {
-      await setDoc(convRef, {
-        membres,
-        dernierMessage: { texte: "", createdAt: new Date() },
-        nonLu: { [user.uid]: 0, [autreUser.id]: 0 },
-        createdAt: new Date()
-      });
-    }
-    navigate("/messages");
+    navigate(`/messages/${convId}`, {
+      state: { convId, autreId: autreUser.id, autre: autreUser }
+    });
   };
 
   const renderBouton = (u) => {

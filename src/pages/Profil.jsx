@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from "firebase/firestore";
 import { signOut } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
 import { IMGBB_API_KEY } from "../config";
 import axios from "axios";
@@ -175,8 +175,8 @@ function Profil() {
   };
 
   if (chargement) return <div className="chargement">Chargement...</div>;
-if (afficherParametres) return <Parametres onRetour={() => setAfficherParametres(false)} />;
-if (afficherNotifications) return <Notifications onRetour={() => setAfficherNotifications(false)} />;
+if (afficherParametres) return <Navigate to="/parametres" />;
+if (afficherNotifications) return <Navigate to="/notifications" />;
   const afficherTelephone = () => {
     if (!profil?.telephone) return "Non renseigné";
     if (telephoneMasque) return "Masqué 🔒";
@@ -196,7 +196,7 @@ if (afficherNotifications) return <Notifications onRetour={() => setAfficherNoti
           <button
             className="profil-btn-parametres"
             style={{ position: "relative" }}
-            onClick={() => setAfficherNotifications(true)}
+            onClick={() => navigate("/notifications")}
           >
             🔔
             {nbNotifs > 0 && (
@@ -207,7 +207,7 @@ if (afficherNotifications) return <Notifications onRetour={() => setAfficherNoti
           </button>
           <button
             className="profil-btn-parametres"
-            onClick={() => setAfficherParametres(true)}
+            onClick={() => navigate("/parametres")}
           >
             ⚙️
           </button>

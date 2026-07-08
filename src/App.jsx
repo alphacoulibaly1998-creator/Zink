@@ -17,6 +17,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MotDePasseOublie from "./pages/MotDePasseOublie";
 import PageSignalement from "./pages/PageSignalement";
+import Parametres from "./pages/Parametres";
+import Notifications from "./pages/Notifications";
 import "./App.css";
 
 export const SignalementContext = React.createContext(null);
@@ -94,11 +96,15 @@ function App() {
             <Route path="/profil" element={utilisateur ? <Profil /> : <Navigate to="/login" />} />
             <Route path="/amis" element={utilisateur ? <Amis /> : <Navigate to="/login" />} />
             <Route path="/messages" element={utilisateur ? <Messages /> : <Navigate to="/login" />} />
+            <Route path="/messages/:convId" element={utilisateur ? <Messages /> : <Navigate to="/login" />} />
             <Route path="/jeux" element={utilisateur ? <Jeux /> : <Navigate to="/login" />} />
             <Route path="/decouvrir" element={utilisateur ? <Decouvrir suggestionsGlobales={suggestionsGlobales} setSuggestionsGlobales={setSuggestionsGlobales} /> : <Navigate to="/login" />} />
             <Route path="/attaques" element={utilisateur ? <AttaquesSonores /> : <Navigate to="/login" />} />
             <Route path="/profil/:userId" element={utilisateur ? <ProfilPublic /> : <Navigate to="/login" />} />
             <Route path="/signalement" element={utilisateur ? <PageSignalement /> : <Navigate to="/login" />} />
+            <Route path="/parametres" element={utilisateur ? <Parametres /> : <Navigate to="/login" />} />
+            <Route path="/notifications" element={utilisateur ? <Notifications /> : <Navigate to="/login" />} />
+            <Route path="/messages/:convId" element={utilisateur ? <Messages /> : <Navigate to="/login" />} />
           </Routes>
         </div>
         {utilisateur && <NavBar />}
