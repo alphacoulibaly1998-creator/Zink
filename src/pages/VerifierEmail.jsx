@@ -61,7 +61,7 @@ function VerifierEmail() {
 
         <p style={{ color: "#dddddd", fontSize: "14px", textAlign: "center", lineHeight: "1.6" }}>
           Nous avons envoyé un email de vérification à <strong>{user?.email}</strong>.
-          Clique sur le lien dans l'email pour activer ton compte.
+          Clique sur le lien dans l'email (vérifie aussi tes spams) pour activer ton compte.
         </p>
 
         {message && (
