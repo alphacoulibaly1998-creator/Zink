@@ -4,7 +4,6 @@ import {
   collection, addDoc, serverTimestamp, onSnapshot,
   query, orderBy, doc, updateDoc, getDoc, setDoc, getDocs
 } from "firebase/firestore";
-import { IMGBB_API_KEY } from "../config";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
 import axios from "axios";
@@ -188,11 +187,13 @@ const msgData = {
           alert("Erreur lors de l'envoi de la vidéo : " + e.message);
         }
       } else if (mediaEnAttente && typeMediaEnAttente === "photo") {
-        const formData = new FormData();
-        formData.append("image", mediaEnAttente);
-        formData.append("key", IMGBB_API_KEY);
-        const res = await axios.post("https://api.imgbb.com/1/upload", formData);
-        await envoyerMessageFusionne("photo", res.data.data.url, texte.trim());
+        const reader = new FileReader();
+        const base64 = await new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(mediaEnAttente);
+        });
+        const res = await axios.post("/api/upload-image", { imageBase64: base64 });
+        await envoyerMessageFusionne("photo", res.data.url, texte.trim());
       } else {
         await envoyerMessage("texte");
       }
