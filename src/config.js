@@ -1,4 +1,2 @@
-export const IMGBB_API_KEY = "c90c22e35355bc0361c3d8d95ca3293e";
-
 export const SUPABASE_URL = "https://smdpygdbfoqmwnvfamjt.supabase.co";
 export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtZHB5Z2RiZm9xbXdudmZhbWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMjU5MjIsImV4cCI6MjA5NjgwMTkyMn0.YC0chRSQ_KjMlYb-CuhopG_n2d7OIL7VwEUMuhGhkhw";

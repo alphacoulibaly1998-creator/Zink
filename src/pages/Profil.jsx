@@ -4,7 +4,6 @@ import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSn
 import { signOut } from "firebase/auth";
 import { useNavigate, Navigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
-import { IMGBB_API_KEY } from "../config";
 import axios from "axios";
 import Parametres from "./Parametres";
 import Notifications from "./Notifications";
@@ -91,11 +90,13 @@ function Profil() {
     }
     setUploadPhoto(true);
     try {
-      const formData = new FormData();
-      formData.append("image", fichier);
-      formData.append("key", IMGBB_API_KEY);
-      const res = await axios.post("https://api.imgbb.com/1/upload", formData);
-      const photoURL = res.data.data.url;
+      const reader = new FileReader();
+      const base64 = await new Promise((resolve) => {
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(fichier);
+      });
+      const res = await axios.post("/api/upload-image", { imageBase64: base64 });
+      const photoURL = res.data.url;
       await updateDoc(doc(db, "utilisateurs", user.uid), { photoURL });
       setProfil({ ...profil, photoURL });
     } catch {
