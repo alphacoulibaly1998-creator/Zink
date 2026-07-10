@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { db, auth } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { IMGBB_API_KEY } from "../config";
 import axios from "axios";
+import { supabase } from "../supabase";
 
 function NouvellePublication({ onPublie }) {
   const [description, setDescription] = useState("");
@@ -42,19 +42,28 @@ function NouvellePublication({ onPublie }) {
       let videoUrl = "";
 
       if (fichier && typeFichier === "image") {
-        const formData = new FormData();
-        formData.append("image", fichier);
-        formData.append("key", IMGBB_API_KEY);
-        const res = await axios.post("https://api.imgbb.com/1/upload", formData);
-        imageUrl = res.data.data.url;
+        const reader = new FileReader();
+        const base64 = await new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(fichier);
+        });
+        const res = await axios.post("/api/upload-image", { imageBase64: base64 });
+        imageUrl = res.data.url;
       }
 
       if (fichier && typeFichier === "video") {
-        const formData = new FormData();
-        formData.append("image", fichier);
-        formData.append("key", IMGBB_API_KEY);
-        const res = await axios.post("https://api.imgbb.com/1/upload", formData);
-        videoUrl = res.data.data.url;
+        const nomFichier = `pub_video_${Date.now()}.mp4`;
+        const { error } = await supabase.storage
+          .from("zink")
+          .upload(nomFichier, fichier, {
+            contentType: fichier.type,
+            upsert: true
+          });
+        if (error) throw error;
+        const { data: urlData } = supabase.storage
+          .from("zink")
+          .getPublicUrl(nomFichier);
+        videoUrl = urlData.publicUrl;
       }
 
       const user = auth.currentUser;
