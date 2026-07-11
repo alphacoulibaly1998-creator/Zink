@@ -412,7 +412,8 @@ body {
   overflow: hidden;
 }
 
-.pub-apercu img {
+.pub-apercu img,
+.pub-apercu video {
   width: 100%;
   border-radius: 12px;
   max-height: 300px;
