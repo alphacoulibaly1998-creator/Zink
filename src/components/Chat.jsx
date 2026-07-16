@@ -103,9 +103,14 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
     }
   };
 
+  const dernierEnvoi = useRef(0);
+
   const envoyerMessage = async (type = "texte", contenu = "") => {
     const valeur = type === "texte" ? texte.trim() : contenu;
     if (!valeur) return;
+    const maintenant = Date.now();
+    if (maintenant - dernierEnvoi.current < 500) return;
+    dernierEnvoi.current = maintenant;
     setChargement(true);
 
     const autreSnap = await getDoc(doc(db, "utilisateurs", autreId));

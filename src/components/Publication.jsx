@@ -91,8 +91,13 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     }
   };
 
+  const dernierCommentaire = useRef(0);
+
   const envoyerCommentaire = async () => {
     if (!commentaire.trim()) return;
+    const maintenant = Date.now();
+    if (maintenant - dernierCommentaire.current < 1000) return;
+    dernierCommentaire.current = maintenant;
     const snap = await getDoc(doc(db, "utilisateurs", user.uid));
     const pseudo = snap.exists() ? snap.data().pseudo : "Inconnu";
     await addDoc(collection(db, "publications", pub.id, "commentaires"), {

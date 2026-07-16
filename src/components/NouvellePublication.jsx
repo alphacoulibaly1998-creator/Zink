@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { db, auth } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
@@ -28,11 +28,19 @@ function NouvellePublication({ onPublie }) {
     setErreur("");
   };
 
+  const dernierEnvoi = useRef(0);
+
   const publier = async () => {
     if (!fichier && !description.trim()) {
       setErreur("Ajoute une photo, une vidéo ou une description.");
       return;
     }
+    const maintenant = Date.now();
+    if (maintenant - dernierEnvoi.current < 3000) {
+      setErreur("Attends quelques secondes avant de publier à nouveau.");
+      return;
+    }
+    dernierEnvoi.current = maintenant;
     setChargement(true);
     setErreur("");
 
