@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
 import axios from "axios";
+import { nettoyerTexte } from "../sanitize";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","😭","😱","🤔","👍","❤️","🔥","🎉","💯","🙏","😴","🤣","😊","🥺","😅","💪","🎮","👀","💬","✨","🌍","🎵","🍕","😋","🤩","👋"];
 
@@ -129,7 +130,7 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
 const msgData = {
       userId: user.uid,
       type,
-      texte: type === "texte" ? valeur : "",
+      texte: type === "texte" ? nettoyerTexte(valeur) : "",
       mediaUrl: type !== "texte" ? valeur : "",
       createdAt: serverTimestamp(),
       supprimePour: [],
@@ -227,7 +228,7 @@ const msgData = {
     const msgData = {
       userId: user.uid,
       type,
-      texte: legende || "",
+      texte: nettoyerTexte(legende || ""),
       mediaUrl: type === "video" ? "" : mediaUrl,
       videoData: type === "video" ? mediaUrl : "",
       createdAt: serverTimestamp(),

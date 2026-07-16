@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { nettoyerTexte } from "../sanitize";
 import { db, auth } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
@@ -75,7 +76,7 @@ function NouvellePublication({ onPublie }) {
       const user = auth.currentUser;
       await addDoc(collection(db, "publications"), {
         userId: user.uid,
-        description: description.trim(),
+        description: nettoyerTexte(description.trim()),
         imageUrl,
         videoUrl,
         likes: [],

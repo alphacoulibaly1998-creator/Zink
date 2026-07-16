@@ -8,6 +8,7 @@ import axios from "axios";
 import Parametres from "./Parametres";
 import Notifications from "./Notifications";
 import { BADGES_INFO } from "../jeuxStats";
+import { nettoyerTexte } from "../sanitize";
 
 const AVATARS = ["🐶","🐱","🦊","🐼","🐨","🦁","🐯","🐸","🐙","🦋","🌸","⭐","🔥","🎮","🎵","🌈","💎","🚀","🎯","👑"];
 
@@ -140,8 +141,8 @@ function Profil() {
       : "";
     const ref = doc(db, "utilisateurs", user.uid);
     await updateDoc(ref, {
-      pseudo,
-      statut,
+      pseudo: nettoyerTexte(pseudo),
+      statut: nettoyerTexte(statut),
       telephone: numeroComplet,
       telephoneMasque,
       dateNaissance: age || "",

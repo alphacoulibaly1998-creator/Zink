@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
 import { creerNotification } from "../notifications";
+import { nettoyerTexte } from "../sanitize";
 import { useNavigate } from "react-router-dom";
 import {
   doc, updateDoc, arrayUnion, arrayRemove,
@@ -103,7 +104,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     await addDoc(collection(db, "publications", pub.id, "commentaires"), {
       userId: user.uid,
       pseudo,
-      texte: commentaire.trim(),
+      texte: nettoyerTexte(commentaire.trim()),
       reponseA: reponseA ? { id: reponseA.id, pseudo: reponseA.pseudo } : null,
       likes: [],
       createdAt: serverTimestamp()
