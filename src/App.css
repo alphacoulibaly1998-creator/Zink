@@ -3285,3 +3285,20 @@ body {
   margin: 0;
 }
 
+.feed-actualiser {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 14px;
+  padding: 16px;
+  color: #a855f7;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.feed-actualiser:hover {
+  border-color: #a855f7;
+  background: #2a2a4a;
+}
