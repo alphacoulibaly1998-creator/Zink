@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
@@ -6,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
 
 function Register() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
   const [pseudo, setPseudo] = useState("");
@@ -181,14 +184,18 @@ function Register() {
   return (
     <div className="auth-container">
       <div className="auth-box">
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+          <button onClick={() => i18n.changeLanguage("fr")} style={{ background: "none", border: "1px solid #2a2a4a", borderRadius: "8px", padding: "4px 8px", color: "#888", cursor: "pointer" }}>🇫🇷 FR</button>
+          <button onClick={() => i18n.changeLanguage("en")} style={{ background: "none", border: "1px solid #2a2a4a", borderRadius: "8px", padding: "4px 8px", color: "#888", cursor: "pointer" }}>🇬🇧 EN</button>
+        </div>
         <h1 className="auth-titre">Zink</h1>
-        <p className="auth-sous-titre">Crée ton compte</p>
+        <p className="auth-sous-titre">{t("inscription.titre")}</p>
 
         <div>
           <input
             className="auth-input"
             type="text"
-            placeholder="Pseudo (obligatoire)"
+            placeholder={t("inscription.pseudo")}
             value={pseudo}
             onChange={(e) => {
               setPseudo(e.target.value);
@@ -223,7 +230,7 @@ function Register() {
         <input
           className="auth-input"
           type="email"
-          placeholder="Email"
+          placeholder={t("inscription.email")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -231,7 +238,7 @@ function Register() {
           <input
             className="auth-input"
             type={voirMdp ? "text" : "password"}
-            placeholder="Mot de passe (8 car. min, 1 majuscule, 1 chiffre)"
+            placeholder={t("inscription.motDePasse")}
             value={motDePasse}
             onChange={(e) => setMotDePasse(e.target.value)}
           />
@@ -248,14 +255,16 @@ function Register() {
           value={paysChoisi?.nom || ""}
           onChange={handlePays}
         >
-          <option value="">-- Choisis ton pays --</option>
+          <option value="">{t("inscription.choisirPays")}</option>
           {paysList.map((p) => (
-            <option key={p.nom} value={p.nom}>{p.nom}</option>
+            <option key={p.nom} value={p.nom}>
+              {i18n.language === "en" ? p.nomEn : p.nom}
+            </option>
           ))}
         </select>
 
 <div className="auth-label-group">
-          <label className="auth-label">🎂 Date de naissance</label>
+          <label className="auth-label">{t("inscription.dateNaissance")}</label>
           <input
             className="auth-input"
             type="date"
@@ -271,7 +280,7 @@ function Register() {
               checked={dateMasquee}
               onChange={(e) => setDateMasquee(e.target.checked)}
             />
-            Masquer ma date de naissance
+            {t("inscription.masquerDate")}
           </label>
         )}
 
@@ -280,11 +289,11 @@ function Register() {
           value={sexe}
           onChange={(e) => setSexe(e.target.value)}
         >
-          <option value="">-- Sexe --</option>
-          <option value="homme">Homme</option>
-          <option value="femme">Femme</option>
-          <option value="autre">Autre</option>
-          <option value="non-precise">Préfère ne pas préciser</option>
+          <option value="">{t("inscription.choisirSexe")}</option>
+          <option value="homme">{t("inscription.homme")}</option>
+          <option value="femme">{t("inscription.femme")}</option>
+          <option value="autre">{t("inscription.autre")}</option>
+          <option value="non-precise">{t("inscription.nonPrecise")}</option>
         </select>
 
         <div>
@@ -302,7 +311,7 @@ function Register() {
               placeholder={
                 paysChoisi
                   ? `${paysChoisi.chiffres} chiffres (optionnel)`
-                  : "Numéro (optionnel)"
+                  : t("inscription.telephone")
               }
               value={telephone}
               onChange={(e) => {
@@ -321,7 +330,7 @@ function Register() {
               checked={telephoneMasque}
               onChange={(e) => setTelephoneMasque(e.target.checked)}
             />
-            Masquer mon numéro de téléphone
+            {t("inscription.masquerTelephone")}
           </label>
         )}
 
@@ -332,11 +341,11 @@ function Register() {
           onClick={handleRegister}
           disabled={chargement}
         >
-          {chargement ? "Inscription..." : "S'inscrire"}
+          {chargement ? t("inscription.inscriptionEnCours") : t("inscription.sinscrire")}
         </button>
 
         <p className="auth-lien" onClick={() => navigate("/login")}>
-          Déjà un compte ? <span>Connecte-toi</span>
+          {t("inscription.dejaCompte")} <span>{t("inscription.connecteToi")}</span>
         </p>
       </div>
     </div>

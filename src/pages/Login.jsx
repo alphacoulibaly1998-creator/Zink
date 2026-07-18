@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { auth, db } from "../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const { t } = useTranslation();
   const [identifiant, setIdentifiant] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
   const [voirMdp, setVoirMdp] = useState(false);
@@ -74,13 +77,17 @@ function Login() {
   return (
     <div className="auth-container">
       <div className="auth-box">
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+          <button onClick={() => i18n.changeLanguage("fr")} style={{ background: "none", border: "1px solid #2a2a4a", borderRadius: "8px", padding: "4px 8px", color: "#888", cursor: "pointer" }}>🇫🇷 FR</button>
+          <button onClick={() => i18n.changeLanguage("en")} style={{ background: "none", border: "1px solid #2a2a4a", borderRadius: "8px", padding: "4px 8px", color: "#888", cursor: "pointer" }}>🇬🇧 EN</button>
+        </div>
         <h1 className="auth-titre">Zink</h1>
-        <p className="auth-sous-titre">Connecte-toi</p>
+        <p className="auth-sous-titre">{t("connexion.titre")}</p>
 
         <input
           className="auth-input"
           type="text"
-          placeholder="Email ou numéro de téléphone"
+          placeholder={t("connexion.emailOuNumero")}
           value={identifiant}
           onChange={(e) => setIdentifiant(e.target.value)}
         />
@@ -89,7 +96,7 @@ function Login() {
           <input
             className="auth-input"
             type={voirMdp ? "text" : "password"}
-            placeholder="Mot de passe"
+            placeholder={t("connexion.motDePasse")}
             value={motDePasse}
             onChange={(e) => setMotDePasse(e.target.value)}
           />
@@ -108,14 +115,14 @@ function Login() {
           onClick={handleLogin}
           disabled={chargement}
         >
-          {chargement ? "Connexion..." : "Se connecter"}
+          {chargement ? t("connexion.connexionEnCours") : t("connexion.seConnecter")}
         </button>
 
         <p className="auth-lien" onClick={() => navigate("/register")}>
-          Pas encore de compte ? <span>Inscris-toi</span>
+          {t("connexion.pasDeCompte")} <span>{t("connexion.inscrisToi")}</span>
         </p>
         <p className="auth-lien" onClick={() => navigate("/mot-de-passe-oublie")}>
-          Mot de passe oublié ? <span>Réinitialiser</span>
+          {t("connexion.motDePasseOublie")} <span>{t("connexion.reinitialiser")}</span>
         </p>
       </div>
     </div>
