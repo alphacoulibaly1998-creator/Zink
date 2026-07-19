@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { db, auth } from "../firebase";
 import {
   collection, query, where, onSnapshot,
@@ -8,6 +9,7 @@ import ProfilPublic from "./ProfilPublic";
 import { useNavigate } from "react-router-dom";
 
 function Notifications() {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [profilOuvert, setProfilOuvert] = useState(null);
@@ -74,15 +76,15 @@ function Notifications() {
   };
 
   const getMessage = (notif) => {
-    const pseudo = notif.auteur?.pseudo || "Quelqu'un";
+    const pseudo = notif.auteur?.pseudo || t("notifications.quelquUn");
     switch (notif.type) {
-      case "demande_ami": return `${pseudo} t'a envoyé une demande d'ami`;
-      case "ami_accepte": return `${pseudo} a accepté ta demande d'ami`;
-      case "message": return `${pseudo} t'a envoyé un message`;
-      case "attaque": return `${pseudo} t'a envoyé une attaque sonore`;
-      case "like": return `${pseudo} a aimé ta publication`;
-      case "commentaire": return `${pseudo} a commenté ta publication`;
-      default: return "Nouvelle notification";
+      case "demande_ami": return `${pseudo} ${t("notifications.demandeAmi")}`;
+      case "ami_accepte": return `${pseudo} ${t("notifications.amiAccepte")}`;
+      case "message": return `${pseudo} ${t("notifications.message")}`;
+      case "attaque": return `${pseudo} ${t("notifications.attaque")}`;
+      case "like": return `${pseudo} ${t("notifications.like")}`;
+      case "commentaire": return `${pseudo} ${t("notifications.commentaire")}`;
+      default: return t("notifications.titre");
     }
   };
 
@@ -108,20 +110,20 @@ function Notifications() {
     <div className="notifs-container">
       <div className="jeu-header">
         <button className="chat-retour" onClick={() => navigate(-1)}>←</button>
-        <h2 className="jeu-titre">🔔 Notifications</h2>
+        <h2 className="jeu-titre">{t("notifications.titre")}</h2>
         {notifications.length > 0 && (
           <button className="notif-tout-lu" onClick={marquerToutLu}>
-            Tout marquer lu
+            {t("notifications.toutMarquerLu")}
           </button>
         )}
       </div>
 
       {chargement ? (
-        <div className="chargement">Chargement...</div>
+        <div className="chargement">{t("notifications.chargement")}</div>
       ) : notifications.length === 0 ? (
         <div className="feed-vide">
-          <p>Aucune nouvelle notification 🔔</p>
-          <p>Tu es à jour !</p>
+          <p>{t("notifications.aucuneNotif")}</p>
+          <p>{t("notifications.aJour")}</p>
         </div>
       ) : (
         <div className="notifs-liste">

@@ -23,6 +23,20 @@ const resources = {
         soisLePremier: "Sois le premier à publier ! 😊",
         actualiser: "🔄 Actualiser le fil"
       },
+      notifications: {
+        titre: "🔔 Notifications",
+        toutMarquerLu: "Tout marquer lu",
+        chargement: "Chargement...",
+        aucuneNotif: "Aucune nouvelle notification 🔔",
+        aJour: "Tu es à jour !",
+        demandeAmi: "t'a envoyé une demande d'ami",
+        amiAccepte: "a accepté ta demande d'ami",
+        message: "t'a envoyé un message",
+        attaque: "t'a envoyé une attaque sonore",
+        like: "a aimé ta publication",
+        commentaire: "a commenté ta publication",
+        quelquUn: "Quelqu'un"
+      },
       publier: {
         placeholder: "Quoi de neuf ? 😊",
         publier: "Publier",
@@ -74,6 +88,20 @@ const resources = {
         aucunePublication: "No posts yet.",
         soisLePremier: "Be the first to post! 😊",
         actualiser: "🔄 Refresh feed"
+      },
+      notifications: {
+        titre: "🔔 Notifications",
+        toutMarquerLu: "Mark all as read",
+        chargement: "Loading...",
+        aucuneNotif: "No new notifications 🔔",
+        aJour: "You're all caught up!",
+        demandeAmi: "sent you a friend request",
+        amiAccepte: "accepted your friend request",
+        message: "sent you a message",
+        attaque: "sent you a sound attack",
+        like: "liked your post",
+        commentaire: "commented on your post",
+        quelquUn: "Someone"
       },
       publier: {
         placeholder: "What's new? 😊",
