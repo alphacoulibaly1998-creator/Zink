@@ -16,6 +16,23 @@ const resources = {
         motDePasseOublie: "Mot de passe oublié ?",
         reinitialiser: "Réinitialiser"
       },
+      accueil: {
+        titre: "🏠 Zink",
+        chargement: "Chargement...",
+        aucunePublication: "Aucune publication pour l'instant.",
+        soisLePremier: "Sois le premier à publier ! 😊",
+        actualiser: "🔄 Actualiser le fil"
+      },
+      publier: {
+        placeholder: "Quoi de neuf ? 😊",
+        publier: "Publier",
+        publicationEnCours: "Publication...",
+        erreurTaille: "L'image ne doit pas dépasser 5MB.",
+        erreurTailleVideo: "La vidéo ne doit pas dépasser 50MB.",
+        erreurVide: "Ajoute une photo, une vidéo ou une description.",
+        erreurGenerale: "Erreur lors de la publication. Réessaie.",
+        erreurRateLimit: "Attends quelques secondes avant de publier à nouveau."
+      },
       inscription: {
         titre: "Crée ton compte",
         pseudo: "Pseudo (obligatoire)",
@@ -50,6 +67,23 @@ const resources = {
         inscrisToi: "Sign up",
         motDePasseOublie: "Forgot password?",
         reinitialiser: "Reset"
+      },
+      accueil: {
+        titre: "🏠 Zink",
+        chargement: "Loading...",
+        aucunePublication: "No posts yet.",
+        soisLePremier: "Be the first to post! 😊",
+        actualiser: "🔄 Refresh feed"
+      },
+      publier: {
+        placeholder: "What's new? 😊",
+        publier: "Post",
+        publicationEnCours: "Posting...",
+        erreurTaille: "Image must not exceed 5MB.",
+        erreurTailleVideo: "Video must not exceed 50MB.",
+        erreurVide: "Add a photo, video or description.",
+        erreurGenerale: "Error posting. Try again.",
+        erreurRateLimit: "Wait a few seconds before posting again."
       },
       inscription: {
         titre: "Create your account",

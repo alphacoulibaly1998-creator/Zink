@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, query, orderBy, onSnapshot, limit, getDocs } from "firebase/firestore";
@@ -6,6 +7,7 @@ import NouvellePublication from "../components/NouvellePublication";
 import Publication from "../components/Publication";
 
 function Accueil() {
+  const { t } = useTranslation();
   const [publications, setPublications] = useState([]);
   const [chargement, setChargement] = useState(true);
   const navigate = useNavigate();
@@ -42,14 +44,14 @@ function Accueil() {
   
   return (
     <div className="accueil">
-      <h1 className="accueil-titre">🏠 Zink</h1>
+      <h1 className="accueil-titre">{t("accueil.titre")}</h1>
       <NouvellePublication />
       {chargement ? (
-        <div className="chargement">Chargement...</div>
+        <div className="chargement">{t("accueil.chargement")}</div>
       ) : publications.length === 0 ? (
         <div className="feed-vide">
-          <p>Aucune publication pour l'instant.</p>
-          <p>Sois le premier à publier ! 😊</p>
+          <p>{t("accueil.aucunePublication")}</p>
+          <p>{t("accueil.soisLePremier")}</p>
         </div>
       ) : (
         <div className="feed">
@@ -62,7 +64,7 @@ function Accueil() {
           />
           ))}
           <button className="feed-actualiser" onClick={actualiser}>
-            🔄 Actualiser le fil
+            {t("accueil.actualiser")}
           </button>
         </div>
       )}

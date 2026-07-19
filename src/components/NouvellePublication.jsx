@@ -1,10 +1,12 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { nettoyerTexte } from "../sanitize";
 import { db, auth } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
 
 function NouvellePublication({ onPublie }) {
+  const { t } = useTranslation();
   const [description, setDescription] = useState("");
   const [fichier, setFichier] = useState(null);
   const [apercu, setApercu] = useState(null);
@@ -16,11 +18,11 @@ function NouvellePublication({ onPublie }) {
     const f = e.target.files[0];
     if (!f) return;
     if (type === "image" && f.size > 5 * 1024 * 1024) {
-      setErreur("L'image ne doit pas dépasser 5MB.");
+      setErreur(t("publier.erreurTaille"));
       return;
     }
     if (type === "video" && f.size > 50 * 1024 * 1024) {
-      setErreur("La vidéo ne doit pas dépasser 50MB.");
+      setErreur(t("publier.erreurTailleVideo"));
       return;
     }
     setFichier(f);
@@ -33,12 +35,12 @@ function NouvellePublication({ onPublie }) {
 
   const publier = async () => {
     if (!fichier && !description.trim()) {
-      setErreur("Ajoute une photo, une vidéo ou une description.");
+      setErreur(t("publier.erreurVide"));
       return;
     }
     const maintenant = Date.now();
     if (maintenant - dernierEnvoi.current < 3000) {
-      setErreur("Attends quelques secondes avant de publier à nouveau.");
+      setErreur(t("publier.erreurRateLimit"));
       return;
     }
     dernierEnvoi.current = maintenant;
@@ -89,7 +91,7 @@ function NouvellePublication({ onPublie }) {
       setTypeFichier("");
       if (onPublie) onPublie();
     } catch (e) {
-      setErreur("Erreur lors de la publication. Réessaie.");
+      setErreur(t("publier.erreurGenerale"));
     }
     setChargement(false);
   };
@@ -98,7 +100,7 @@ function NouvellePublication({ onPublie }) {
     <div className="nouvelle-pub">
       <textarea
         className="pub-textarea"
-        placeholder="Quoi de neuf ? 😊"
+        placeholder={t("publier.placeholder")}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         rows={3}
@@ -152,7 +154,7 @@ function NouvellePublication({ onPublie }) {
           onClick={publier}
           disabled={chargement}
         >
-          {chargement ? "Publication..." : "Publier"}
+          {chargement ? t("publier.publicationEnCours") : t("publier.publier")}
         </button>
       </div>
     </div>
