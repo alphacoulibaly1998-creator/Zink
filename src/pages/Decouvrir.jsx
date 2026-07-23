@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
 import {
   collection, query, where, getDocs, limit,
-  doc, setDoc, getDoc, updateDoc, arrayUnion
+  doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot
 } from "firebase/firestore";
 import { creerNotification } from "../notifications";
 import { useNavigate } from "react-router-dom";
@@ -19,11 +19,10 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const charger = async () => {
-      const snap = await getDoc(doc(db, "utilisateurs", user.uid));
+    const unsub = onSnapshot(doc(db, "utilisateurs", user.uid), (snap) => {
       if (snap.exists()) setMonProfil(snap.data());
-    };
-    charger();
+    });
+    return () => unsub();
   }, []);
 
   useEffect(() => {
@@ -165,6 +164,24 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
     }));
   };
 
+  const accepterDemande = async (autreUser) => {
+    const monRef = doc(db, "utilisateurs", user.uid);
+    const autreRef = doc(db, "utilisateurs", autreUser.id);
+    await updateDoc(monRef, {
+      amis: arrayUnion(autreUser.id),
+      demandesRecues: arrayRemove(autreUser.id)
+    });
+    await updateDoc(autreRef, {
+      amis: arrayUnion(user.uid),
+      demandesEnvoyees: arrayRemove(user.uid)
+    });
+    setMonProfil((prev) => ({
+      ...prev,
+      amis: [...(prev?.amis || []), autreUser.id],
+      demandesRecues: (prev?.demandesRecues || []).filter((id) => id !== autreUser.id)
+    }));
+  };
+
   const ouvrirConversation = async (autreUser) => {
     const membres = [user.uid, autreUser.id].sort();
     const convId = membres.join("_");
@@ -182,7 +199,7 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
       <button className="decouvrir-btn-ami en-attente">⏳ Envoyée</button>
     );
     if (statut === "recu") return (
-      <button className="decouvrir-btn-ami recu" onClick={() => envoyerDemande(u)}>
+      <button className="decouvrir-btn-ami recu" onClick={() => accepterDemande(u)}>
         👥 Accepter
       </button>
     );

@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { auth, db } from "../firebase";
 import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { useNavigate, Navigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
 import axios from "axios";
-import Parametres from "./Parametres";
-import Notifications from "./Notifications";
 import { BADGES_INFO } from "../jeuxStats";
 import { nettoyerTexte } from "../sanitize";
 
 const AVATARS = ["🐶","🐱","🦊","🐼","🐨","🦁","🐯","🐸","🐙","🦋","🌸","⭐","🔥","🎮","🎵","🌈","💎","🚀","🎯","👑"];
 
 function Profil() {
+  const { t } = useTranslation();
   const [profil, setProfil] = useState(null);
   const [edition, setEdition] = useState(false);
   const [pseudo, setPseudo] = useState("");
@@ -26,8 +27,6 @@ function Profil() {
   const [chargement, setChargement] = useState(true);
   const [uploadPhoto, setUploadPhoto] = useState(false);
   const [afficherAvatars, setAfficherAvatars] = useState(false);
-  const [afficherParametres, setAfficherParametres] = useState(false);
-  const [afficherNotifications, setAfficherNotifications] = useState(false);
   const [nbNotifs, setNbNotifs] = useState(0);
   const navigate = useNavigate();
   const user = auth.currentUser;
@@ -44,6 +43,7 @@ function Profil() {
     });
     return () => unsub();
   }, []);
+
   useEffect(() => {
     const chargerProfil = async () => {
       const ref = doc(db, "utilisateurs", user.uid);
@@ -164,7 +164,7 @@ function Profil() {
     setEdition(false);
   };
 
- const deconnexion = async () => {
+  const deconnexion = async () => {
     try {
       const ref = doc(db, "utilisateurs", user.uid);
       await updateDoc(ref, {
@@ -176,24 +176,28 @@ function Profil() {
     navigate("/login");
   };
 
-  if (chargement) return <div className="chargement">Chargement...</div>;
-if (afficherParametres) return <Navigate to="/parametres" />;
-if (afficherNotifications) return <Navigate to="/notifications" />;
   const afficherTelephone = () => {
-    if (!profil?.telephone) return "Non renseigné";
-    if (telephoneMasque) return "Masqué 🔒";
+    if (!profil?.telephone) return t("profil.nonRenseigne");
+    if (telephoneMasque) return t("profil.masque");
     return profil.telephone;
   };
 
   const afficherSexe = (s) => {
-    const map = { homme: "Homme", femme: "Femme", autre: "Autre", "non-precise": "Non précisé" };
-    return map[s] || "Non renseigné";
+    const map = {
+      homme: t("inscription.homme"),
+      femme: t("inscription.femme"),
+      autre: t("inscription.autre"),
+      "non-precise": t("inscription.nonPrecise")
+    };
+    return map[s] || t("profil.nonRenseigne");
   };
+
+  if (chargement) return <div className="chargement">Chargement...</div>;
 
   return (
     <div className="profil-container">
       <div className="profil-top">
-        <h1 className="accueil-titre">👤 Profil</h1>
+        <h1 className="accueil-titre">{t("profil.titre")}</h1>
         <div style={{ display: "flex", gap: "8px" }}>
           <button
             className="profil-btn-parametres"
@@ -215,8 +219,8 @@ if (afficherNotifications) return <Navigate to="/notifications" />;
           </button>
         </div>
       </div>
-      <div className="profil-header">
 
+      <div className="profil-header">
         <div className="profil-photo-container">
           {profil?.photoURL ? (
             <img src={profil.photoURL} alt="avatar" className="profil-avatar" />
@@ -240,7 +244,7 @@ if (afficherNotifications) return <Navigate to="/notifications" />;
           className="profil-btn-avatar"
           onClick={() => setAfficherAvatars(!afficherAvatars)}
         >
-          😊 Choisir un avatar
+          {t("profil.choisirAvatar")}
         </button>
 
         {afficherAvatars && (
@@ -262,7 +266,7 @@ if (afficherNotifications) return <Navigate to="/notifications" />;
             className="auth-input"
             value={pseudo}
             onChange={(e) => setPseudo(e.target.value)}
-            placeholder="Pseudo"
+            placeholder={t("profil.pseudoPlaceholder")}
           />
         ) : (
           <h2 className="profil-pseudo">{profil?.pseudo}</h2>
@@ -275,7 +279,7 @@ if (afficherNotifications) return <Navigate to="/notifications" />;
             className="auth-input"
             value={statut}
             onChange={(e) => setStatut(e.target.value)}
-            placeholder="Statut"
+            placeholder={t("profil.statutPlaceholder")}
           />
         ) : (
           <p className="profil-statut">"{profil?.statut}"</p>
@@ -284,22 +288,121 @@ if (afficherNotifications) return <Navigate to="/notifications" />;
 
       <div className="profil-infos">
         <div className="profil-info-card">
-          <span className="profil-info-label">⭐ Points</span>
+          <span className="profil-info-label">{t("profil.age")}</span>
+          <span className="profil-info-valeur">
+            {edition ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <input
+                  type="date"
+                  className="auth-input"
+                  value={age}
+                  max={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setAge(e.target.value)}
+                  style={{ padding: "6px" }}
+                />
+                {age && (
+                  <label className="auth-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={dateMasquee}
+                      onChange={(e) => setDateMasquee(e.target.checked)}
+                    />
+                    {t("profil.masquerDate")}
+                  </label>
+                )}
+              </div>
+            ) : (
+              profil?.dateMasquee
+                ? t("profil.masque")
+                : profil?.dateNaissance
+                ? `${new Date(profil.dateNaissance).toLocaleDateString(i18n.language === "en" ? "en-US" : "fr-FR", { day: "numeric", month: "long", year: "numeric" })} (${profil.age} ${t("profil.ans")})`
+                : t("profil.nonRenseigne")
+            )}
+          </span>
+        </div>
+        <div className="profil-info-card">
+          <span className="profil-info-label">{t("profil.sexe")}</span>
+          <span className="profil-info-valeur">
+            {edition ? (
+              <select
+                className="auth-input"
+                value={sexe}
+                onChange={(e) => setSexe(e.target.value)}
+                style={{ padding: "6px" }}
+              >
+                <option value="">{t("inscription.choisirSexe")}</option>
+                <option value="homme">{t("inscription.homme")}</option>
+                <option value="femme">{t("inscription.femme")}</option>
+                <option value="autre">{t("inscription.autre")}</option>
+                <option value="non-precise">{t("inscription.nonPrecise")}</option>
+              </select>
+            ) : (
+              afficherSexe(profil?.sexe)
+            )}
+          </span>
+        </div>
+        <div className="profil-info-card">
+          <span className="profil-info-label">{t("profil.telephone")}</span>
+          <span className="profil-info-valeur">{afficherTelephone()}</span>
+        </div>
+      </div>
+
+      {edition && (
+        <div className="profil-tel-edition">
+          <div className="tel-container">
+            <input
+              className="auth-input tel-indicatif"
+              type="text"
+              value={profil?.indicatif || ""}
+              readOnly
+            />
+            <input
+              className="auth-input tel-numero"
+              type="tel"
+              placeholder={
+                getPaysInfo()
+                  ? `${getPaysInfo().chiffres} ${i18n.language === "en" ? "digits (optional)" : "chiffres (optionnel)"}`
+                  : t("inscription.telephone")
+              }
+              value={telephone}
+              onChange={(e) => {
+                setErreurTel("");
+                setTelephone(e.target.value);
+              }}
+            />
+          </div>
+          {erreurTel && <p className="auth-erreur">{erreurTel}</p>}
+          {telephone && (
+            <label className="auth-checkbox" style={{ marginTop: "10px" }}>
+              <input
+                type="checkbox"
+                checked={telephoneMasque}
+                onChange={(e) => setTelephoneMasque(e.target.checked)}
+              />
+              {t("profil.masquerNumero")}
+            </label>
+          )}
+        </div>
+      )}
+
+      <div className="profil-infos">
+        <div className="profil-info-card">
+          <span className="profil-info-label">{t("profil.points")}</span>
           <span className="profil-info-valeur">{profil?.points || 0}</span>
         </div>
         <div className="profil-info-card">
-          <span className="profil-info-label">🏆 Badges</span>
+          <span className="profil-info-label">{t("profil.badges")}</span>
           <span className="profil-info-valeur">{profil?.badges?.length || 0}</span>
         </div>
         <div className="profil-info-card">
-          <span className="profil-info-label">🔥 Série actuelle</span>
+          <span className="profil-info-label">{t("profil.serieActuelle")}</span>
           <span className="profil-info-valeur">{profil?.serieVictoires || 0}</span>
         </div>
       </div>
 
       {profil?.badges?.length > 0 && (
         <div className="badges-section">
-          <p className="attaques-titre">🏆 Tes badges</p>
+          <p className="attaques-titre">{t("profil.tesBadges")}</p>
           <div className="badges-grid">
             {(() => {
               const badges = [...profil.badges];
@@ -326,122 +429,23 @@ if (afficherNotifications) return <Navigate to="/notifications" />;
         </div>
       )}
 
-      <div className="profil-infos" style={{ display: "none" }}>
-      <div className="profil-info-card">
-          <span className="profil-info-label">🎂 Date de naissance</span>
-          <span className="profil-info-valeur">
-            {edition ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <input
-                  type="date"
-                  className="auth-input"
-                  value={age}
-                  max={new Date().toISOString().split("T")[0]}
-                  onChange={(e) => setAge(e.target.value)}
-                  style={{ padding: "6px" }}
-                />
-                {age && (
-                  <label className="auth-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={dateMasquee}
-                      onChange={(e) => setDateMasquee(e.target.checked)}
-                    />
-                    Masquer ma date de naissance
-                  </label>
-                )}
-              </div>
-            ) : (
-              profil?.dateMasquee
-                ? "Masquée 🔒"
-                : profil?.dateNaissance
-                ? `${new Date(profil.dateNaissance).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} (${profil.age} ans)`
-                : "Non renseigné"
-            )}
-          </span>
-        </div>
-        <div className="profil-info-card">
-          <span className="profil-info-label">👤 Sexe</span>
-          <span className="profil-info-valeur">
-            {edition ? (
-              <select
-                className="auth-input"
-                value={sexe}
-                onChange={(e) => setSexe(e.target.value)}
-                style={{ padding: "6px" }}
-              >
-                <option value="">-- Sexe --</option>
-                <option value="homme">Homme</option>
-                <option value="femme">Femme</option>
-                <option value="autre">Autre</option>
-                <option value="non-precise">Préfère ne pas préciser</option>
-              </select>
-            ) : (
-              afficherSexe(profil?.sexe)
-            )}
-          </span>
-        </div>
-        <div className="profil-info-card">
-          <span className="profil-info-label">📱 Téléphone</span>
-          <span className="profil-info-valeur">{afficherTelephone()}</span>
-        </div>
-      </div>
-
-      {edition && (
-        <div className="profil-tel-edition">
-          <div className="tel-container">
-            <input
-              className="auth-input tel-indicatif"
-              type="text"
-              value={profil?.indicatif || ""}
-              readOnly
-            />
-            <input
-              className="auth-input tel-numero"
-              type="tel"
-              placeholder={
-                getPaysInfo()
-                  ? `${getPaysInfo().chiffres} chiffres (optionnel)`
-                  : "Numéro (optionnel)"
-              }
-              value={telephone}
-              onChange={(e) => {
-                setErreurTel("");
-                setTelephone(e.target.value);
-              }}
-            />
-          </div>
-          {erreurTel && <p className="auth-erreur">{erreurTel}</p>}
-          {telephone && (
-            <label className="auth-checkbox" style={{ marginTop: "10px" }}>
-              <input
-                type="checkbox"
-                checked={telephoneMasque}
-                onChange={(e) => setTelephoneMasque(e.target.checked)}
-              />
-              Masquer mon numéro de téléphone
-            </label>
-          )}
-        </div>
-      )}
-
       <div className="profil-actions">
         {edition ? (
           <>
             <button className="auth-btn" onClick={sauvegarder}>
-              💾 Sauvegarder
+              {t("profil.sauvegarder")}
             </button>
             <button className="profil-btn-annuler" onClick={() => setEdition(false)}>
-              Annuler
+              {t("profil.annuler")}
             </button>
           </>
         ) : (
           <button className="auth-btn" onClick={() => setEdition(true)}>
-            ✏️ Modifier le profil
+            {t("profil.modifier")}
           </button>
         )}
         <button className="profil-btn-deconnexion" onClick={deconnexion}>
-          🚪 Se déconnecter
+          {t("profil.deconnexion")}
         </button>
       </div>
     </div>
