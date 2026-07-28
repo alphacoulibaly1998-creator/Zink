@@ -4,6 +4,7 @@ import { nettoyerTexte } from "../sanitize";
 import { db, auth } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import axios from "axios";
+import { supabase } from "../supabase";
 
 function NouvellePublication({ onPublie }) {
   const { t } = useTranslation();
@@ -62,17 +63,15 @@ function NouvellePublication({ onPublie }) {
       }
 
       if (fichier && typeFichier === "video") {
-        const reader = new FileReader();
-        const base64 = await new Promise((resolve) => {
-          reader.onloadend = () => resolve(reader.result);
-          reader.readAsDataURL(fichier);
-        });
         const nomFichier = `pub_video_${Date.now()}.mp4`;
-        const res = await axios.post("/api/upload-video", {
-          videoBase64: base64,
-          nomFichier
+        const { data } = await axios.post("/api/upload-video", { nomFichier });
+        await axios.put(data.signedUrl, fichier, {
+          headers: { "Content-Type": fichier.type }
         });
-        videoUrl = res.data.url;
+        const { data: urlData } = supabase.storage
+          .from("zink")
+          .getPublicUrl(nomFichier);
+        videoUrl = urlData.publicUrl;
       }
 
       const user = auth.currentUser;

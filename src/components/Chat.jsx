@@ -177,17 +177,15 @@ const msgData = {
     try {
       if (mediaEnAttente && typeMediaEnAttente === "video") {
         try {
-          const reader = new FileReader();
-          const base64 = await new Promise((resolve) => {
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(mediaEnAttente);
-          });
           const nomFichier = `video_${Date.now()}.mp4`;
-          const res = await axios.post("/api/upload-video", {
-            videoBase64: base64,
-            nomFichier
+          const { data } = await axios.post("/api/upload-video", { nomFichier });
+          await axios.put(data.signedUrl, mediaEnAttente, {
+            headers: { "Content-Type": mediaEnAttente.type }
           });
-          await envoyerMessageFusionne("video", res.data.url, texte.trim());
+          const { data: urlData } = supabase.storage
+            .from("zink")
+            .getPublicUrl(nomFichier);
+          await envoyerMessageFusionne("video", urlData.publicUrl, texte.trim());
         } catch (e) {
           alert("Erreur lors de l'envoi de la vidéo.");
         }
