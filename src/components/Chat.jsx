@@ -187,6 +187,8 @@ const msgData = {
             .getPublicUrl(nomFichier);
           await envoyerMessageFusionne("video", urlData.publicUrl, texte.trim());
         } catch (e) {
+          console.error("Erreur vidéo:", e);
+          console.error("Détails:", e.response?.data || e.message);
           alert("Erreur lors de l'envoi de la vidéo.");
         }
       } else if (mediaEnAttente && typeMediaEnAttente === "photo") {
