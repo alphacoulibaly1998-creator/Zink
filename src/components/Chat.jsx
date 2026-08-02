@@ -138,10 +138,14 @@ const msgData = {
       statut: "envoye"
     };
 
+    console.log("Étape 1: avant addDoc message");
     await addDoc(collection(db, "conversations", convId, "messages"), msgData);
+    console.log("Étape 2: message créé avec succès");
     const convRef = doc(db, "conversations", convId);
     const convSnap = await getDoc(convRef);
+    console.log("Étape 3: conversation lue");
     const nonLuActuel = convSnap.data()?.nonLu?.[autreId] || 0;
+    console.log("Étape 4: avant updateDoc conversation");
     await updateDoc(convRef, {
       dernierMessage: {
         texte: type === "texte" ? valeur : type === "photo" ? "📷 Photo" : type === "video" ? "🎥 Vidéo" : "🎤 Vocal",
