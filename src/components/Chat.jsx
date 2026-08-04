@@ -138,14 +138,10 @@ const msgData = {
       statut: "envoye"
     };
 
-    console.log("Étape 1: avant addDoc message");
     await addDoc(collection(db, "conversations", convId, "messages"), msgData);
-    console.log("Étape 2: message créé avec succès");
     const convRef = doc(db, "conversations", convId);
     const convSnap = await getDoc(convRef);
-    console.log("Étape 3: conversation lue");
     const nonLuActuel = convSnap.data()?.nonLu?.[autreId] || 0;
-    console.log("Étape 4: avant updateDoc conversation");
     await updateDoc(convRef, {
       dernierMessage: {
         texte: type === "texte" ? valeur : type === "photo" ? "📷 Photo" : type === "video" ? "🎥 Vidéo" : "🎤 Vocal",
@@ -191,8 +187,6 @@ const msgData = {
             .getPublicUrl(nomFichier);
           await envoyerMessageFusionne("video", urlData.publicUrl, texte.trim());
         } catch (e) {
-          console.error("Erreur vidéo:", e);
-          console.error("Détails:", e.response?.data || e.message);
           alert("Erreur lors de l'envoi de la vidéo.");
         }
       } else if (mediaEnAttente && typeMediaEnAttente === "photo") {
