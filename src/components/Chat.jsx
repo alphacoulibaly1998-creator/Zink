@@ -421,11 +421,10 @@ const msgData = {
                 className={`message ${estMoi ? "message-moi" : "message-autre"}`}
                 onTouchStart={(e) => {
                   longPress.current = false;
-                  const target = e.currentTarget;
+                  const y = e.touches[0].clientY;
                   appuiLongTimer.current = setTimeout(() => {
                     longPress.current = true;
-                    const rect = target.getBoundingClientRect();
-                    setMenuMessageVersHaut(window.innerHeight - rect.bottom < 180);
+                    setMenuMessageVersHaut(window.innerHeight - y < 200);
                     setMenuMessage(msg.id);
                   }, 500);
                 }}
@@ -434,11 +433,10 @@ const msgData = {
                 onTouchCancel={() => clearTimeout(appuiLongTimer.current)}
                 onMouseDown={(e) => {
                   longPress.current = false;
-                  const target = e.currentTarget;
+                  const y = e.clientY;
                   appuiLongTimer.current = setTimeout(() => {
                     longPress.current = true;
-                    const rect = target.getBoundingClientRect();
-                    setMenuMessageVersHaut(window.innerHeight - rect.bottom < 180);
+                    setMenuMessageVersHaut(window.innerHeight - y < 200);
                     setMenuMessage(msg.id);
                   }, 500);
                 }}

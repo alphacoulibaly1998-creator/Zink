@@ -1022,6 +1022,9 @@ body {
   border-radius: 16px;
   font-size: 15px;
   position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .message-moi {
