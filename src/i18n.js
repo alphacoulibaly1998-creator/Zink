@@ -190,6 +190,20 @@ const resources = {
         femme: "Femme",
         autre: "Autre",
         nonPrecise: "Non précisé"
+      },
+      decouvrir: {
+        titre: "🔍 Découvrir",
+        placeholderRecherche: "Rechercher par pseudo...",
+        tapePseudo: "Tape un pseudo.",
+        aucunResultat: "Aucun utilisateur trouvé.",
+        erreurRecherche: "Erreur lors de la recherche.",
+        suggestionsPourToi: "✨ Suggestions pour toi",
+        chargement: "Chargement...",
+        voirAutresSuggestions: "🔄 Voir d'autres suggestions",
+        dejaAmi: "✓ Ami",
+        envoyee: "⏳ Envoyée",
+        accepter: "👥 Accepter",
+        ajouter: "👥 Ajouter"
       }
     }
   },
@@ -380,6 +394,20 @@ const resources = {
         femme: "Female",
         autre: "Other",
         nonPrecise: "Not specified"
+      },
+      decouvrir: {
+        titre: "🔍 Discover",
+        placeholderRecherche: "Search by username...",
+        tapePseudo: "Type a username.",
+        aucunResultat: "No user found.",
+        erreurRecherche: "Error during search.",
+        suggestionsPourToi: "✨ Suggestions for you",
+        chargement: "Loading...",
+        voirAutresSuggestions: "🔄 See other suggestions",
+        dejaAmi: "✓ Friend",
+        envoyee: "⏳ Sent",
+        accepter: "👥 Accept",
+        ajouter: "👥 Add"
       }
     }
   }

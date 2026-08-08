@@ -6,8 +6,11 @@ import {
 } from "firebase/firestore";
 import { creerNotification } from "../notifications";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
+  const { t } = useTranslation();
   const [recherche, setRecherche] = useState("");
   const [resultats, setResultats] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
@@ -100,7 +103,7 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
     setResultats([]);
     setSuggestions([]);
     if (!recherche.trim()) {
-      setErreur("Tape un pseudo.");
+      setErreur(t("decouvrir.tapePseudo"));
       return;
     }
     setChargement(true);
@@ -128,9 +131,9 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
       });
       const res = [...map.values()];
       setResultats(res);
-      if (res.length === 0) setErreur("Aucun utilisateur trouvé.");
+      if (res.length === 0) setErreur(t("decouvrir.aucunResultat"));
     } catch (e) {
-      setErreur("Erreur lors de la recherche.");
+      setErreur(t("decouvrir.erreurRecherche"));
     }
     setChargement(false);
   };
@@ -193,19 +196,19 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
   const renderBouton = (u) => {
     const statut = getStatutRelation(u);
     if (statut === "ami") return (
-      <button className="decouvrir-btn-ami deja-ami">✓ Ami</button>
+      <button className="decouvrir-btn-ami deja-ami">{t("decouvrir.dejaAmi")}</button>
     );
     if (statut === "envoye") return (
-      <button className="decouvrir-btn-ami en-attente">⏳ Envoyée</button>
+      <button className="decouvrir-btn-ami en-attente">{t("decouvrir.envoyee")}</button>
     );
     if (statut === "recu") return (
       <button className="decouvrir-btn-ami recu" onClick={() => accepterDemande(u)}>
-        👥 Accepter
+        {t("decouvrir.accepter")}
       </button>
     );
     return (
       <button className="decouvrir-btn-ami" onClick={() => envoyerDemande(u)}>
-        👥 Ajouter
+        {t("decouvrir.ajouter")}
       </button>
     );
   };
@@ -213,14 +216,14 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
 
   return (
     <div className="decouvrir-container">
-      <h1 className="accueil-titre">🔍 Découvrir</h1>
+      <h1 className="accueil-titre">{t("decouvrir.titre")}</h1>
 
       <div className="decouvrir-recherche">
         <div className="decouvrir-input-container">
           <input
             className="auth-input"
             type="text"
-            placeholder="Rechercher par pseudo..."
+            placeholder={t("decouvrir.placeholderRecherche")}
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && chercher()}
@@ -237,7 +240,7 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
                     {u.pseudo?.[0]?.toUpperCase() || "?"}
                   </div>
                   <span>{u.pseudo}</span>
-                  <span className="suggestion-pays">🌍 {u.pays}</span>
+                  <span className="suggestion-pays">🌍 {i18n.language === "en" ? (u.paysEn || u.pays) : u.pays}</span>
                 </div>
               ))}
             </div>
@@ -252,9 +255,9 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
 
       {!recherche.trim() && resultats.length === 0 && (
         <div className="decouvrir-suggestions-section">
-          <p className="attaques-titre">✨ Suggestions pour toi</p>
+          <p className="attaques-titre">{t("decouvrir.suggestionsPourToi")}</p>
           {chargementSuggestions ? (
-            <div className="chargement">Chargement...</div>
+            <div className="chargement">{t("decouvrir.chargement")}</div>
           ) : (
             <>
               <div className="decouvrir-resultats">
@@ -279,7 +282,7 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
                       style={{ cursor: "pointer" }}
                     >
                       <span className="conv-pseudo">{u.pseudo}</span>
-                      <span className="conv-dernier">🌍 {u.pays}</span>
+                      <span className="conv-dernier">🌍 {i18n.language === "en" ? (u.paysEn || u.pays) : u.pays}</span>
                     </div>
                     <div className="decouvrir-btns">
                       {renderBouton(u)}
@@ -291,7 +294,7 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
                 className="voir-plus-commentaires"
                 onClick={chargerPlusSuggestions}
               >
-                🔄 Voir d'autres suggestions
+                {t("decouvrir.voirAutresSuggestions")}
               </button>
             </>
           )}
@@ -320,7 +323,7 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
               style={{ cursor: "pointer" }}
             >
               <span className="conv-pseudo">{u.pseudo}</span>
-              <span className="conv-dernier">🌍 {u.pays}</span>
+              <span className="conv-dernier">🌍 {i18n.language === "en" ? (u.paysEn || u.pays) : u.pays}</span>
             </div>
             <div className="decouvrir-btns">
               {renderBouton(u)}
