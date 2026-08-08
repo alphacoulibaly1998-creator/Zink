@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { auth, db } from "../firebase";
 import {
   updatePassword, verifyBeforeUpdateEmail,
@@ -14,6 +15,7 @@ import { auth as authAdmin } from "../firebase";
 const EMAIL_ADMIN = "alphacoulibaly1998@gmail.com";
 
 function Parametres() {
+  const { t, i18n } = useTranslation();
   const [section, setSection] = useState(null);
   const [mdpActuel, setMdpActuel] = useState("");
   const [nouveauMdp, setNouveauMdp] = useState("");
@@ -54,7 +56,7 @@ function Parametres() {
   }, []);
 
   const debloquer = async (autreId, pseudo) => {
-    if (!window.confirm(`Débloquer ${pseudo} ?`)) return;
+    if (!window.confirm(t("parametres.confirmerDebloquer", { pseudo }))) return;
     await updateDoc(doc(db, "utilisateurs", user.uid), {
       bloques: arrayRemove(autreId)
     });
@@ -78,26 +80,26 @@ function Parametres() {
     setErreur("");
     setMessage("");
     if (!mdpActuel || !nouveauMdp) {
-      setErreur("Remplis tous les champs.");
+      setErreur(t("parametres.remplirChamps"));
       return;
     }
     const mdpRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!mdpRegex.test(nouveauMdp)) {
-      setErreur("Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.");
+      setErreur(t("parametres.mdpTropFaible"));
       return;
     }
     setChargement(true);
     try {
       await reauthenthifier();
       await updatePassword(user, nouveauMdp);
-      setMessage("✅ Mot de passe changé avec succès !");
+      setMessage(t("parametres.mdpChangeSucces"));
       reinitialiser();
       setSection(null);
     } catch (e) {
       if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
-        setErreur("Mot de passe actuel incorrect.");
+        setErreur(t("parametres.mdpActuelIncorrect"));
       } else {
-        setErreur("Une erreur est survenue. Réessaie.");
+        setErreur(t("parametres.erreurGenerale"));
       }
     }
     setChargement(false);
@@ -107,32 +109,32 @@ function Parametres() {
     setErreur("");
     setMessage("");
     if (!mdpActuel || !nouvelEmail) {
-      setErreur("Remplis tous les champs.");
+      setErreur(t("parametres.remplirChamps"));
       return;
     }
     if (nouvelEmail === user.email) {
-      setErreur("C'est déjà ton email actuel.");
+      setErreur(t("parametres.emailDejaActuel"));
       return;
     }
     setChargement(true);
     try {
       await reauthenthifier();
       await verifyBeforeUpdateEmail(user, nouvelEmail);
-      setMessage("✅ Un email de vérification a été envoyé à " + nouvelEmail + ". Vérifie ta boîte mail pour confirmer le changement.");
+      setMessage(t("parametres.emailVerifEnvoye", { email: nouvelEmail }));
       setMdpActuel("");
       setNouvelEmail("");
       setSection(null);
     } catch (e) {
       if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
-        setErreur("Mot de passe actuel incorrect.");
+        setErreur(t("parametres.mdpActuelIncorrect"));
       } else if (e.code === "auth/email-already-in-use") {
-        setErreur("Cet email est déjà utilisé par un autre compte.");
+        setErreur(t("parametres.emailDejaUtilise"));
       } else if (e.code === "auth/invalid-email") {
-        setErreur("L'adresse email n'est pas valide.");
+        setErreur(t("parametres.emailInvalide"));
       } else if (e.code === "auth/requires-recent-login") {
-        setErreur("Session expirée. Déconnecte-toi et reconnecte-toi avant de changer l'email.");
+        setErreur(t("parametres.sessionExpiree"));
       } else {
-        setErreur("Une erreur est survenue. Réessaie.");
+        setErreur(t("parametres.erreurGenerale"));
       }
     }
     setChargement(false);
@@ -141,10 +143,10 @@ function Parametres() {
   const supprimerCompte = async () => {
     setErreur("");
     if (!mdpActuel) {
-      setErreur("Entre ton mot de passe pour confirmer.");
+      setErreur(t("parametres.entrerMdpConfirmer"));
       return;
     }
-    if (!window.confirm("Supprimer définitivement ton compte ? Cette action est irréversible.")) return;
+    if (!window.confirm(t("parametres.confirmerSuppression"))) return;
     setChargement(true);
     try {
       await reauthenthifier();
@@ -153,9 +155,9 @@ function Parametres() {
       navigate("/login");
     } catch (e) {
       if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
-        setErreur("Mot de passe incorrect.");
+        setErreur(t("parametres.mdpIncorrect"));
       } else {
-        setErreur("Une erreur est survenue. Réessaie.");
+        setErreur(t("parametres.erreurGenerale"));
       }
     }
     setChargement(false);
@@ -168,7 +170,7 @@ function Parametres() {
     <div className="parametres-container">
       <div className="jeu-header">
         <button className="chat-retour" onClick={() => navigate(-1)}>←</button>
-        <h2 className="jeu-titre">⚙️ Paramètres</h2>
+        <h2 className="jeu-titre">{t("parametres.titre")}</h2>
       </div>
 
       {message && <p className="auth-succes">{message}</p>}
@@ -176,11 +178,39 @@ function Parametres() {
       <div className="parametres-liste">
 
         <div
+          className={`param-item ${section === "langue" ? "actif" : ""}`}
+          onClick={() => setSection(section === "langue" ? null : "langue")}
+        >
+          <span className="param-icon">🌐</span>
+          <span className="param-label">{t("parametres.langue")}</span>
+          <span className="param-fleche">{section === "langue" ? "▲" : "▼"}</span>
+        </div>
+
+        {section === "langue" && (
+          <div className="param-form" style={{ display: "flex", gap: "8px" }}>
+            <button
+              className="auth-btn"
+              style={{ opacity: i18n.language === "fr" ? 1 : 0.5 }}
+              onClick={() => i18n.changeLanguage("fr")}
+            >
+              🇫🇷 Français
+            </button>
+            <button
+              className="auth-btn"
+              style={{ opacity: i18n.language === "en" ? 1 : 0.5 }}
+              onClick={() => i18n.changeLanguage("en")}
+            >
+              🇬🇧 English
+            </button>
+          </div>
+        )}
+
+        <div
           className={`param-item ${section === "mdp" ? "actif" : ""}`}
           onClick={() => { setSection(section === "mdp" ? null : "mdp"); reinitialiser(); }}
         >
           <span className="param-icon">🔑</span>
-          <span className="param-label">Changer le mot de passe</span>
+          <span className="param-label">{t("parametres.changerMdp")}</span>
           <span className="param-fleche">{section === "mdp" ? "▲" : "▼"}</span>
         </div>
 
@@ -190,7 +220,7 @@ function Parametres() {
               <input
                 className="auth-input"
                 type={voirMdp ? "text" : "password"}
-                placeholder="Mot de passe actuel"
+                placeholder={t("parametres.mdpActuelPlaceholder")}
                 value={mdpActuel}
                 onChange={(e) => setMdpActuel(e.target.value)}
               />
@@ -202,7 +232,7 @@ function Parametres() {
               <input
                 className="auth-input"
                 type={voirNouveauMdp ? "text" : "password"}
-                placeholder="Nouveau mot de passe"
+                placeholder={t("parametres.nouveauMdpPlaceholder")}
                 value={nouveauMdp}
                 onChange={(e) => setNouveauMdp(e.target.value)}
               />
@@ -212,7 +242,7 @@ function Parametres() {
             </div>
             {erreur && <p className="auth-erreur">{erreur}</p>}
             <button className="auth-btn" onClick={changerMdp} disabled={chargement}>
-              {chargement ? "..." : "💾 Sauvegarder"}
+              {chargement ? "..." : t("parametres.sauvegarder")}
             </button>
           </div>
         )}
@@ -222,13 +252,13 @@ function Parametres() {
           onClick={() => { setSection(section === "email" ? null : "email"); reinitialiser(); }}
         >
           <span className="param-icon">📧</span>
-          <span className="param-label">Changer l'email</span>
+          <span className="param-label">{t("parametres.changerEmail")}</span>
           <span className="param-fleche">{section === "email" ? "▲" : "▼"}</span>
         </div>
 
         {section === "email" && (
           <div className="param-form">
-            <p className="param-info">Email actuel : <strong>{user.email}</strong></p>
+            <p className="param-info">{t("parametres.emailActuel")} <strong>{user.email}</strong></p>
             <div className="mdp-container">
               <input
                 className="auth-input"
@@ -244,13 +274,13 @@ function Parametres() {
             <input
               className="auth-input"
               type="email"
-              placeholder="Nouvel email"
+              placeholder={t("parametres.nouvelEmailPlaceholder")}
               value={nouvelEmail}
               onChange={(e) => setNouvelEmail(e.target.value)}
             />
             {erreur && <p className="auth-erreur">{erreur}</p>}
             <button className="auth-btn" onClick={changerEmail} disabled={chargement}>
-              {chargement ? "..." : "💾 Sauvegarder"}
+              {chargement ? "..." : t("parametres.sauvegarder")}
             </button>
           </div>
         )}
@@ -260,18 +290,18 @@ function Parametres() {
           onClick={() => { setSection(section === "supprimer" ? null : "supprimer"); reinitialiser(); }}
         >
           <span className="param-icon">🗑️</span>
-          <span className="param-label">Supprimer mon compte</span>
+          <span className="param-label">{t("parametres.supprimerCompte")}</span>
           <span className="param-fleche">{section === "supprimer" ? "▲" : "▼"}</span>
         </div>
 
         {section === "supprimer" && (
           <div className="param-form">
-            <p className="param-info danger-txt">⚠️ Cette action est irréversible !</p>
+            <p className="param-info danger-txt">{t("parametres.irreversible")}</p>
             <div className="mdp-container">
               <input
                 className="auth-input"
                 type={voirMdp ? "text" : "password"}
-                placeholder="Confirme ton mot de passe"
+                placeholder={t("parametres.confirmeMdp")}
                 value={mdpActuel}
                 onChange={(e) => setMdpActuel(e.target.value)}
               />
@@ -285,7 +315,7 @@ function Parametres() {
               onClick={supprimerCompte}
               disabled={chargement}
             >
-              {chargement ? "..." : "🗑️ Supprimer définitivement"}
+              {chargement ? "..." : t("parametres.supprimerDefinitivement")}
             </button>
           </div>
         )}
@@ -295,14 +325,14 @@ function Parametres() {
           onClick={() => setSection(section === "bloques" ? null : "bloques")}
         >
           <span className="param-icon">🚫</span>
-          <span className="param-label">Personnes bloquées</span>
+          <span className="param-label">{t("parametres.personnesBloquees")}</span>
           <span className="param-fleche">{section === "bloques" ? "▲" : "▼"}</span>
         </div>
 
         {section === "bloques" && (
           <div className="param-form">
             {bloques.length === 0 ? (
-              <p className="param-info">Aucune personne bloquée.</p>
+              <p className="param-info">{t("parametres.aucunePersonneBloquee")}</p>
             ) : (
               bloques.map((b) => (
                 <div key={b.id} className="ami-item">
@@ -313,7 +343,7 @@ function Parametres() {
                     <span className="conv-pseudo">{b.pseudo}</span>
                   </div>
                   <button className="ami-btn-suppr" onClick={() => debloquer(b.id, b.pseudo)}>
-                    Débloquer
+                    {t("parametres.debloquer")}
                   </button>
                 </div>
               ))
@@ -326,23 +356,22 @@ function Parametres() {
           onClick={() => setSection(section === "feedback" ? null : "feedback")}
         >
           <span className="param-icon">💬</span>
-          <span className="param-label">Envoyer un feedback</span>
+          <span className="param-label">{t("parametres.envoyerFeedback")}</span>
           <span className="param-fleche">{section === "feedback" ? "▲" : "▼"}</span>
         </div>
 
         {section === "feedback" && (
           <div className="param-form">
             {feedbackEnvoye ? (
-              <p className="auth-succes">✅ Merci pour ton retour !</p>
+              <p className="auth-succes">{t("parametres.feedbackMerci")}</p>
             ) : (
               <>
                 <p className="param-info">
-                  Dis-nous ce que tu penses de Zink, un bug rencontré,
-                  ou une idée d'amélioration.
+                  {t("parametres.feedbackIntro")}
                 </p>
                 <textarea
                   className="pub-textarea"
-                  placeholder="Ton message..."
+                  placeholder={t("parametres.feedbackPlaceholder")}
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
                   rows={4}
@@ -363,7 +392,7 @@ function Parametres() {
                   }}
                   disabled={!feedback.trim()}
                 >
-                  📤 Envoyer
+                  {t("parametres.envoyer")}
                 </button>
               </>
             )}
@@ -375,7 +404,7 @@ function Parametres() {
           onClick={() => setAfficherAPropos(true)}
         >
           <span className="param-icon">ℹ️</span>
-          <span className="param-label">À propos de Zink</span>
+          <span className="param-label">{t("parametres.aPropos")}</span>
           <span className="param-fleche">→</span>
         </div>
 
@@ -385,7 +414,7 @@ function Parametres() {
             onClick={() => setAfficherAdmin(true)}
           >
             <span className="param-icon">🛠️</span>
-            <span className="param-label">Admin</span>
+            <span className="param-label">{t("parametres.admin")}</span>
             <span className="param-fleche">→</span>
           </div>
         )}

@@ -2,19 +2,21 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { db, auth } from "../firebase";
 import { collection, query, where, onSnapshot, doc } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
 
 const liens = [
-  { path: "/", label: "Accueil", icon: "🏠" },
-  { path: "/profil", label: "Profil", icon: "👤" },
-  { path: "/amis", label: "Amis", icon: "👥" },
-  { path: "/messages", label: "Messages", icon: "💬" },
-  { path: "/jeux", label: "Jeux", icon: "🎮" },
-  { path: "/decouvrir", label: "Découvrir", icon: "🔍" },
-  { path: "/attaques", label: "Attaques", icon: "💥" },
+  { path: "/", labelKey: "navbar.accueil", icon: "🏠" },
+  { path: "/profil", labelKey: "navbar.profil", icon: "👤" },
+  { path: "/amis", labelKey: "navbar.amis", icon: "👥" },
+  { path: "/messages", labelKey: "navbar.messages", icon: "💬" },
+  { path: "/jeux", labelKey: "navbar.jeux", icon: "🎮" },
+  { path: "/decouvrir", labelKey: "navbar.decouvrir", icon: "🔍" },
+  { path: "/attaques", labelKey: "navbar.attaques", icon: "💥" },
 ];
 
 function NavBar() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
   const [messagesNonLus, setMessagesNonLus] = useState(0);
   const [demandesAmis, setDemandesAmis] = useState(0);
@@ -84,7 +86,7 @@ function NavBar() {
             )}
             
           </div>
-          <span className="nav-label">{lien.label}</span>
+          <span className="nav-label">{t(lien.labelKey)}</span>
         </button>
       ))}
     </nav>
