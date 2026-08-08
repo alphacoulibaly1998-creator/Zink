@@ -6,8 +6,11 @@ import {
 } from "firebase/firestore";
 import { creerNotification } from "../notifications";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 function Amis() {
+  const { t } = useTranslation();
   const [amis, setAmis] = useState([]);
   const [demandes, setDemandes] = useState([]);
   const [onglet, setOnglet] = useState("amis");
@@ -76,7 +79,7 @@ function Amis() {
   };
 
   const supprimerAmi = async (autreId) => {
-    if (!window.confirm("Supprimer cet ami ?")) return;
+    if (!window.confirm(t("amis.confirmerSupprimerAmi"))) return;
     const monRef = doc(db, "utilisateurs", user.uid);
     const autreRef = doc(db, "utilisateurs", autreId);
     await updateDoc(monRef, { amis: arrayRemove(autreId) });
@@ -105,24 +108,24 @@ function Amis() {
   };
 
 
-  if (chargement) return <div className="chargement">Chargement...</div>;
+  if (chargement) return <div className="chargement">{t("amis.chargement")}</div>;
 
   return (
     <div className="amis-container">
-      <h1 className="accueil-titre">👥 Amis</h1>
+      <h1 className="accueil-titre">{t("amis.titre")}</h1>
 
       <div className="amis-onglets">
         <button
           className={`onglet-btn ${onglet === "amis" ? "actif" : ""}`}
           onClick={() => setOnglet("amis")}
         >
-          Amis {amis.length > 0 && <span className="onglet-badge">{amis.length}</span>}
+          {t("amis.ongletAmis")} {amis.length > 0 && <span className="onglet-badge">{amis.length}</span>}
         </button>
         <button
           className={`onglet-btn ${onglet === "demandes" ? "actif" : ""}`}
           onClick={() => setOnglet("demandes")}
         >
-          Demandes {demandes.length > 0 && <span className="onglet-badge">{demandes.length}</span>}
+          {t("amis.ongletDemandes")} {demandes.length > 0 && <span className="onglet-badge">{demandes.length}</span>}
         </button>
       </div>
 
@@ -130,8 +133,8 @@ function Amis() {
         <div className="amis-liste">
           {amis.length === 0 ? (
             <div className="feed-vide">
-              <p>Aucun ami pour l'instant.</p>
-              <p>Va dans Découvrir pour en trouver ! 😊</p>
+              <p>{t("amis.aucunAmi")}</p>
+              <p>{t("amis.vaDansDecouvrir")}</p>
             </div>
           ) : (
             amis.map((ami) => (
@@ -157,7 +160,7 @@ function Amis() {
                 >
                   <span className="conv-pseudo">{ami.pseudo}</span>
                   <span className={`ami-statut-txt ${ami.enLigne ? "en-ligne" : "hors-ligne"}`}>
-                    {ami.enLigne ? "En ligne" : "Hors ligne"}
+                    {ami.enLigne ? t("amis.enLigne") : t("amis.horsLigne")}
                   </span>
                 </div>
                 <div className="ami-actions">
@@ -185,18 +188,18 @@ function Amis() {
                           setMenuAmi(null);
                           ouvrirChat(ami.id);
                         }}>
-                          💬 Envoyer un message
+                          {t("amis.envoyerMessage")}
                         </button>
                         <button onClick={() => {
                           setMenuAmi(null);
                           supprimerAmi(ami.id);
                         }}>
-                          👥 Retirer des amis
+                          {t("amis.retirerAmis")}
                         </button>
                         <button onClick={async () => {
                           setMenuAmi(null);
                           const { updateDoc: ud, doc: d, arrayUnion: au, arrayRemove: ar } = await import("firebase/firestore");
-                          if (window.confirm(`Bloquer ${ami.pseudo} ? Il sera retiré de tes amis.`)) {
+                          if (window.confirm(t("amis.confirmerBloquer", { pseudo: ami.pseudo }))) {
                             await ud(d(db, "utilisateurs", user.uid), {
                               bloques: au(ami.id),
                               amis: ar(ami.id)
@@ -204,16 +207,16 @@ function Amis() {
                             await ud(d(db, "utilisateurs", ami.id), {
                               amis: ar(user.uid)
                             });
-                            alert(`${ami.pseudo} a été bloqué et retiré de tes amis.`);
+                            alert(t("amis.bloqueRetireAlert", { pseudo: ami.pseudo }));
                           }
                         }}>
-                          🚫 Bloquer
+                          {t("amis.bloquer")}
                         </button>
                         <button className="menu-suppr" onClick={() => {
                           setMenuAmi(null);
-                          alert(`${ami.pseudo} a été signalé.`);
+                          alert(t("amis.signaleAlert", { pseudo: ami.pseudo }));
                         }}>
-                          🚩 Signaler
+                          {t("amis.signaler")}
                         </button>
                       </div>
                     )}
@@ -229,7 +232,7 @@ function Amis() {
         <div className="amis-liste">
           {demandes.length === 0 ? (
             <div className="feed-vide">
-              <p>Aucune demande d'ami en attente.</p>
+              <p>{t("amis.aucuneDemande")}</p>
             </div>
           ) : (
             demandes.map((d) => (
@@ -253,7 +256,7 @@ function Amis() {
                   style={{ cursor: "pointer" }}
                 >
                   <span className="conv-pseudo">{d.pseudo}</span>
-                  <span className="conv-dernier">🌍 {d.pays}</span>
+                  <span className="conv-dernier">🌍 {i18n.language === "en" ? (d.paysEn || d.pays) : d.pays}</span>
                 </div>
                 <div className="ami-actions">
                   <button

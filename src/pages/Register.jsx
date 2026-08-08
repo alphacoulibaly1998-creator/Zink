@@ -156,6 +156,7 @@ function Register() {
         age: ageCalcule || 0,
         sexe,
         pays: paysChoisi.nom,
+        paysEn: paysChoisi.nomEn,
         indicatif: paysChoisi.indicatif,
         chiffresTel: paysChoisi.chiffres,
         telephone: numeroComplet,

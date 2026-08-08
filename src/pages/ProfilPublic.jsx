@@ -5,8 +5,11 @@ import {
 } from "firebase/firestore";
 import { creerNotification } from "../notifications";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 function ProfilPublic({ userId: userIdProp, onRetour }) {
+  const { t } = useTranslation();
   const [profil, setProfil] = useState(null);
   const [monProfil, setMonProfil] = useState(null);
   const [chargement, setChargement] = useState(true);
@@ -93,10 +96,10 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
   const partagerProfil = async () => {
     const url = `${window.location.origin}/profil/${userId}`;
     if (navigator.share) {
-      await navigator.share({ title: `Profil de ${profil?.pseudo} sur Zink`, url });
+      await navigator.share({ title: `${profil?.pseudo} - Zink`, url });
     } else {
       navigator.clipboard.writeText(url);
-      alert("Lien copié !");
+      alert(t("profilPublic.lienCopie"));
     }
   };
 
@@ -108,7 +111,7 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
 
   const retirerAmi = async () => {
     setMenuOuvert(false);
-    if (!window.confirm(`Retirer ${profil?.pseudo} de tes amis ?`)) return;
+    if (!window.confirm(t("profilPublic.confirmerRetirerAmi", { pseudo: profil?.pseudo }))) return;
     await updateDoc(doc(db, "utilisateurs", user.uid), {
       amis: arrayRemove(userId)
     });
@@ -119,7 +122,7 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
       ...prev,
       amis: (prev?.amis || []).filter((id) => id !== userId)
     }));
-    alert(`${profil?.pseudo} a été retiré de tes amis.`);
+    alert(t("profilPublic.amiRetireAlert", { pseudo: profil?.pseudo }));
   };
 
   const bloquerUtilisateur = async () => {
@@ -127,7 +130,7 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
     const bloques = monProfil?.bloques || [];
     const estBloque = bloques.includes(userId);
     if (estBloque) {
-      if (!window.confirm(`Débloquer ${profil?.pseudo} ?`)) return;
+      if (!window.confirm(t("profilPublic.confirmerDebloquer", { pseudo: profil?.pseudo }))) return;
       await updateDoc(doc(db, "utilisateurs", user.uid), {
         bloques: arrayRemove(userId)
       });
@@ -135,9 +138,9 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
         ...prev,
         bloques: (prev?.bloques || []).filter((id) => id !== userId)
       }));
-      alert(`${profil?.pseudo} a été débloqué.`);
+      alert(t("profilPublic.debloqueAlert", { pseudo: profil?.pseudo }));
     } else {
-      if (!window.confirm(`Bloquer ${profil?.pseudo} ? Il sera retiré de tes amis.`)) return;
+      if (!window.confirm(t("profilPublic.confirmerBloquer", { pseudo: profil?.pseudo }))) return;
       await updateDoc(doc(db, "utilisateurs", user.uid), {
         bloques: arrayUnion(userId),
         amis: arrayRemove(userId)
@@ -150,17 +153,22 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
         bloques: [...(prev?.bloques || []), userId],
         amis: (prev?.amis || []).filter((id) => id !== userId)
       }));
-      alert(`${profil?.pseudo} a été bloqué et retiré de tes amis.`);
+      alert(t("profilPublic.bloqueRetireAlert", { pseudo: profil?.pseudo }));
     }
   };
 
   const afficherSexe = (s) => {
-    const map = { homme: "Homme", femme: "Femme", autre: "Autre", "non-precise": "Non précisé" };
+    const map = {
+      homme: t("profilPublic.homme"),
+      femme: t("profilPublic.femme"),
+      autre: t("profilPublic.autre"),
+      "non-precise": t("profilPublic.nonPrecise")
+    };
     return map[s] || null;
   };
 
-  if (chargement) return <div className="chargement">Chargement...</div>;
-  if (!profil) return <div className="chargement">Profil introuvable.</div>;
+  if (chargement) return <div className="chargement">{t("profilPublic.chargement")}</div>;
+  if (!profil) return <div className="chargement">{t("profilPublic.profilIntrouvable")}</div>;
 
   const statut = getStatutRelation();
 
@@ -168,7 +176,7 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
     <div className="profil-container">
       <div className="jeu-header">
         <button className="chat-retour" onClick={onRetour || (() => navigate(-1))}>←</button>
-        <h2 className="jeu-titre">👤 Profil</h2>
+        <h2 className="jeu-titre">{t("profilPublic.titre")}</h2>
         <div className="pub-menu-container">
           <button
             className="pub-btn-menu"
@@ -186,18 +194,18 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
           {menuOuvert && (
             <div className={`pub-menu ${menuOuvertVersHaut ? "vers-haut" : ""}`}>
               <button onClick={() => { partagerProfil(); setMenuOuvert(false); }}>
-                🔗 Partager le profil
+                {t("profilPublic.partagerProfil")}
               </button>
               {getStatutRelation() === "ami" && (
                 <button onClick={retirerAmi}>
-                  👥 Retirer des amis
+                  {t("profilPublic.retirerAmis")}
                 </button>
               )}
               <button onClick={bloquerUtilisateur}>
-                🚫 {monProfil?.bloques?.includes(userId) ? "Débloquer" : "Bloquer"}
+                {monProfil?.bloques?.includes(userId) ? t("profilPublic.debloquer") : t("profilPublic.bloquer")}
               </button>
               <button className="menu-suppr" onClick={() => { signalerProfil(); setMenuOuvert(false); }}>
-                🚩 Signaler
+                {t("profilPublic.signaler")}
               </button>
             </div>
           )}
@@ -216,24 +224,24 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
         </div>
 
         <h2 className="profil-pseudo">{profil.pseudo}</h2>
-        <p className="profil-pays">🌍 {profil.pays}</p>
+        <p className="profil-pays">🌍 {i18n.language === "en" ? (profil.paysEn || profil.pays) : profil.pays}</p>
         <p className="profil-statut">"{profil.statut}"</p>
 
         <div className="profil-public-actions">
           {statut === "ami" && (
-            <button className="decouvrir-btn-ami deja-ami">✓ Ami</button>
+            <button className="decouvrir-btn-ami deja-ami">{t("profilPublic.dejaAmi")}</button>
           )}
           {statut === "envoye" && (
-            <button className="decouvrir-btn-ami en-attente">⏳ Demande envoyée</button>
+            <button className="decouvrir-btn-ami en-attente">{t("profilPublic.demandeEnvoyee")}</button>
           )}
            {statut === "recu" && (
             <button className="decouvrir-btn-ami recu" onClick={accepterDemande}>
-              👥 Accepter
+              {t("profilPublic.accepter")}
             </button>
           )}
           {statut === "aucun" && (
             <button className="decouvrir-btn-ami" onClick={envoyerDemande}>
-              👥 Ajouter
+              {t("profilPublic.ajouter")}
             </button>
           )}
           <button className="ami-btn-msg" onClick={ouvrirChat}>💬</button>
@@ -242,37 +250,37 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
 
       <div className="profil-infos">
         <div className="profil-info-card">
-          <span className="profil-info-label">⭐ Points</span>
+          <span className="profil-info-label">{t("profilPublic.points")}</span>
           <span className="profil-info-valeur">{profil.points || 0}</span>
         </div>
         <div className="profil-info-card">
-          <span className="profil-info-label">🏆 Badges</span>
+          <span className="profil-info-label">{t("profilPublic.badges")}</span>
           <span className="profil-info-valeur">{profil.badges?.length || 0}</span>
         </div>
         {profil.sexe && (
           <div className="profil-info-card">
-            <span className="profil-info-label">👤 Sexe</span>
+            <span className="profil-info-label">{t("profilPublic.sexe")}</span>
             <span className="profil-info-valeur">{afficherSexe(profil.sexe)}</span>
           </div>
         )}
         {profil.dateNaissance && !profil.dateMasquee && (
           <div className="profil-info-card">
-            <span className="profil-info-label">🎂 Âge</span>
-            <span className="profil-info-valeur">{profil.age} ans</span>
+            <span className="profil-info-label">{t("profilPublic.age")}</span>
+            <span className="profil-info-valeur">{profil.age} {t("profilPublic.ans")}</span>
           </div>
         )}
         <div className="profil-info-card">
-          <span className="profil-info-label">📱 Téléphone</span>
+          <span className="profil-info-label">{t("profilPublic.telephone")}</span>
           <span className="profil-info-valeur">
             {profil.telephone && !profil.telephoneMasque
               ? profil.telephone
-              : "Masqué 🔒"}
+              : t("profilPublic.masque")}
           </span>
         </div>
         <div className="profil-info-card">
-          <span className="profil-info-label">🌐 Statut</span>
+          <span className="profil-info-label">{t("profilPublic.statutConnexion")}</span>
           <span className={`profil-info-valeur ${profil.enLigne ? "en-ligne" : "hors-ligne"}`}>
-            {profil.enLigne ? "● En ligne" : "● Hors ligne"}
+            {profil.enLigne ? t("profilPublic.enLigne") : t("profilPublic.horsLigne")}
           </span>
         </div>
       </div>
