@@ -8,10 +8,13 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
 import axios from "axios";
 import { nettoyerTexte } from "../sanitize";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 const EMOJIS = ["😀","😂","😍","🥰","😎","😭","😱","🤔","👍","❤️","🔥","🎉","💯","🙏","😴","🤣","😊","🥺","😅","💪","🎮","👀","💬","✨","🌍","🎵","🍕","😋","🤩","👋"];
 
 function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [texte, setTexte] = useState("");
   const [chargement, setChargement] = useState(false);
@@ -120,7 +123,7 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
     const mesBlockes = monSnap.data()?.bloques || [];
 
     if (bloquesParlAutre.includes(user.uid) || mesBlockes.includes(autreId)) {
-      alert("Impossible d'envoyer un message à cet utilisateur.");
+      alert(t("chat.impossibleEnvoyer"));
       setChargement(false);
       return;
     }
@@ -144,7 +147,7 @@ const msgData = {
     const nonLuActuel = convSnap.data()?.nonLu?.[autreId] || 0;
     await updateDoc(convRef, {
       dernierMessage: {
-        texte: type === "texte" ? valeur : type === "photo" ? "📷 Photo" : type === "video" ? "🎥 Vidéo" : "🎤 Vocal",
+        texte: type === "texte" ? valeur : type === "photo" ? t("chat.photoLabel") : type === "video" ? t("chat.videoLabel") : t("chat.vocalLabel"),
         createdAt: new Date()
       },
       [`nonLu.${autreId}`]: nonLuActuel + 1
@@ -158,11 +161,11 @@ const msgData = {
     const fichier = e.target.files[0];
     if (!fichier) return;
     if (type === "video" && fichier.size > 45 * 1024 * 1024) {
-      alert("La vidéo ne doit pas dépasser 45MB.");
+      alert(t("chat.videoTropLourde"));
       return;
     }
     if (type === "photo" && fichier.size > 5 * 1024 * 1024) {
-      alert("La photo ne doit pas dépasser 5MB.");
+      alert(t("chat.photoTropLourde"));
       return;
     }
     setMediaEnAttente(fichier);
@@ -187,7 +190,7 @@ const msgData = {
             .getPublicUrl(nomFichier);
           await envoyerMessageFusionne("video", urlData.publicUrl, texte.trim());
         } catch (e) {
-          alert("Erreur lors de l'envoi de la vidéo.");
+          alert(t("chat.erreurEnvoiVideo"));
         }
       } else if (mediaEnAttente && typeMediaEnAttente === "photo") {
         const reader = new FileReader();
@@ -204,7 +207,7 @@ const msgData = {
       setApercuMedia(null);
       setTypeMediaEnAttente(null);
     } catch {
-      alert("Erreur lors de l'envoi.");
+      alert(t("chat.erreurEnvoi"));
     }
     setChargement(false);
   };
@@ -217,7 +220,7 @@ const msgData = {
     const mesBlockes = monSnap.data()?.bloques || [];
 
     if (bloquesParlAutre.includes(user.uid) || mesBlockes.includes(autreId)) {
-      alert("Impossible d'envoyer un message à cet utilisateur.");
+      alert(t("chat.impossibleEnvoyer"));
       return;
     }
 
@@ -241,7 +244,7 @@ const msgData = {
     const nonLuActuel = convSnap.data()?.nonLu?.[autreId] || 0;
     await updateDoc(convRef, {
       dernierMessage: {
-        texte: legende || (type === "photo" ? "📷 Photo" : "🎥 Vidéo"),
+        texte: legende || (type === "photo" ? t("chat.photoLabel") : t("chat.videoLabel")),
         createdAt: new Date()
       },
       [`nonLu.${autreId}`]: nonLuActuel + 1
@@ -282,7 +285,7 @@ const msgData = {
       setMediaRecorder(recorder);
       setEnregistrement(true);
     } catch {
-      alert("Impossible d'accéder au microphone.");
+      alert(t("chat.micInaccessible"));
     }
   };
 
@@ -321,14 +324,14 @@ const msgData = {
     const diff = createdAt ? now - createdAt : 0;
 
     if (pourTous && diff > 24 * 60 * 60 * 1000) {
-      alert("Tu ne peux supprimer pour tout le monde que dans les 24h.");
+      alert(t("chat.limite24h"));
       return;
     }
 
     if (pourTous) {
-      await updateDoc(ref, { supprimePourTous: true, texte: "Message supprimé" });
+      await updateDoc(ref, { supprimePourTous: true, texte: t("chat.messageSupprime") });
       await updateDoc(doc(db, "conversations", convId), {
-        "dernierMessage.texte": "Message supprimé"
+        "dernierMessage.texte": t("chat.messageSupprime")
       });
     } else {
       await updateDoc(ref, {
@@ -351,8 +354,8 @@ const msgData = {
         });
         await updateDoc(convRef, {
           "dernierMessage.texte": precedent
-            ? precedent.data().texte || "📷 Photo"
-            : "Aucun message"
+            ? precedent.data().texte || t("chat.photoLabel")
+            : t("chat.aucunMessage")
         });
       }
     }
@@ -365,7 +368,8 @@ const msgData = {
 
   const formaterHeure = (timestamp) => {
     if (!timestamp) return "";
-    return timestamp.toDate().toLocaleTimeString("fr-FR", {
+    const locale = i18n.language === "en" ? "en-US" : "fr-FR";
+    return timestamp.toDate().toLocaleTimeString(locale, {
       hour: "2-digit", minute: "2-digit"
     });
   };
@@ -398,7 +402,7 @@ const msgData = {
         >
           <span className="chat-pseudo">{autre?.pseudo}</span>
           <span className={`chat-statut ${autreEnLigne ? "en-ligne" : "hors-ligne"}`}>
-            {autreEnLigne ? "● En ligne" : "● Hors ligne"}
+            {autreEnLigne ? t("chat.enLigne") : t("chat.horsLigne")}
           </span>
         </div>
       </div>
@@ -421,7 +425,7 @@ const msgData = {
                   appuiLongTimer.current = setTimeout(() => {
                     longPress.current = true;
                     const rect = target.getBoundingClientRect();
-                    setMenuMessageVersHaut(window.innerHeight - rect.bottom < 250);
+                    setMenuMessageVersHaut(window.innerHeight - rect.bottom < 180);
                     setMenuMessage(msg.id);
                   }, 500);
                 }}
@@ -434,7 +438,7 @@ const msgData = {
                   appuiLongTimer.current = setTimeout(() => {
                     longPress.current = true;
                     const rect = target.getBoundingClientRect();
-                    setMenuMessageVersHaut(window.innerHeight - rect.bottom < 250);
+                    setMenuMessageVersHaut(window.innerHeight - rect.bottom < 180);
                     setMenuMessage(msg.id);
                   }, 500);
                 }}
@@ -461,7 +465,7 @@ const msgData = {
                       setMenuMessage(menuMessage === msg.id ? null : msg.id);
                     }}
                   >
-                    Message supprimé
+                    {t("chat.messageSupprime")}
                   </span>
                 ) : msg.type === "texte" ? (
                   <span>{msg.texte}</span>
@@ -484,14 +488,14 @@ const msgData = {
                     }}
                     style={{ cursor: "pointer" }}
                   >
-                    <p className="message-pub-label">📸 Publication de {msg.pubAuteur}</p>
+                    <p className="message-pub-label">{t("chat.publicationDe", { pseudo: msg.pubAuteur })}</p>
                     {msg.pubImage && (
                       <img src={msg.pubImage} alt="publication" className="message-photo" />
                     )}
                     {msg.pubDescription && (
                       <p className="message-legende">{msg.pubDescription}</p>
                     )}
-                    <span style={{ color: "#a855f7", fontSize: "12px" }}>Voir sur Zink →</span>
+                    <span style={{ color: "#a855f7", fontSize: "12px" }}>{t("chat.voirSurZink")}</span>
                   </div>
                 ) : msg.type === "vocal" ? (
                   <audio controls src={msg.mediaUrl} className="message-audio" />
@@ -510,24 +514,24 @@ const msgData = {
                 <div className={`message-menu ${menuMessageVersHaut ? "vers-haut" : ""}`} onClick={(e) => e.stopPropagation()}>
                   {msg.supprimePourTous ? (
                     <button onClick={() => supprimerMessage(msg, false)}>
-                      🗑️ Supprimer pour moi
+                      {t("chat.supprimerPourMoi")}
                     </button>
                   ) : estMoi ? (
                     <>
                       <button onClick={() => supprimerMessage(msg, false)}>
-                        🗑️ Supprimer pour moi
+                        {t("chat.supprimerPourMoi")}
                       </button>
                       <button onClick={() => supprimerMessage(msg, true)}>
-                        🗑️ Supprimer pour tous
+                        {t("chat.supprimerPourTous")}
                       </button>
                     </>
                   ) : (
                     <>
                       <button onClick={() => supprimerMessage(msg, false)}>
-                        🗑️ Supprimer pour moi
+                        {t("chat.supprimerPourMoi")}
                       </button>
                       <button onClick={() => signalerMessage(msg)}>
-                        🚩 Signaler
+                        {t("chat.signaler")}
                       </button>
                     </>
                   )}
@@ -590,7 +594,7 @@ const msgData = {
           <input
             className="chat-texte"
             type="text"
-            placeholder="Écris un message..."
+            placeholder={t("chat.ecrisMessage")}
             value={texte}
             onChange={(e) => setTexte(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && envoyerMessage()}
@@ -618,7 +622,7 @@ const msgData = {
                 </>
               )}
               {pauseVocal && (
-                <span className="vocal-pause-txt">En pause</span>
+                <span className="vocal-pause-txt">{t("chat.enPause")}</span>
               )}
             </div>
             <span className="vocal-timer">{formaterDuree(dureeVocal)}</span>
@@ -647,7 +651,7 @@ const msgData = {
       {afficherMedia && (
         <div className="chat-media-panel" onClick={(e) => e.stopPropagation()}>
           <label className="chat-media-btn">
-            📷 Photo
+            {t("chat.photoLabel")}
             <input
               type="file"
               accept="image/*"
@@ -656,7 +660,7 @@ const msgData = {
             />
           </label>
           <label className="chat-media-btn">
-            🎥 Vidéo
+            {t("chat.videoLabel")}
             <input
               type="file"
               accept="video/*"

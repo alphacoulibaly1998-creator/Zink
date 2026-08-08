@@ -221,6 +221,29 @@ const resources = {
         aLinstant: "À l'instant",
         min: "min",
         inconnu: "Inconnu"
+      },
+      chat: {
+        enLigne: "● En ligne",
+        horsLigne: "● Hors ligne",
+        impossibleEnvoyer: "Impossible d'envoyer un message à cet utilisateur.",
+        videoTropLourde: "La vidéo ne doit pas dépasser 45MB.",
+        photoTropLourde: "La photo ne doit pas dépasser 5MB.",
+        erreurEnvoiVideo: "Erreur lors de l'envoi de la vidéo.",
+        erreurEnvoi: "Erreur lors de l'envoi.",
+        micInaccessible: "Impossible d'accéder au microphone.",
+        limite24h: "Tu ne peux supprimer pour tout le monde que dans les 24h.",
+        messageSupprime: "Message supprimé",
+        aucunMessage: "Aucun message",
+        photoLabel: "📷 Photo",
+        videoLabel: "🎥 Vidéo",
+        vocalLabel: "🎤 Vocal",
+        publicationDe: "📸 Publication de {{pseudo}}",
+        voirSurZink: "Voir sur Zink →",
+        supprimerPourMoi: "🗑️ Supprimer pour moi",
+        supprimerPourTous: "🗑️ Supprimer pour tous",
+        signaler: "🚩 Signaler",
+        ecrisMessage: "Écris un message...",
+        enPause: "En pause"
       }
     }
   },
@@ -442,6 +465,29 @@ const resources = {
         aLinstant: "Just now",
         min: "min",
         inconnu: "Unknown"
+      },
+      chat: {
+        enLigne: "● Online",
+        horsLigne: "● Offline",
+        impossibleEnvoyer: "Cannot send a message to this user.",
+        videoTropLourde: "Video must not exceed 45MB.",
+        photoTropLourde: "Photo must not exceed 5MB.",
+        erreurEnvoiVideo: "Error sending video.",
+        erreurEnvoi: "Error sending.",
+        micInaccessible: "Cannot access microphone.",
+        limite24h: "You can only delete for everyone within 24h.",
+        messageSupprime: "Message deleted",
+        aucunMessage: "No message",
+        photoLabel: "📷 Photo",
+        videoLabel: "🎥 Video",
+        vocalLabel: "🎤 Voice message",
+        publicationDe: "📸 Post by {{pseudo}}",
+        voirSurZink: "View on Zink →",
+        supprimerPourMoi: "🗑️ Delete for me",
+        supprimerPourTous: "🗑️ Delete for everyone",
+        signaler: "🚩 Report",
+        ecrisMessage: "Write a message...",
+        enPause: "Paused"
       }
     }
   }
