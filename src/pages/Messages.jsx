@@ -6,8 +6,11 @@ import {
 } from "firebase/firestore";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Chat from "../components/Chat";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 function Messages() {
+  const { t } = useTranslation();
   const [conversations, setConversations] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [menuConv, setMenuConv] = useState(null);
@@ -77,7 +80,7 @@ function Messages() {
           const autreSnap = await getDoc(doc(db, "utilisateurs", autreId));
           data.autre = autreSnap.exists()
             ? autreSnap.data()
-            : { pseudo: "Inconnu", photoURL: "" };
+            : { pseudo: t("messagesPage.inconnu"), photoURL: "" };
           data.autreId = autreId;
           return data;
         })
@@ -105,7 +108,7 @@ function Messages() {
 
   const supprimerConversation = async (convId) => {
     setMenuConv(null);
-    if (window.confirm("Supprimer cette conversation ?")) {
+    if (window.confirm(t("messagesPage.confirmerSupprimerConv"))) {
       await deleteDoc(doc(db, "conversations", convId));
     }
   };
@@ -116,18 +119,18 @@ function Messages() {
     const bloques = userSnap.data()?.bloques || [];
     const estBloque = bloques.includes(conv.autreId);
     if (estBloque) {
-      if (window.confirm(`Débloquer ${conv.autre?.pseudo} ?`)) {
+      if (window.confirm(t("messagesPage.confirmerDebloquer", { pseudo: conv.autre?.pseudo }))) {
         await updateDoc(doc(db, "utilisateurs", user.uid), {
           bloques: bloques.filter((id) => id !== conv.autreId)
         });
-        alert(`${conv.autre?.pseudo} a été débloqué.`);
+        alert(t("messagesPage.debloqueAlert", { pseudo: conv.autre?.pseudo }));
       }
     } else {
-      if (window.confirm(`Bloquer ${conv.autre?.pseudo} ?`)) {
+      if (window.confirm(t("messagesPage.confirmerBloquer", { pseudo: conv.autre?.pseudo }))) {
         await updateDoc(doc(db, "utilisateurs", user.uid), {
           bloques: [...bloques, conv.autreId]
         });
-        alert(`${conv.autre?.pseudo} a été bloqué.`);
+        alert(t("messagesPage.bloqueAlert", { pseudo: conv.autre?.pseudo }));
       }
     }
   };
@@ -137,10 +140,11 @@ function Messages() {
     const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
     const now = new Date();
     const diff = now - date;
-    if (diff < 60000) return "À l'instant";
-    if (diff < 3600000) return `${Math.floor(diff / 60000)} min`;
+    if (diff < 60000) return t("messagesPage.aLinstant");
+    if (diff < 3600000) return `${Math.floor(diff / 60000)} ${t("messagesPage.min")}`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h`;
-    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+    const locale = i18n.language === "en" ? "en-US" : "fr-FR";
+    return date.toLocaleDateString(locale, { day: "numeric", month: "short" });
   };
 
 
@@ -158,14 +162,14 @@ function Messages() {
 
   return (
     <div className="messages-container" onClick={() => setMenuConv(null)}>
-      <h1 className="accueil-titre">💬 Messages</h1>
+      <h1 className="accueil-titre">{t("messagesPage.titre")}</h1>
 
       {chargement ? (
-        <div className="chargement">Chargement...</div>
+        <div className="chargement">{t("messagesPage.chargement")}</div>
       ) : conversations.length === 0 ? (
         <div className="feed-vide">
-          <p>Aucune conversation pour l'instant.</p>
-          <p>Va dans Découvrir pour trouver des amis ! 😊</p>
+          <p>{t("messagesPage.aucuneConversation")}</p>
+          <p>{t("messagesPage.vaDansDecouvrir")}</p>
         </div>
       ) : (
         <div className="conv-liste">
@@ -190,7 +194,7 @@ function Messages() {
                 <div className="conv-infos">
                   <span className="conv-pseudo">{conv.autre?.pseudo}</span>
                   <span className="conv-dernier">
-                    {conv.dernierMessage?.texte || "Nouvelle conversation"}
+                    {conv.dernierMessage?.texte || t("messagesPage.nouvelleConversation")}
                   </span>
                 </div>
                 <div className="conv-meta">
@@ -226,13 +230,13 @@ function Messages() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <button onClick={() => supprimerConversation(conv.id)}>
-                      🗑️ Supprimer
+                      {t("messagesPage.supprimer")}
                     </button>
                     <button
                       className="menu-suppr"
                       onClick={() => bloquerUtilisateur(conv)}
                     >
-                      🚫 Bloquer / Débloquer
+                      {t("messagesPage.bloquerDebloquer")}
                     </button>
                   </div>
                 )}

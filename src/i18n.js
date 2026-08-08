@@ -204,6 +204,23 @@ const resources = {
         envoyee: "⏳ Envoyée",
         accepter: "👥 Accepter",
         ajouter: "👥 Ajouter"
+      },
+      messagesPage: {
+        titre: "💬 Messages",
+        chargement: "Chargement...",
+        aucuneConversation: "Aucune conversation pour l'instant.",
+        vaDansDecouvrir: "Va dans Découvrir pour trouver des amis ! 😊",
+        nouvelleConversation: "Nouvelle conversation",
+        supprimer: "🗑️ Supprimer",
+        bloquerDebloquer: "🚫 Bloquer / Débloquer",
+        confirmerSupprimerConv: "Supprimer cette conversation ?",
+        confirmerDebloquer: "Débloquer {{pseudo}} ?",
+        debloqueAlert: "{{pseudo}} a été débloqué.",
+        confirmerBloquer: "Bloquer {{pseudo}} ?",
+        bloqueAlert: "{{pseudo}} a été bloqué.",
+        aLinstant: "À l'instant",
+        min: "min",
+        inconnu: "Inconnu"
       }
     }
   },
@@ -408,6 +425,23 @@ const resources = {
         envoyee: "⏳ Sent",
         accepter: "👥 Accept",
         ajouter: "👥 Add"
+      },
+      messagesPage: {
+        titre: "💬 Messages",
+        chargement: "Loading...",
+        aucuneConversation: "No conversations yet.",
+        vaDansDecouvrir: "Go to Discover to find friends! 😊",
+        nouvelleConversation: "New conversation",
+        supprimer: "🗑️ Delete",
+        bloquerDebloquer: "🚫 Block / Unblock",
+        confirmerSupprimerConv: "Delete this conversation?",
+        confirmerDebloquer: "Unblock {{pseudo}}?",
+        debloqueAlert: "{{pseudo}} has been unblocked.",
+        confirmerBloquer: "Block {{pseudo}}?",
+        bloqueAlert: "{{pseudo}} has been blocked.",
+        aLinstant: "Just now",
+        min: "min",
+        inconnu: "Unknown"
       }
     }
   }
