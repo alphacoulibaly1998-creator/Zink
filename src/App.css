@@ -1420,6 +1420,19 @@ body {
   .profil-container {
     padding-bottom: 10px;
   }
+
+  .bn-grille {
+    gap: 1px;
+  }
+
+  .bn-case {
+    font-size: 9px;
+  }
+
+  .jeu-mode-titre {
+    margin-top: 4px;
+    margin-bottom: 2px;
+  }
 }
 
 
@@ -2113,6 +2126,7 @@ body {
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  padding: 0;
 }
 
 .bn-case.touche { background: #ff6b6b; }
