@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
 import { enregistrerPartie } from "../../jeuxStats";
 import { auth } from "../../firebase";
+import { useTranslation } from "react-i18next";
 
 const COLS = 7;
 const ROWS = 6;
@@ -119,6 +120,7 @@ const meilleurCoupIA = (grille, difficulte, joueurIA) => {
 };
 
 function Puissance4({ onRetour }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState(null);
   const [difficulte, setDifficulte] = useState(null);
   const [grille, setGrille] = useState(creerGrille());
@@ -181,17 +183,17 @@ function Puissance4({ onRetour }) {
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={onRetour}>←</button>
-          <h2 className="jeu-titre">🔴 Puissance 4</h2>
+          <h2 className="jeu-titre">{t("puissance4.titre")}</h2>
         </div>
         <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis un mode de jeu</p>
-          <button className="jeu-mode-btn" onClick={() => { setMode("local"); reinitialiser(); }}>
-            👥 2 Joueurs
-            <span>Jouez à deux sur le même appareil</span>
+          <p className="jeu-mode-titre">{t("puissance4.choisirMode")}</p>
+          <button className="jeu-mode-btn" onClick={() => { setMode("local"); reinitialiser(); setScores({ 1: 0, 2: 0 }); }}>
+            {t("puissance4.deuxJoueurs")}
+            <span>{t("puissance4.deuxJoueursDesc")}</span>
           </button>
           <button className="jeu-mode-btn" onClick={() => setMode("ia")}>
-            🤖 Contre l'IA
-            <span>Joue contre l'ordinateur</span>
+            {t("puissance4.contreIA")}
+            <span>{t("puissance4.contreIADesc")}</span>
           </button>
         </div>
       </div>
@@ -203,13 +205,13 @@ function Puissance4({ onRetour }) {
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={() => setMode(null)}>←</button>
-          <h2 className="jeu-titre">🔴 Puissance 4</h2>
+          <h2 className="jeu-titre">{t("puissance4.titre")}</h2>
         </div>
         <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis la difficulté</p>
-          <button className="jeu-mode-btn facile" onClick={() => { reinitialiser(); setDifficulte("facile"); }}>😊 Facile</button>
-          <button className="jeu-mode-btn normal" onClick={() => { reinitialiser(); setDifficulte("normal"); }}>😐 Normal</button>
-          <button className="jeu-mode-btn expert" onClick={() => { reinitialiser(); setDifficulte("expert"); }}>😈 Expert</button>
+          <p className="jeu-mode-titre">{t("puissance4.choisirDifficulte")}</p>
+          <button className="jeu-mode-btn facile" onClick={() => { reinitialiser(); setScores({ 1: 0, 2: 0 }); setDifficulte("facile"); }}>{t("puissance4.facile")}</button>
+          <button className="jeu-mode-btn normal" onClick={() => { reinitialiser(); setScores({ 1: 0, 2: 0 }); setDifficulte("normal"); }}>{t("puissance4.normal")}</button>
+          <button className="jeu-mode-btn expert" onClick={() => { reinitialiser(); setScores({ 1: 0, 2: 0 }); setDifficulte("expert"); }}>{t("puissance4.expert")}</button>
         </div>
       </div>
     );
@@ -218,41 +220,41 @@ function Puissance4({ onRetour }) {
   return (
     <div className="jeu-container">
       <div className="jeu-header">
-        <button className="chat-retour" onClick={() => { setDifficulte(null); reinitialiser(); }}>←</button>
-        <h2 className="jeu-titre">🔴 Puissance 4</h2>
+        <button className="chat-retour" onClick={() => { mode === "local" ? setMode(null) : setDifficulte(null); reinitialiser(); }}>←</button>
+        <h2 className="jeu-titre">{t("puissance4.titre")}</h2>
         <button className="jeu-btn-regles" onClick={() => setAfficherRegles(!afficherRegles)}>❓</button>
       </div>
 
       {afficherRegles && (
         <div className="jeu-regles">
-          <p><strong>🎯 Objectif :</strong> Aligne 4 jetons de ta couleur horizontalement, verticalement ou en diagonale.</p>
-          <p><strong>👥 Joueurs :</strong> 🔴 Joueur 1 vs 🟡 Joueur 2, à tour de rôle.</p>
-          <p><strong>▶️ Comment jouer :</strong> Clique sur une colonne pour y faire tomber ton jeton.</p>
-          {mode === "ia" && <p><strong>🤖 Difficulté :</strong> {difficulte}</p>}
-          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>Compris !</button>
+          <p><strong>{t("puissance4.objectifTitre")}</strong> {t("puissance4.objectifTexte")}</p>
+          <p><strong>{t("puissance4.joueursTitre")}</strong> {t("puissance4.joueursTexte")}</p>
+          <p><strong>{t("puissance4.commentJouerTitre")}</strong> {t("puissance4.commentJouerTexte")}</p>
+          {mode === "ia" && <p><strong>{t("puissance4.difficulteTitre")}</strong> {t(`puissance4.${difficulte}`)}</p>}
+          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>{t("puissance4.compris")}</button>
         </div>
       )}
 
       <div className="jeu-scores">
         <div className={`score-card ${joueur === 1 && !winner ? "actif" : ""}`}>
-          <span className="score-joueur">{mode === "ia" ? "👤 Toi" : "🔴 J1"}</span>
+          <span className="score-joueur">{mode === "ia" ? t("puissance4.toi") : t("puissance4.j1")}</span>
           <span className="score-pts">{scores[1]}</span>
         </div>
         <div className="score-vs">VS</div>
         <div className={`score-card ${joueur === 2 && !winner ? "actif" : ""}`}>
-          <span className="score-joueur">{mode === "ia" ? `🤖 IA (${difficulte})` : "🟡 J2"}</span>
+          <span className="score-joueur">{mode === "ia" ? t("puissance4.iaAvecDifficulte", { difficulte: t(`puissance4.${difficulte}`) }) : t("puissance4.j2")}</span>
           <span className="score-pts">{scores[2]}</span>
         </div>
       </div>
 
       <div className="p4-statut">
-        {winner === 0 ? "Match nul !"
+        {winner === 0 ? t("puissance4.matchNul")
           : winner ? mode === "ia"
-            ? winner === 1 ? "🏆 Tu as gagné !" : "🤖 L'IA a gagné !"
-            : `🏆 Joueur ${winner} gagne !`
-          : iaReflechit ? "🤖 L'IA réfléchit..."
-          : mode === "ia" ? "👤 Ton tour"
-          : `Tour du joueur ${joueur === 1 ? "🔴" : "🟡"}`}
+            ? winner === 1 ? t("puissance4.tuGagnes") : t("puissance4.iaGagne")
+            : t("puissance4.joueurGagne", { joueur: winner })
+          : iaReflechit ? t("puissance4.iaReflechit")
+          : mode === "ia" ? t("puissance4.tonTour")
+          : t("puissance4.tourDuJoueur", { couleur: joueur === 1 ? "🔴" : "🟡" })}
       </div>
 
       <div className="p4-grille">
@@ -268,7 +270,7 @@ function Puissance4({ onRetour }) {
       </div>
 
       {(winner !== null) && (
-        <button className="auth-btn" onClick={reinitialiser}>🔄 Rejouer</button>
+        <button className="auth-btn" onClick={reinitialiser}>{t("puissance4.rejouer")}</button>
       )}
 
       <ChatJeu jeuId="puissance4" partieId={partieId.current} modeIA={mode === "ia"} />

@@ -4,6 +4,8 @@ import { enregistrerPartie } from "../../jeuxStats";
 import { auth } from "../../firebase";
 import { addDoc, collection, serverTimestamp, getDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 const gagnant = (cases) => {
   const lignes = [
@@ -59,20 +61,22 @@ const meilleurCoup = (cases, joueur) => {
   return index;
 };
 
-const MESSAGES_IA = {
-  debut: ["C'est parti ! 🎮", "Je suis prêt ! 🤖", "À toi de jouer ! 😏"],
-  coup: ["Hmm... 🤔", "Intéressant... 😏", "Bien joué, mais... 🤖", "Je vois ton plan ! 😈"],
-  gagne: ["J'ai gagné ! 🤖😂", "Trop facile ! 😈", "Essaie encore ! 🏆", "L'IA domine ! 🤖"],
-  perdu: ["Bravo ! Tu m'as battu ! 😱", "Incroyable ! 🎉", "Tu es fort(e) ! 👏"],
-  nul: ["Match nul ! On se retrouve ! 🤝", "Égalité ! 😌"],
+const CLES_MESSAGES_IA = {
+  debut: ["ticTacToe.msgDebut1", "ticTacToe.msgDebut2", "ticTacToe.msgDebut3"],
+  coup: ["ticTacToe.msgCoup1", "ticTacToe.msgCoup2", "ticTacToe.msgCoup3", "ticTacToe.msgCoup4"],
+  gagne: ["ticTacToe.msgGagne1", "ticTacToe.msgGagne2", "ticTacToe.msgGagne3", "ticTacToe.msgGagne4"],
+  perdu: ["ticTacToe.msgPerdu1", "ticTacToe.msgPerdu2", "ticTacToe.msgPerdu3"],
+  nul: ["ticTacToe.msgNul1", "ticTacToe.msgNul2"],
 };
 
 const messageAleatoire = (type) => {
-  const msgs = MESSAGES_IA[type];
-  return msgs[Math.floor(Math.random() * msgs.length)];
+  const cles = CLES_MESSAGES_IA[type];
+  const cle = cles[Math.floor(Math.random() * cles.length)];
+  return i18n.t(cle);
 };
 
 function TicTacToe({ onRetour }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState(null);
   const [difficulte, setDifficulte] = useState(null);
   const [cases, setCases] = useState(Array(9).fill(null));
@@ -163,17 +167,17 @@ function TicTacToe({ onRetour }) {
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={onRetour}>←</button>
-          <h2 className="jeu-titre">⭕ Tic Tac Toe</h2>
+          <h2 className="jeu-titre">{t("ticTacToe.titre")}</h2>
         </div>
         <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis un mode de jeu</p>
-          <button className="jeu-mode-btn" onClick={() => { setMode("local"); setDifficulte(null); }}>
-            👥 2 Joueurs
-            <span>Jouez à deux sur le même appareil</span>
+          <p className="jeu-mode-titre">{t("ticTacToe.choisirMode")}</p>
+          <button className="jeu-mode-btn" onClick={() => { setCases(Array(9).fill(null)); setJoueur("X"); setScores({ X: 0, O: 0 }); partieId.current = Date.now().toString(); setMode("local"); setDifficulte(null); }}>
+            {t("ticTacToe.deuxJoueurs")}
+            <span>{t("ticTacToe.deuxJoueursDesc")}</span>
           </button>
           <button className="jeu-mode-btn" onClick={() => setMode("ia")}>
-            🤖 Contre l'IA
-            <span>Joue contre l'ordinateur</span>
+            {t("ticTacToe.contreIA")}
+            <span>{t("ticTacToe.contreIADesc")}</span>
           </button>
         </div>
       </div>
@@ -185,18 +189,18 @@ function TicTacToe({ onRetour }) {
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={() => setMode(null)}>←</button>
-          <h2 className="jeu-titre">⭕ Tic Tac Toe</h2>
+          <h2 className="jeu-titre">{t("ticTacToe.titre")}</h2>
         </div>
         <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis la difficulté</p>
-         <button className="jeu-mode-btn facile" onClick={() => { setCases(Array(9).fill(null)); setJoueur("X"); partieId.current = Date.now().toString(); setDifficulte("facile"); envoyerMessageIA("debut"); }}>
-            😊 Facile
+          <p className="jeu-mode-titre">{t("ticTacToe.choisirDifficulte")}</p>
+         <button className="jeu-mode-btn facile" onClick={() => { setCases(Array(9).fill(null)); setJoueur("X"); setScores({ X: 0, O: 0 }); partieId.current = Date.now().toString(); setDifficulte("facile"); envoyerMessageIA("debut"); }}>
+            {t("ticTacToe.facile")}
           </button>
-          <button className="jeu-mode-btn normal" onClick={() => { setCases(Array(9).fill(null)); setJoueur("X"); partieId.current = Date.now().toString(); setDifficulte("normal"); envoyerMessageIA("debut"); }}>
-            😐 Normal
+          <button className="jeu-mode-btn normal" onClick={() => { setCases(Array(9).fill(null)); setJoueur("X"); setScores({ X: 0, O: 0 }); partieId.current = Date.now().toString(); setDifficulte("normal"); envoyerMessageIA("debut"); }}>
+            {t("ticTacToe.normal")}
           </button>
-          <button className="jeu-mode-btn expert" onClick={() => { setCases(Array(9).fill(null)); setJoueur("X"); partieId.current = Date.now().toString(); setDifficulte("expert"); envoyerMessageIA("debut"); }}>
-            😈 Expert
+          <button className="jeu-mode-btn expert" onClick={() => { setCases(Array(9).fill(null)); setJoueur("X"); setScores({ X: 0, O: 0 }); partieId.current = Date.now().toString(); setDifficulte("expert"); envoyerMessageIA("debut"); }}>
+            {t("ticTacToe.expert")}
           </button>
         </div>
       </div>
@@ -206,29 +210,29 @@ function TicTacToe({ onRetour }) {
   return (
     <div className="jeu-container">
       <div className="jeu-header">
-        <button className="chat-retour" onClick={() => setDifficulte(null)}>←</button>
-        <h2 className="jeu-titre">⭕ Tic Tac Toe</h2>
+        <button className="chat-retour" onClick={() => mode === "local" ? setMode(null) : setDifficulte(null)}>←</button>
+        <h2 className="jeu-titre">{t("ticTacToe.titre")}</h2>
         <button className="jeu-btn-regles" onClick={() => setAfficherRegles(!afficherRegles)}>❓</button>
       </div>
 
       {afficherRegles && (
         <div className="jeu-regles">
-          <p><strong>🎯 Objectif :</strong> Aligne 3 symboles en ligne, colonne ou diagonale.</p>
-          <p><strong>👤 Tu joues :</strong> {mode === "ia" ? "X (tu commences)" : "X et O à tour de rôle"}</p>
-          <p><strong>▶️ Comment jouer :</strong> Clique sur une case vide.</p>
-          {mode === "ia" && <p><strong>🤖 Difficulté :</strong> {difficulte}</p>}
-          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>Compris !</button>
+          <p><strong>{t("ticTacToe.objectifTitre")}</strong> {t("ticTacToe.objectifTexte")}</p>
+          <p><strong>{t("ticTacToe.tuJouesTitre")}</strong> {mode === "ia" ? t("ticTacToe.tuJouesIA") : t("ticTacToe.tuJouesLocal")}</p>
+          <p><strong>{t("ticTacToe.commentJouerTitre")}</strong> {t("ticTacToe.commentJouerTexte")}</p>
+          {mode === "ia" && <p><strong>{t("ticTacToe.difficulteTitre")}</strong> {t(`ticTacToe.${difficulte}`)}</p>}
+          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>{t("ticTacToe.compris")}</button>
         </div>
       )}
 
       <div className="jeu-scores">
         <div className={`score-card ${joueur === "X" && !winner ? "actif" : ""}`}>
-          <span className="score-joueur">{mode === "ia" ? "👤 Toi" : "Joueur X"}</span>
+          <span className="score-joueur">{mode === "ia" ? t("ticTacToe.toi") : t("ticTacToe.joueurX")}</span>
           <span className="score-pts">{scores.X}</span>
         </div>
         <div className="score-vs">VS</div>
         <div className={`score-card ${joueur === "O" && !winner ? "actif" : ""}`}>
-          <span className="score-joueur">{mode === "ia" ? `🤖 IA (${difficulte})` : "Joueur O"}</span>
+          <span className="score-joueur">{mode === "ia" ? t("ticTacToe.iaAvecDifficulte", { difficulte: t(`ticTacToe.${difficulte}`) }) : t("ticTacToe.joueurO")}</span>
           <span className="score-pts">{scores.O}</span>
         </div>
       </div>
@@ -236,12 +240,12 @@ function TicTacToe({ onRetour }) {
       <div className="ttt-statut">
         {winner
           ? mode === "ia"
-            ? winner === "X" ? "🏆 Tu as gagné !" : "🤖 L'IA a gagné !"
-            : `🏆 Joueur ${winner} gagne !`
-          : plein ? "Match nul !"
-          : iaReflechit ? "🤖 L'IA réfléchit..."
-          : mode === "ia" ? "👤 Ton tour"
-          : `Tour du joueur ${joueur}`}
+            ? winner === "X" ? t("ticTacToe.tuGagnes") : t("ticTacToe.iaGagne")
+            : t("ticTacToe.joueurGagne", { joueur: winner })
+          : plein ? t("ticTacToe.matchNul")
+          : iaReflechit ? t("ticTacToe.iaReflechit")
+          : mode === "ia" ? t("ticTacToe.tonTour")
+          : t("ticTacToe.tourDuJoueur", { joueur })}
       </div>
 
       <div className="ttt-grille">
@@ -258,7 +262,7 @@ function TicTacToe({ onRetour }) {
       </div>
 
       {(winner || plein) && (
-        <button className="auth-btn" onClick={rejouer}>🔄 Rejouer</button>
+        <button className="auth-btn" onClick={rejouer}>{t("ticTacToe.rejouer")}</button>
       )}
 
       <ChatJeu jeuId="tictactoe" partieId={partieId.current} modeIA={mode === "ia"} />

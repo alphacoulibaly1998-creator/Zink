@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
 import { enregistrerPartie } from "../../jeuxStats";
 import { auth } from "../../firebase";
+import { useTranslation } from "react-i18next";
 
 const TAILLE = 10;
 const BATEAUX = [5, 4, 3, 3, 2];
@@ -76,10 +77,11 @@ const coupIAIntelligent = (tirs, grille) => {
 };
 
 function BatailleNavale({ onRetour }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState(null);
   const [difficulte, setDifficulte] = useState(null);
-  const [grilleJ1] = useState(placerBateauxAuto());
-  const [grilleJ2] = useState(placerBateauxAuto());
+  const [grilleJ1, setGrilleJ1] = useState(placerBateauxAuto());
+  const [grilleJ2, setGrilleJ2] = useState(placerBateauxAuto());
   const [tirsJ1, setTirsJ1] = useState(creerGrille());
   const [tirsJ2, setTirsJ2] = useState(creerGrille());
   const [joueur, setJoueur] = useState(1);
@@ -87,6 +89,16 @@ function BatailleNavale({ onRetour }) {
   const [afficherRegles, setAfficherRegles] = useState(false);
   const [iaReflechit, setIaReflechit] = useState(false);
   const partieId = useRef(Date.now().toString());
+
+  const reinitialiser = () => {
+    setGrilleJ1(placerBateauxAuto());
+    setGrilleJ2(placerBateauxAuto());
+    setTirsJ1(creerGrille());
+    setTirsJ2(creerGrille());
+    setJoueur(1);
+    setWinner(null);
+    partieId.current = Date.now().toString();
+  };
 
   const tirer = (r, c) => {
     if (winner || iaReflechit) return;
@@ -153,39 +165,17 @@ function BatailleNavale({ onRetour }) {
   const grilleAffichee = mode === "ia" ? tirsJ1 : joueur === 1 ? tirsJ1 : tirsJ2;
   const grilleEnnemie = mode === "ia" ? grilleJ2 : joueur === 1 ? grilleJ2 : grilleJ1;
 
-  if (!mode) {
+  if (!difficulte) {
     return (
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={onRetour}>←</button>
-          <h2 className="jeu-titre">🚢 Bataille Navale</h2>
+          <h2 className="jeu-titre">{t("batailleNavale.titre")}</h2>
         </div>
         <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis un mode de jeu</p>
-          <button className="jeu-mode-btn" onClick={() => setMode("local")}>
-            👥 2 Joueurs
-            <span>Jouez à deux sur le même appareil</span>
-          </button>
-          <button className="jeu-mode-btn" onClick={() => setMode("ia")}>
-            🤖 Contre l'IA
-            <span>Joue contre l'ordinateur</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (mode === "ia" && !difficulte) {
-    return (
-      <div className="jeu-container">
-        <div className="jeu-header">
-          <button className="chat-retour" onClick={() => setMode(null)}>←</button>
-          <h2 className="jeu-titre">🚢 Bataille Navale</h2>
-        </div>
-        <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis la difficulté</p>
-          <button className="jeu-mode-btn facile" onClick={() => setDifficulte("facile")}>😊 Facile</button>
-          <button className="jeu-mode-btn expert" onClick={() => setDifficulte("expert")}>😈 Expert</button>
+          <p className="jeu-mode-titre">{t("batailleNavale.choisirDifficulte")}</p>
+          <button className="jeu-mode-btn facile" onClick={() => { setMode("ia"); reinitialiser(); setDifficulte("facile"); }}>{t("batailleNavale.facile")}</button>
+          <button className="jeu-mode-btn expert" onClick={() => { setMode("ia"); reinitialiser(); setDifficulte("expert"); }}>{t("batailleNavale.expert")}</button>
         </div>
       </div>
     );
@@ -194,36 +184,52 @@ function BatailleNavale({ onRetour }) {
   return (
     <div className="jeu-container">
       <div className="jeu-header">
-        <button className="chat-retour" onClick={() => { setDifficulte(null); }}>←</button>
-        <h2 className="jeu-titre">🚢 Bataille Navale</h2>
+        <button className="chat-retour" onClick={() => { setDifficulte(null); reinitialiser(); }}>←</button>
+        <h2 className="jeu-titre">{t("batailleNavale.titre")}</h2>
         <button className="jeu-btn-regles" onClick={() => setAfficherRegles(!afficherRegles)}>❓</button>
       </div>
 
       {afficherRegles && (
         <div className="jeu-regles">
-          <p><strong>🎯 Objectif :</strong> Coule tous les bateaux ennemis.</p>
-          <p><strong>▶️ Comment jouer :</strong> Clique sur une case pour tirer. 💥 = touché, 💧 = raté.</p>
-          <p><strong>🚢 Bateaux :</strong> 5 bateaux de tailles 5, 4, 3, 3 et 2.</p>
-          {mode === "ia" && <p><strong>🤖 Difficulté :</strong> {difficulte}</p>}
-          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>Compris !</button>
+          <p><strong>{t("batailleNavale.objectifTitre")}</strong> {t("batailleNavale.objectifTexte")}</p>
+          <p><strong>{t("batailleNavale.commentJouerTitre")}</strong> {t("batailleNavale.commentJouerTexte")}</p>
+          <p><strong>{t("batailleNavale.bateauxTitre")}</strong> {t("batailleNavale.bateauxTexte")}</p>
+          <p><strong>{t("batailleNavale.difficulteTitre")}</strong> {t(`batailleNavale.${difficulte}`)}</p>
+          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>{t("batailleNavale.compris")}</button>
         </div>
       )}
 
       <div className="bn-statut">
         {winner
-          ? mode === "ia"
-            ? winner === 1 ? "🏆 Tu as gagné !" : "🤖 L'IA a gagné !"
-            : `🏆 Joueur ${winner} gagne !`
-          : iaReflechit ? "🤖 L'IA réfléchit..."
-          : mode === "ia" ? "👤 Ton tour — Tire sur la grille !"
-          : `Tour du Joueur ${joueur} — Tire !`}
+          ? winner === 1 ? t("batailleNavale.tuGagnes") : t("batailleNavale.iaGagne")
+          : iaReflechit ? t("batailleNavale.iaReflechit")
+          : t("batailleNavale.tonTour")}
       </div>
 
+      <p className="jeu-mode-titre">{t("batailleNavale.taFlotte")}</p>
+      <div className="bn-grille bn-grille-defense">
+        {grilleJ1.map((row, r) =>
+          row.map((cell, c) => {
+            const tir = tirsJ2[r][c];
+            return (
+              <button
+                key={`def-${r}-${c}`}
+                className={`bn-case ${tir === "touche" ? "touche" : tir === "rate" ? "rate" : ""}`}
+                disabled
+              >
+                {tir === "touche" ? "💥" : tir === "rate" ? "💧" : cell === "bateau" ? "🚢" : ""}
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      <p className="jeu-mode-titre">{t("batailleNavale.zoneEnnemie")}</p>
       <div className="bn-grille">
         {grilleAffichee.map((row, r) =>
           row.map((cell, c) => (
             <button
-              key={`${r}-${c}`}
+              key={`att-${r}-${c}`}
               className={`bn-case ${cell === "touche" ? "touche" : cell === "rate" ? "rate" : ""}`}
               onClick={() => tirer(r, c)}
               disabled={iaReflechit}
@@ -235,8 +241,8 @@ function BatailleNavale({ onRetour }) {
       </div>
 
       {winner && (
-        <button className="auth-btn" onClick={() => window.location.reload()}>
-          🔄 Rejouer
+        <button className="auth-btn" onClick={reinitialiser}>
+          {t("batailleNavale.rejouer")}
         </button>
       )}
 

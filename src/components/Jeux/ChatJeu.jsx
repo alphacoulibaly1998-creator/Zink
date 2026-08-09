@@ -4,23 +4,27 @@ import {
   collection, addDoc, serverTimestamp,
   onSnapshot, query, orderBy, getDoc, doc
 } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
-const MESSAGES_IA_REACTION = [
-  "Hmm intéressant... 🤔",
-  "Tu crois vraiment que ça va marcher ? 😏",
-  "Bien joué, mais j'ai vu mieux ! 😈",
-  "Ah oui ? On verra ça ! 🤖",
-  "Tu me fais peur... pas ! 😂",
-  "Continue comme ça... 😏",
-  "J'adore quand tu essaies ! 🤖",
-  "Sérieusement ? 😄",
+const CLES_MESSAGES_IA_REACTION = [
+  "chatJeu.msgReaction1",
+  "chatJeu.msgReaction2",
+  "chatJeu.msgReaction3",
+  "chatJeu.msgReaction4",
+  "chatJeu.msgReaction5",
+  "chatJeu.msgReaction6",
+  "chatJeu.msgReaction7",
+  "chatJeu.msgReaction8",
 ];
 
 const messageIAAleatoire = () => {
-  return MESSAGES_IA_REACTION[Math.floor(Math.random() * MESSAGES_IA_REACTION.length)];
+  const cle = CLES_MESSAGES_IA_REACTION[Math.floor(Math.random() * CLES_MESSAGES_IA_REACTION.length)];
+  return i18n.t(cle);
 };
 
 function ChatJeu({ jeuId, partieId, modeIA }) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [texte, setTexte] = useState("");
   const [ouvert, setOuvert] = useState(false);
@@ -60,7 +64,7 @@ function ChatJeu({ jeuId, partieId, modeIA }) {
   const envoyer = async () => {
     if (!texte.trim()) return;
     const snap = await getDoc(doc(db, "utilisateurs", user.uid));
-    const pseudo = snap.exists() ? snap.data().pseudo : "Joueur";
+    const pseudo = snap.exists() ? snap.data().pseudo : t("chatJeu.joueur");
     const messageTexte = texte.trim();
     await addDoc(collection(db, "chatsJeux", chatId, "messages"), {
       userId: user.uid,
@@ -78,7 +82,7 @@ function ChatJeu({ jeuId, partieId, modeIA }) {
         className="chat-jeu-toggle"
         onClick={() => setOuvert(!ouvert)}
       >
-        💬 {ouvert ? "Fermer le chat" : "Ouvrir le chat"}
+        💬 {ouvert ? t("chatJeu.fermerChat") : t("chatJeu.ouvrirChat")}
       </button>
 
       {ouvert && (
@@ -86,7 +90,7 @@ function ChatJeu({ jeuId, partieId, modeIA }) {
           <div className="chat-jeu-messages">
             {messages.length === 0 && (
               <p style={{ color: "#888", fontSize: "13px", textAlign: "center" }}>
-                {modeIA ? "Provoque l'IA ! 😈" : "Aucun message pour cette partie"}
+                {modeIA ? t("chatJeu.provoqueIA") : t("chatJeu.aucunMessage")}
               </p>
             )}
             {messages.map((m) => (
@@ -109,7 +113,7 @@ function ChatJeu({ jeuId, partieId, modeIA }) {
           <div className="chat-jeu-input">
             <input
               type="text"
-              placeholder={modeIA ? "Provoque l'IA... 😈" : "Écris un message..."}
+              placeholder={modeIA ? t("chatJeu.provoqueIAPlaceholder") : t("chatJeu.ecrisMessage")}
               value={texte}
               onChange={(e) => setTexte(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && envoyer()}
