@@ -2,13 +2,13 @@ import { db } from "./firebase";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
 
 export const BADGES_INFO = {
-  premiere_victoire: { nom: "Premier gagnant", icon: "🥇", description: "Remporte ta première partie" },
-  serie_3: { nom: "Série de 3", icon: "🔥", description: "Gagne 3 parties d'affilée" },
-  serie_6: { nom: "Série de 6", icon: "🔥🔥", description: "Gagne 6 parties d'affilée" },
-  serie_10: { nom: "Série de 10", icon: "🔥🔥🔥", description: "Gagne 10 parties d'affilée" },
-  joueur_assidu: { nom: "Joueur assidu", icon: "🎮", description: "Joue 10 parties" },
-  champion: { nom: "Champion", icon: "👑", description: "Atteins 50 points" },
-  maitre_jeu: { nom: "Maître du jeu", icon: "🏆", description: "Gagne 5 fois au même jeu" },
+  premiere_victoire: { nomKey: "badges.premiereVictoireNom", icon: "🥇", descKey: "badges.premiereVictoireDesc" },
+  serie_3: { nomKey: "badges.serie3Nom", icon: "🔥", descKey: "badges.serie3Desc" },
+  serie_6: { nomKey: "badges.serie6Nom", icon: "🔥🔥", descKey: "badges.serie6Desc" },
+  serie_10: { nomKey: "badges.serie10Nom", icon: "🔥🔥🔥", descKey: "badges.serie10Desc" },
+  joueur_assidu: { nomKey: "badges.joueurAssiduNom", icon: "🎮", descKey: "badges.joueurAssiduDesc" },
+  champion: { nomKey: "badges.championNom", icon: "👑", descKey: "badges.championDesc" },
+  maitre_jeu: { nomKey: "badges.maitreJeuNom", icon: "🏆", descKey: "badges.maitreJeuDesc" },
 };
 
 export const enregistrerPartie = async (userId, jeuId, aGagne) => {

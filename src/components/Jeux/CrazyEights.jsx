@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
 import { enregistrerPartie } from "../../jeuxStats";
 import { auth } from "../../firebase";
+import { useTranslation } from "react-i18next";
 
 const COULEURS = ["♠", "♥", "♦", "♣"];
 const VALEURS = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
@@ -34,6 +35,7 @@ const choisirCoupIA = (main, dessus, difficulte) => {
 };
 
 function CrazyEights({ onRetour }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState(null);
   const [difficulte, setDifficulte] = useState(null);
   const [jeu, setJeu] = useState(creerJeu());
@@ -103,7 +105,7 @@ function CrazyEights({ onRetour }) {
     const carte = main[index];
     const dessus = pile[pile.length - 1];
     if (!carteCompatible(carte, dessus)) {
-      alert("Cette carte n'est pas compatible !");
+      alert(t("crazyEights.carteIncompatible"));
       return;
     }
     main.splice(index, 1);
@@ -156,39 +158,17 @@ function CrazyEights({ onRetour }) {
     return c.couleur === "♥" || c.couleur === "♦" ? "rouge" : "noir";
   };
 
-  if (!mode) {
+  if (!difficulte) {
     return (
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={onRetour}>←</button>
-          <h2 className="jeu-titre">🃏 Crazy Eights</h2>
+          <h2 className="jeu-titre">{t("crazyEights.titre")}</h2>
         </div>
         <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis un mode de jeu</p>
-          <button className="jeu-mode-btn" onClick={() => setMode("local")}>
-            👥 2 Joueurs
-            <span>Jouez à deux sur le même appareil</span>
-          </button>
-          <button className="jeu-mode-btn" onClick={() => setMode("ia")}>
-            🤖 Contre l'IA
-            <span>Joue contre l'ordinateur</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (mode === "ia" && !difficulte) {
-    return (
-      <div className="jeu-container">
-        <div className="jeu-header">
-          <button className="chat-retour" onClick={() => setMode(null)}>←</button>
-          <h2 className="jeu-titre">🃏 Crazy Eights</h2>
-        </div>
-        <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis la difficulté</p>
-          <button className="jeu-mode-btn facile" onClick={() => setDifficulte("facile")}>😊 Facile</button>
-          <button className="jeu-mode-btn expert" onClick={() => setDifficulte("expert")}>😈 Expert</button>
+          <p className="jeu-mode-titre">{t("crazyEights.choisirDifficulte")}</p>
+          <button className="jeu-mode-btn facile" onClick={() => { setMode("ia"); setDifficulte("facile"); }}>{t("crazyEights.facile")}</button>
+          <button className="jeu-mode-btn expert" onClick={() => { setMode("ia"); setDifficulte("expert"); }}>{t("crazyEights.expert")}</button>
         </div>
       </div>
     );
@@ -199,14 +179,13 @@ function CrazyEights({ onRetour }) {
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={() => { setDifficulte(null); }}>←</button>
-          <h2 className="jeu-titre">🃏 Crazy Eights</h2>
+          <h2 className="jeu-titre">{t("crazyEights.titre")}</h2>
         </div>
         <div className="feed-vide">
-          <p>Pose tes cartes avant l'adversaire !</p>
-          <p>Les 8 sont des jokers 🃏</p>
+          <p>{t("crazyEights.introTexte1")}</p>
+          <p>{t("crazyEights.introTexte2")}</p>
         </div>
-        <button className="auth-btn" onClick={demarrer}>🎮 Commencer</button>
-        <ChatJeu jeuId="crazyeights" partieId={partieId.current} modeIA={mode === "ia"} />
+        <button className="auth-btn" onClick={demarrer}>{t("crazyEights.commencer")}</button>
       </div>
     );
   }
@@ -215,31 +194,28 @@ function CrazyEights({ onRetour }) {
     <div className="jeu-container">
       <div className="jeu-header">
         <button className="chat-retour" onClick={() => setDemarre(false)}>←</button>
-        <h2 className="jeu-titre">🃏 Crazy Eights</h2>
+        <h2 className="jeu-titre">{t("crazyEights.titre")}</h2>
         <button className="jeu-btn-regles" onClick={() => setAfficherRegles(!afficherRegles)}>❓</button>
       </div>
 
       {afficherRegles && (
         <div className="jeu-regles">
-          <p><strong>🎯 Objectif :</strong> Être le premier à se débarrasser de toutes ses cartes.</p>
-          <p><strong>▶️ Comment jouer :</strong> Pose une carte de même couleur ou valeur que la carte du dessus.</p>
-          <p><strong>🃏 Les 8 :</strong> Jokers, jouables n'importe quand !</p>
-          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>Compris !</button>
+          <p><strong>{t("crazyEights.objectifTitre")}</strong> {t("crazyEights.objectifTexte")}</p>
+          <p><strong>{t("crazyEights.commentJouerTitre")}</strong> {t("crazyEights.commentJouerTexte")}</p>
+          <p><strong>{t("crazyEights.huitTitre")}</strong> {t("crazyEights.huitTexte")}</p>
+          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>{t("crazyEights.compris")}</button>
         </div>
       )}
 
       <div className="ce-statut">
         {winner
-          ? mode === "ia"
-            ? winner === 1 ? "🏆 Tu as gagné !" : "🤖 L'IA a gagné !"
-            : `🏆 Joueur ${winner} gagne !`
-          : iaReflechit ? "🤖 L'IA réfléchit..."
-          : mode === "ia" ? `👤 Ton tour — ${main.length} cartes`
-          : `Tour du Joueur ${joueur} — ${main.length} cartes`}
+          ? winner === 1 ? t("crazyEights.tuGagnes") : t("crazyEights.iaGagne")
+          : iaReflechit ? t("crazyEights.iaReflechit")
+          : t("crazyEights.tonTour", { nb: main.length })}
       </div>
 
       <div className="ce-centre">
-        <div className="ce-pioche" onClick={piocher}>🂠 Piocher</div>
+        <div className="ce-pioche" onClick={piocher}>{t("crazyEights.piocher")}</div>
         {dessus && (
           <div className={`ce-carte ce-dessus ${couleurCarte(dessus)}`}>
             <span>{dessus.valeur}</span>
@@ -249,29 +225,29 @@ function CrazyEights({ onRetour }) {
       </div>
 
       <div className="ce-main">
-        {(mode === "ia" && joueur === 2 ? [] : main).map((c, i) => (
+        {(joueur === 2 ? [] : main).map((c, i) => (
           <button
             key={i}
             className={`ce-carte ${couleurCarte(c)}`}
             onClick={() => jouerCarte(i)}
-            disabled={iaReflechit || (mode === "ia" && joueur === 2)}
+            disabled={iaReflechit || joueur === 2}
           >
             <span>{c.valeur}</span>
             <span>{c.couleur}</span>
           </button>
         ))}
-        {mode === "ia" && joueur === 2 && (
+        {joueur === 2 && (
           <p style={{ color: "#888", fontSize: "13px", textAlign: "center", width: "100%" }}>
-            🤖 L'IA a {main.length} carte{main.length > 1 ? "s" : ""}...
+            {t("crazyEights.iaCartes", { nb: main.length, s: main.length > 1 ? "s" : "" })}
           </p>
         )}
       </div>
 
       {winner && (
-        <button className="auth-btn" onClick={demarrer}>🔄 Rejouer</button>
+        <button className="auth-btn" onClick={demarrer}>{t("crazyEights.rejouer")}</button>
       )}
 
-      <ChatJeu jeuId="crazyeights" partieId={partieId.current} modeIA={mode === "ia"} />
+      <ChatJeu jeuId="crazyeights" partieId={partieId.current} modeIA={true} />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import ChatJeu from "./ChatJeu";
 import { enregistrerPartie } from "../../jeuxStats";
 import { auth } from "../../firebase";
+import { useTranslation } from "react-i18next";
 
 const TAILLE = 6;
 
@@ -61,6 +62,7 @@ const choisirCoupIA = (grille, couleur, difficulte) => {
 };
 
 function FlipChip({ onRetour }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState(null);
   const [difficulte, setDifficulte] = useState(null);
   const [grille, setGrille] = useState(creerGrille());
@@ -133,17 +135,17 @@ function FlipChip({ onRetour }) {
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={onRetour}>←</button>
-          <h2 className="jeu-titre">🪙 Flip Chip</h2>
+          <h2 className="jeu-titre">{t("flipChip.titre")}</h2>
         </div>
         <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis un mode de jeu</p>
-          <button className="jeu-mode-btn" onClick={() => { setMode("local"); rejouer(); }}>
-            👥 2 Joueurs
-            <span>Jouez à deux sur le même appareil</span>
+          <p className="jeu-mode-titre">{t("flipChip.choisirMode")}</p>
+          <button className="jeu-mode-btn" onClick={() => { setMode("local"); rejouer(); setScores({ noir: 0, blanc: 0 }); }}>
+            {t("flipChip.deuxJoueurs")}
+            <span>{t("flipChip.deuxJoueursDesc")}</span>
           </button>
           <button className="jeu-mode-btn" onClick={() => setMode("ia")}>
-            🤖 Contre l'IA
-            <span>Joue contre l'ordinateur</span>
+            {t("flipChip.contreIA")}
+            <span>{t("flipChip.contreIADesc")}</span>
           </button>
         </div>
       </div>
@@ -155,12 +157,12 @@ function FlipChip({ onRetour }) {
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={() => setMode(null)}>←</button>
-          <h2 className="jeu-titre">🪙 Flip Chip</h2>
+          <h2 className="jeu-titre">{t("flipChip.titre")}</h2>
         </div>
         <div className="jeu-mode-selection">
-          <p className="jeu-mode-titre">Choisis la difficulté</p>
-          <button className="jeu-mode-btn facile" onClick={() => { rejouer(); setDifficulte("facile"); }}>😊 Facile</button>
-          <button className="jeu-mode-btn expert" onClick={() => { rejouer(); setDifficulte("expert"); }}>😈 Expert</button>
+          <p className="jeu-mode-titre">{t("flipChip.choisirDifficulte")}</p>
+          <button className="jeu-mode-btn facile" onClick={() => { rejouer(); setScores({ noir: 0, blanc: 0 }); setDifficulte("facile"); }}>{t("flipChip.facile")}</button>
+          <button className="jeu-mode-btn expert" onClick={() => { rejouer(); setScores({ noir: 0, blanc: 0 }); setDifficulte("expert"); }}>{t("flipChip.expert")}</button>
         </div>
       </div>
     );
@@ -169,42 +171,42 @@ function FlipChip({ onRetour }) {
   return (
     <div className="jeu-container">
       <div className="jeu-header">
-        <button className="chat-retour" onClick={() => { setDifficulte(null); rejouer(); }}>←</button>
-        <h2 className="jeu-titre">🪙 Flip Chip</h2>
+        <button className="chat-retour" onClick={() => { mode === "local" ? setMode(null) : setDifficulte(null); rejouer(); }}>←</button>
+        <h2 className="jeu-titre">{t("flipChip.titre")}</h2>
         <button className="jeu-btn-regles" onClick={() => setAfficherRegles(!afficherRegles)}>❓</button>
       </div>
 
       {afficherRegles && (
         <div className="jeu-regles">
-          <p><strong>🎯 Objectif :</strong> Avoir le plus de jetons de ta couleur quand la grille est pleine.</p>
-          <p><strong>▶️ Comment jouer :</strong> Clique sur une case vide pour y placer ton jeton.</p>
-          <p><strong>🔄 Retournement :</strong> Encercle des jetons adverses pour les transformer en ta couleur !</p>
-          {mode === "ia" && <p><strong>🤖 Difficulté :</strong> {difficulte}</p>}
-          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>Compris !</button>
+          <p><strong>{t("flipChip.objectifTitre")}</strong> {t("flipChip.objectifTexte")}</p>
+          <p><strong>{t("flipChip.commentJouerTitre")}</strong> {t("flipChip.commentJouerTexte")}</p>
+          <p><strong>{t("flipChip.retournementTitre")}</strong> {t("flipChip.retournementTexte")}</p>
+          {mode === "ia" && <p><strong>{t("flipChip.difficulteTitre")}</strong> {t(`flipChip.${difficulte}`)}</p>}
+          <button className="jeu-btn-fermer-regles" onClick={() => setAfficherRegles(false)}>{t("flipChip.compris")}</button>
         </div>
       )}
 
       <div className="jeu-scores">
         <div className={`score-card ${joueur === "noir" && !winner ? "actif" : ""}`}>
-          <span className="score-joueur">{mode === "ia" ? "👤 Toi" : "⚫ Noir"}</span>
+          <span className="score-joueur">{mode === "ia" ? t("flipChip.toi") : t("flipChip.noir")}</span>
           <span className="score-pts">{scores.noir} — {compter(grille, "noir")}</span>
         </div>
         <div className="score-vs">VS</div>
         <div className={`score-card ${joueur === "blanc" && !winner ? "actif" : ""}`}>
-          <span className="score-joueur">{mode === "ia" ? `🤖 IA (${difficulte})` : "⚪ Blanc"}</span>
+          <span className="score-joueur">{mode === "ia" ? t("flipChip.iaAvecDifficulte", { difficulte: t(`flipChip.${difficulte}`) }) : t("flipChip.blanc")}</span>
           <span className="score-pts">{scores.blanc} — {compter(grille, "blanc")}</span>
         </div>
       </div>
 
       <div className="fc-statut">
         {winner
-          ? winner === "egalite" ? "Match nul !"
+          ? winner === "egalite" ? t("flipChip.matchNul")
           : mode === "ia"
-            ? winner === "noir" ? "🏆 Tu as gagné !" : "🤖 L'IA a gagné !"
-            : `🏆 ${winner === "noir" ? "⚫ Noir" : "⚪ Blanc"} gagne !`
-          : iaReflechit ? "🤖 L'IA réfléchit..."
-          : mode === "ia" ? "👤 Ton tour"
-          : `Tour de ${joueur === "noir" ? "⚫ Noir" : "⚪ Blanc"}`}
+            ? winner === "noir" ? t("flipChip.tuGagnes") : t("flipChip.iaGagne")
+            : t("flipChip.joueurGagne", { couleur: winner === "noir" ? t("flipChip.noir") : t("flipChip.blanc") })
+          : iaReflechit ? t("flipChip.iaReflechit")
+          : mode === "ia" ? t("flipChip.tonTour")
+          : t("flipChip.tourDe", { couleur: joueur === "noir" ? t("flipChip.noir") : t("flipChip.blanc") })}
       </div>
 
       <div className="fc-grille">
@@ -223,7 +225,7 @@ function FlipChip({ onRetour }) {
       </div>
 
       {winner && (
-        <button className="auth-btn" onClick={rejouer}>🔄 Rejouer</button>
+        <button className="auth-btn" onClick={rejouer}>{t("flipChip.rejouer")}</button>
       )}
 
       <ChatJeu jeuId="flipchip" partieId={partieId.current} modeIA={mode === "ia"} />

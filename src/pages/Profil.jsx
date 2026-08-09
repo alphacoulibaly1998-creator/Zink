@@ -86,7 +86,7 @@ function Profil() {
     const fichier = e.target.files[0];
     if (!fichier) return;
     if (fichier.size > 5 * 1024 * 1024) {
-      alert("L'image ne doit pas dépasser 5MB.");
+      alert(t("profilExtra.imageTropLourde"));
       return;
     }
     setUploadPhoto(true);
@@ -101,7 +101,7 @@ function Profil() {
       await updateDoc(doc(db, "utilisateurs", user.uid), { photoURL });
       setProfil({ ...profil, photoURL });
     } catch {
-      alert("Erreur lors du chargement de la photo.");
+      alert(t("profilExtra.erreurUploadPhoto"));
     }
     setUploadPhoto(false);
   };
@@ -120,7 +120,7 @@ function Profil() {
     if (!validerTelephone()) {
       const paysInfo = getPaysInfo();
       setErreurTel(
-        `Numéro invalide. Le ${profil?.pays} nécessite exactement ${paysInfo?.chiffres} chiffres.`
+        t("profilExtra.numeroInvalide", { pays: profil?.pays, chiffres: paysInfo?.chiffres })
       );
       return;
     }
@@ -128,7 +128,7 @@ function Profil() {
       const dateNaissance = new Date(age);
       const ageCalcule = Math.floor((new Date() - dateNaissance) / (365.25 * 24 * 60 * 60 * 1000));
       if (ageCalcule < 0 || ageCalcule > 120) {
-        alert("Date de naissance invalide.");
+        alert(t("profilExtra.dateInvalide"));
         return;
       }
     }
@@ -192,7 +192,7 @@ function Profil() {
     return map[s] || t("profil.nonRenseigne");
   };
 
-  if (chargement) return <div className="chargement">Chargement...</div>;
+  if (chargement) return <div className="chargement">{t("profilExtra.chargement")}</div>;
 
   return (
     <div className="profil-container">
@@ -272,7 +272,7 @@ function Profil() {
           <h2 className="profil-pseudo">{profil?.pseudo}</h2>
         )}
 
-        <p className="profil-pays">🌍 {profil?.pays}</p>
+        <p className="profil-pays">🌍 {i18n.language === "en" ? (profil?.paysEn || profil?.pays) : profil?.pays}</p>
 
         {edition ? (
           <input
@@ -420,8 +420,8 @@ function Profil() {
               return (
                 <div key={badgeId} className="badge-card">
                   <span className="badge-icon">{badge.icon}</span>
-                  <span className="badge-nom">{badge.nom}</span>
-                  <span className="badge-desc">{badge.description}</span>
+                  <span className="badge-nom">{t(badge.nomKey)}</span>
+                  <span className="badge-desc">{t(badge.descKey)}</span>
                 </div>
               );
             })}
