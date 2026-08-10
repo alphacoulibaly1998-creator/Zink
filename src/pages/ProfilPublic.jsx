@@ -65,6 +65,20 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
     }));
   };
 
+  const annulerDemande = async () => {
+    if (!window.confirm(t("demandesAmi.confirmerAnnuler", { pseudo: profil?.pseudo }))) return;
+    await updateDoc(doc(db, "utilisateurs", user.uid), {
+      demandesEnvoyees: arrayRemove(userId)
+    });
+    await updateDoc(doc(db, "utilisateurs", userId), {
+      demandesRecues: arrayRemove(user.uid)
+    });
+    setMonProfil((prev) => ({
+      ...prev,
+      demandesEnvoyees: (prev?.demandesEnvoyees || []).filter((id) => id !== userId)
+    }));
+  };
+
   const accepterDemande = async () => {
     await updateDoc(doc(db, "utilisateurs", user.uid), {
       amis: arrayUnion(userId),
@@ -232,7 +246,7 @@ function ProfilPublic({ userId: userIdProp, onRetour }) {
             <button className="decouvrir-btn-ami deja-ami">{t("profilPublic.dejaAmi")}</button>
           )}
           {statut === "envoye" && (
-            <button className="decouvrir-btn-ami en-attente">{t("profilPublic.demandeEnvoyee")}</button>
+            <button className="decouvrir-btn-ami en-attente" onClick={annulerDemande}>{t("demandesAmi.annulerDemande")}</button>
           )}
            {statut === "recu" && (
             <button className="decouvrir-btn-ami recu" onClick={accepterDemande}>

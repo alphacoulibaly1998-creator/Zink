@@ -20,6 +20,7 @@ import PageSignalement from "./pages/PageSignalement";
 import VerifierEmail from "./pages/VerifierEmail";
 import Parametres from "./pages/Parametres";
 import Notifications from "./pages/Notifications";
+import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import "./App.css";
 
 export const SignalementContext = React.createContext(null);
@@ -100,6 +101,7 @@ function App() {
             <Route path="/register" element={!utilisateur ? <Register /> : <Navigate to="/" />} />
             <Route path="/verifier-email" element={utilisateur && !utilisateur.emailVerified ? <VerifierEmail /> : <Navigate to="/" />} />
            <Route path="/mot-de-passe-oublie" element={!utilisateur ? <MotDePasseOublie /> : <Navigate to="/" />} />
+            <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
             <Route path="/" element={utilisateur ? (utilisateur.emailVerified ? <Accueil /> : <Navigate to="/verifier-email" />) : <Navigate to="/login" />} />
             <Route path="/profil" element={routeProtegee(utilisateur, <Profil />)} />
             <Route path="/amis" element={routeProtegee(utilisateur, <Amis />)} />

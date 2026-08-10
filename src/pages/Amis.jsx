@@ -13,12 +13,16 @@ function Amis() {
   const { t } = useTranslation();
   const [amis, setAmis] = useState([]);
   const [demandes, setDemandes] = useState([]);
+  const [demandesEnvoyees, setDemandesEnvoyees] = useState([]);
   const [onglet, setOnglet] = useState("amis");
   const [chargement, setChargement] = useState(true);
   const [menuAmi, setMenuAmi] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
-    const handleClick = () => setMenuAmi(null);
+    const handleClick = (e) => {
+      if (e.target.closest(".pub-menu-container")) return;
+      setMenuAmi(null);
+    };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
@@ -31,6 +35,7 @@ function Amis() {
 
       const amisIds = data.amis || [];
       const demandesIds = data.demandesRecues || [];
+      const envoyeesIds = data.demandesEnvoyees || [];
 
       const chargerProfils = async (ids) => {
         return await Promise.all(
@@ -41,13 +46,15 @@ function Amis() {
         );
       };
 
-      const [amisData, demandesData] = await Promise.all([
+      const [amisData, demandesData, envoyeesData] = await Promise.all([
         chargerProfils(amisIds),
-        chargerProfils(demandesIds)
+        chargerProfils(demandesIds),
+        chargerProfils(envoyeesIds)
       ]);
 
       setAmis(amisData.filter(Boolean));
       setDemandes(demandesData.filter(Boolean));
+      setDemandesEnvoyees(envoyeesData.filter(Boolean));
       setChargement(false);
     });
     return () => unsub();
@@ -75,6 +82,18 @@ function Amis() {
     });
     await updateDoc(autreRef, {
       demandesEnvoyees: arrayRemove(user.uid)
+    });
+  };
+
+  const annulerDemandeEnvoyee = async (autreId, pseudo) => {
+    if (!window.confirm(t("demandesAmi.confirmerAnnuler", { pseudo }))) return;
+    const monRef = doc(db, "utilisateurs", user.uid);
+    const autreRef = doc(db, "utilisateurs", autreId);
+    await updateDoc(monRef, {
+      demandesEnvoyees: arrayRemove(autreId)
+    });
+    await updateDoc(autreRef, {
+      demandesRecues: arrayRemove(user.uid)
     });
   };
 
@@ -126,6 +145,12 @@ function Amis() {
           onClick={() => setOnglet("demandes")}
         >
           {t("amis.ongletDemandes")} {demandes.length > 0 && <span className="onglet-badge">{demandes.length}</span>}
+        </button>
+        <button
+          className={`onglet-btn ${onglet === "envoyees" ? "actif" : ""}`}
+          onClick={() => setOnglet("envoyees")}
+        >
+          {t("demandesAmi.ongletEnvoyees")} {demandesEnvoyees.length > 0 && <span className="onglet-badge">{demandesEnvoyees.length}</span>}
         </button>
       </div>
 
@@ -270,6 +295,50 @@ function Amis() {
                     onClick={() => refuserDemande(d.id)}
                   >
                     ✕
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {onglet === "envoyees" && (
+        <div className="amis-liste">
+          {demandesEnvoyees.length === 0 ? (
+            <div className="feed-vide">
+              <p>{t("demandesAmi.aucuneDemandeEnvoyee")}</p>
+            </div>
+          ) : (
+            demandesEnvoyees.map((d) => (
+              <div key={d.id} className="ami-item">
+                <div
+                  className="ami-avatar"
+                  onClick={() => navigate(`/profil/${d.id}`)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {d.photoURL ? (
+                    <img src={d.photoURL} alt="avatar" />
+                  ) : (
+                    <div className="conv-avatar-placeholder">
+                      {d.pseudo?.[0]?.toUpperCase() || "?"}
+                    </div>
+                  )}
+                </div>
+                <div
+                  className="ami-infos"
+                  onClick={() => navigate(`/profil/${d.id}`)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <span className="conv-pseudo">{d.pseudo}</span>
+                  <span className="conv-dernier">🌍 {i18n.language === "en" ? (d.paysEn || d.pays) : d.pays}</span>
+                </div>
+                <div className="ami-actions">
+                  <button
+                    className="ami-btn-suppr"
+                    onClick={() => annulerDemandeEnvoyee(d.id, d.pseudo)}
+                  >
+                    {t("demandesAmi.annulerDemande")}
                   </button>
                 </div>
               </div>

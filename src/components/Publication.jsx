@@ -3,6 +3,7 @@ import { db, auth } from "../firebase";
 import { creerNotification } from "../notifications";
 import { nettoyerTexte } from "../sanitize";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   doc, updateDoc, arrayUnion, arrayRemove,
   deleteDoc, getDoc, addDoc, collection,
@@ -10,6 +11,8 @@ import {
 } from "firebase/firestore";
 
 function Publication({ pub, onSupprime, onVoirProfil }) {
+  const { t } = useTranslation();
+  const [commentaireReponsesOuvert, setCommentaireReponsesOuvert] = useState(null);
  const [auteur, setAuteur] = useState(null);
   const [commentaire, setCommentaire] = useState("");
   const [commentaires, setCommentaires] = useState([]);
@@ -101,11 +104,13 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     dernierCommentaire.current = maintenant;
     const snap = await getDoc(doc(db, "utilisateurs", user.uid));
     const pseudo = snap.exists() ? snap.data().pseudo : "Inconnu";
+    const parentId = reponseA ? (reponseA.commentaireParentId || reponseA.id) : null;
     await addDoc(collection(db, "publications", pub.id, "commentaires"), {
       userId: user.uid,
       pseudo,
       texte: nettoyerTexte(commentaire.trim()),
       reponseA: reponseA ? { id: reponseA.id, pseudo: reponseA.pseudo } : null,
+      commentaireParentId: parentId,
       likes: [],
       createdAt: serverTimestamp()
     });
@@ -271,6 +276,158 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     });
   };
 
+  const commentairesPrincipaux = commentaires.filter((c) => !c.commentaireParentId);
+  const getReponses = (parentId) => commentaires.filter((c) => c.commentaireParentId === parentId);
+
+  const renderUnCommentaire = (c, estReponse) => (
+    <div key={c.id} className="commentaire-wrapper">
+      {(estReponse ? reponseEnEdition === c.id : commentaireEnEdition === c.id) ? (
+        <div className="commentaire-edition">
+          <input
+            type="text"
+            value={estReponse ? texteEditionReponse : texteEdition}
+            onChange={(e) =>
+              estReponse
+                ? setTexteEditionReponse(e.target.value)
+                : setTexteEdition(e.target.value)
+            }
+            onKeyDown={(e) => {
+              if (e.key !== "Enter") return;
+              if (estReponse) {
+                updateDoc(
+                  doc(db, "publications", pub.id, "commentaires", c.id),
+                  { texte: texteEditionReponse.trim(), modifie: true }
+                );
+                setReponseEnEdition(null);
+              } else {
+                sauvegarderEditionCommentaire(c);
+              }
+            }}
+            autoFocus
+          />
+          <button
+            onClick={() => {
+              if (estReponse) {
+                updateDoc(
+                  doc(db, "publications", pub.id, "commentaires", c.id),
+                  { texte: texteEditionReponse.trim(), modifie: true }
+                );
+                setReponseEnEdition(null);
+              } else {
+                sauvegarderEditionCommentaire(c);
+              }
+            }}
+          >
+            ✓
+          </button>
+          <button
+            onClick={() =>
+              estReponse ? setReponseEnEdition(null) : setCommentaireEnEdition(null)
+            }
+          >
+            ✕
+          </button>
+        </div>
+      ) : (
+        <div className="commentaire">
+          <div className="commentaire-contenu">
+            <span
+              className="commentaire-pseudo"
+              onClick={() => c.userId !== user.uid && onVoirProfil && onVoirProfil(c.userId)}
+              style={{ cursor: c.userId !== user.uid ? "pointer" : "default" }}
+            >
+              {c.pseudo}
+            </span>
+            {c.reponseA && (
+              <span className="commentaire-reponse-a">
+                ↩️ {c.reponseA.pseudo}
+              </span>
+            )}
+            <span className="commentaire-texte">
+              {c.texte}
+              {c.modifie && (
+                <span className="commentaire-modifie"> (modifié)</span>
+              )}
+            </span>
+            <div className="commentaire-actions">
+              <button
+                className={`commentaire-like-btn ${c.likes?.includes(user.uid) ? "like-actif" : ""}`}
+                onClick={() => likerCommentaire(c)}
+              >
+                {c.likes?.includes(user.uid) ? "❤️" : "🤍"} {c.likes?.length || 0}
+              </button>
+              <button
+                className="commentaire-repondre-btn"
+                onClick={() => {
+                  setReponseA({ ...c, commentaireParentId: c.commentaireParentId || c.id });
+                  setCommentaire(`@${c.pseudo} `);
+                }}
+              >
+                {t("publication.repondre")}
+              </button>
+              <div className="pub-menu-container">
+                <button
+                  className="commentaire-btn-menu"
+                  onClick={(e) => {
+                    if (menuCommentaire !== c.id) {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const espaceEnBas = window.innerHeight - rect.bottom;
+                      setMenuOuvertVersHaut(espaceEnBas < 200);
+                    }
+                    setMenuCommentaire(menuCommentaire === c.id ? null : c.id);
+                    setMenuReponse(null);
+                  }}
+                >
+                  ⋯
+                </button>
+                {menuCommentaire === c.id && (
+                  <div className={`commentaire-menu ${menuOuvertVersHaut ? "vers-haut" : ""}`}>
+                    {c.userId === user.uid && (
+                      <>
+                        <button onClick={() => {
+                          if (estReponse) {
+                            setReponseEnEdition(c.id);
+                            setTexteEditionReponse(c.texte);
+                            setMenuReponse(null);
+                          } else {
+                            setCommentaireEnEdition(c.id);
+                            setTexteEdition(c.texte);
+                            setMenuCommentaire(null);
+                          }
+                        }}>
+                          ✏️ Modifier
+                        </button>
+                        <button
+                          className="menu-suppr"
+                          onClick={() => {
+                            if (estReponse) setMenuReponse(null);
+                            else setMenuCommentaire(null);
+                            supprimerCommentaire(c);
+                          }}
+                        >
+                          🗑️ Supprimer
+                        </button>
+                      </>
+                    )}
+                    {c.userId !== user.uid && (
+                      <button onClick={() => {
+                        if (estReponse) setMenuReponse(null);
+                        else setMenuCommentaire(null);
+                        signalerCommentaire(c.id);
+                      }}>
+                        🚩 Signaler
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="publication">
       <div className="pub-header">
@@ -410,192 +567,43 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
 
       {afficherCommentaires && (
         <div className="pub-commentaires">
-          {(voirTousCommentaires ? commentaires : commentaires.slice(0, 2)).map((c) => (
-            <div key={c.id} className="commentaire-wrapper">
-              {commentaireEnEdition === c.id ? (
-                <div className="commentaire-edition">
-                  <input
-                    type="text"
-                    value={texteEdition}
-                    onChange={(e) => setTexteEdition(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && sauvegarderEditionCommentaire(c)
-                    }
-                    autoFocus
-                  />
-                  <button onClick={() => sauvegarderEditionCommentaire(c)}>
-                    ✓
-                  </button>
-                  <button onClick={() => setCommentaireEnEdition(null)}>
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <div className="commentaire">
-                  <div className="commentaire-contenu">
-                <span
-                  className="commentaire-pseudo"
-                  onClick={() => c.userId !== user.uid && onVoirProfil && onVoirProfil(c.userId)}
-                  style={{ cursor: c.userId !== user.uid ? "pointer" : "default" }}
-                >
-                  {c.pseudo}
-                </span>
-                {c.reponseA && (
-                  <span className="commentaire-reponse-a">
-                    ↩️ {c.reponseA.pseudo}
-                  </span>
-                )}
-                    <span className="commentaire-texte">
-                      {c.texte}
-                      {c.modifie && (
-                        <span className="commentaire-modifie"> (modifié)</span>
-                      )}
-                    </span>
-                <div className="commentaire-actions">
-                  <button
-                    className={`commentaire-like-btn ${c.likes?.includes(user.uid) ? "like-actif" : ""}`}
-                    onClick={() => likerCommentaire(c)}
-                  >
-                    {c.likes?.includes(user.uid) ? "❤️" : "🤍"} {c.likes?.length || 0}
-                  </button>
-                  <button
-                    className="commentaire-repondre-btn"
-                    onClick={() => {
-                      setReponseA(c);
-                      setCommentaire(`@${c.pseudo} `);
-                    }}
-                  >
-                    💬 Répondre
-                  </button>
-                  <div className="pub-menu-container">
+          {(voirTousCommentaires ? commentairesPrincipaux : commentairesPrincipaux.slice(0, 2)).map((c) => {
+            const reponses = getReponses(c.id);
+            const reponsesOuvertes = commentaireReponsesOuvert === c.id;
+            return (
+              <div key={c.id}>
+                {renderUnCommentaire(c, false)}
+                {reponses.length > 0 && (
+                  <div className="reponses-liste">
                     <button
-                      className="commentaire-btn-menu"
-                      onClick={(e) => {
-                        if (menuReponse !== c.id) {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const espaceEnBas = window.innerHeight - rect.bottom;
-                          setMenuReponseVersHaut(espaceEnBas < 200);
-                        }
-                        setMenuReponse(menuReponse === c.id ? null : c.id);
-                      }}
+                      className="voir-plus-commentaires reponses-toggle"
+                      onClick={() =>
+                        setCommentaireReponsesOuvert(reponsesOuvertes ? null : c.id)
+                      }
                     >
-                      ⋯
+                      {reponsesOuvertes
+                        ? t("publication.masquerReponses")
+                        : t("publication.voirReponses", { nb: reponses.length })}
                     </button>
-                    {menuReponse === c.id && (
-                      <div className={`commentaire-menu ${menuReponseVersHaut ? "vers-haut" : ""}`}>
-                        {c.userId === user.uid && (
-                          <>
-                            <button onClick={() => {
-                              setReponseEnEdition(c.id);
-                              setTexteEditionReponse(c.texte);
-                              setMenuReponse(null);
-                            }}>
-                              ✏️ Modifier
-                            </button>
-                            <button
-                              className="menu-suppr"
-                              onClick={() => {
-                                setMenuReponse(null);
-                                supprimerCommentaire(c);
-                              }}
-                            >
-                              🗑️ Supprimer
-                            </button>
-                          </>
-                        )}
-                        {c.userId !== user.uid && (
-                          <button onClick={() => {
-                            setMenuReponse(null);
-                            navigate(`/signalement?type=commentaire&cibleId=${c.id}`);
-                          }}>
-                            🚩 Signaler
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {reponseEnEdition === c.id && (
-                  <div className="commentaire-edition">
-                    <input
-                      type="text"
-                      value={texteEditionReponse}
-                      onChange={(e) => setTexteEditionReponse(e.target.value)}
-                      onKeyDown={async (e) => {
-                        if (e.key === "Enter") {
-                          await updateDoc(
-                            doc(db, "publications", pub.id, "commentaires", c.id),
-                            { texte: texteEditionReponse.trim(), modifie: true }
-                          );
-                          setReponseEnEdition(null);
-                        }
-                      }}
-                      autoFocus
-                    />
-                    <button onClick={async () => {
-                      await updateDoc(
-                        doc(db, "publications", pub.id, "commentaires", c.id),
-                        { texte: texteEditionReponse.trim(), modifie: true }
-                      );
-                      setReponseEnEdition(null);
-                    }}>✓</button>
-                    <button onClick={() => setReponseEnEdition(null)}>✕</button>
+                    {reponsesOuvertes &&
+                      reponses.map((r) => (
+                        <div key={r.id} className="reponse-indentee">
+                          {renderUnCommentaire(r, true)}
+                        </div>
+                      ))}
                   </div>
                 )}
-                  </div>
-                  <div className="pub-menu-container">
-                  <button
-                    className="commentaire-btn-menu"
-                    onClick={(e) => {
-                      if (menuCommentaire !== c.id) {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const espaceEnBas = window.innerHeight - rect.bottom;
-                        setMenuOuvertVersHaut(espaceEnBas < 200);
-                      }
-                      setMenuCommentaire(menuCommentaire === c.id ? null : c.id);
-                    }}
-                  >
-                    ⋯
-                  </button>
-                  {menuCommentaire === c.id && (
-                    <div className={`commentaire-menu ${menuOuvertVersHaut ? "vers-haut" : ""}`}>
-                      {c.userId === user.uid && (
-                        <>
-                          <button onClick={() => {
-                            setCommentaireEnEdition(c.id);
-                            setTexteEdition(c.texte);
-                            setMenuCommentaire(null);
-                          }}>
-                            ✏️ Modifier
-                          </button>
-                          <button
-                            className="menu-suppr"
-                            onClick={() => supprimerCommentaire(c)}
-                          >
-                            🗑️ Supprimer
-                          </button>
-                        </>
-                      )}
-                      {c.userId !== user.uid && (
-                        <button onClick={() => signalerCommentaire(c.id)}>
-                          🚩 Signaler
-                        </button>
-                      )}
-                    </div>
-                  )}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-          {commentaires.length > 2 && (
+              </div>
+            );
+          })}
+          {commentairesPrincipaux.length > 2 && (
             <button
               className="voir-plus-commentaires"
               onClick={() => setVoirTousCommentaires(!voirTousCommentaires)}
             >
               {voirTousCommentaires
                 ? "Masquer les commentaires"
-                : `Voir les ${commentaires.length - 2} autres commentaires`}
+                : `Voir les ${commentairesPrincipaux.length - 2} autres commentaires`}
             </button>
           )}
           {reponseA && (

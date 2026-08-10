@@ -87,7 +87,10 @@ const resources = {
         homme: "Homme",
         femme: "Femme",
         autre: "Autre",
-        nonPrecise: "Préfère ne pas préciser"
+        nonPrecise: "Préfère ne pas préciser",
+        accepteTexte: "En cliquant sur S'inscrire, vous acceptez notre",
+        politiqueLien: "Politique de confidentialité",
+        ageMinimum: "Tu dois avoir au moins 16 ans pour créer un compte sur Zink."
       },
       navbar: {
         accueil: "Accueil",
@@ -497,6 +500,43 @@ const resources = {
         version: "🔢 Version",
         description: "Zink est un réseau social pensé pour connecter, jouer et partager avec tes amis. Développé avec passion, une phase à la fois.",
         droitsReserves: "© 2026 Zink. Tous droits réservés."
+      },
+      publication: {
+        voirReponses: "Voir les {{nb}} réponses",
+        masquerReponses: "Masquer les réponses",
+        repondre: "💬 Répondre"
+      },
+      demandesAmi: {
+        annulerDemande: "⏳ Annuler la demande",
+        confirmerAnnuler: "Annuler ta demande d'ami envoyée à {{pseudo}} ?",
+        ongletEnvoyees: "Envoyées",
+        aucuneDemandeEnvoyee: "Aucune demande envoyée en attente."
+      },
+      politique: {
+        titre: "📜 Politique de confidentialité",
+        derniereMaj: "Dernière mise à jour : 10 août 2026",
+        sommaire: "Sommaire",
+        section1Titre: "1. Qui sommes-nous",
+        section1Texte: "Zink est un réseau social édité par Alpha Coulibaly. Pour toute question relative à vos données personnelles, contactez-nous à zinkcontact8@gmail.com.",
+        section2Titre: "2. Données que nous collectons",
+        section2Texte: "Informations de compte (pseudo, email, mot de passe chiffré, numéro de téléphone optionnel), informations de profil (date de naissance, sexe, pays, photo, statut personnalisé), contenu que vous publiez (publications, photos, vidéos, commentaires, messages privés, messages vocaux), et informations techniques (statut de connexion, activité liée aux jeux).",
+        section3Titre: "3. Pourquoi nous collectons ces données",
+        section3Texte: "Nous utilisons ces informations pour créer et sécuriser votre compte, permettre les fonctionnalités sociales (amis, messages, publications, jeux), personnaliser votre expérience (langue, indicatif téléphonique selon le pays), et assurer la modération et la sécurité de la plateforme.",
+        section4Titre: "4. Où sont hébergées vos données",
+        section4Texte: "Vos données sont hébergées par nos prestataires : Firebase (Google, Amérique du Nord) pour les données de profil, publications et messagerie, et Supabase (Europe de l'Ouest) pour les fichiers vidéo. Nous ne vendons ni ne partageons vos données avec des annonceurs ou des tiers à des fins commerciales.",
+        section5Titre: "5. Sécurité",
+        section5Texte: "Nous mettons en œuvre des mesures de sécurité pour protéger vos données : chiffrement en transit, limitation du taux de requêtes, et règles d'accès strictes à notre base de données. Vos mots de passe ne sont jamais stockés en texte brut : ils sont hashés et chiffrés au repos par notre prestataire d'authentification (Firebase Authentication), qui applique ce chiffrement automatiquement et de façon standard dans l'industrie.",
+        section6Titre: "6. Vos droits",
+        section6Texte: "Vous pouvez à tout moment modifier vos informations de profil, masquer votre numéro de téléphone ou votre date de naissance, bloquer d'autres utilisateurs, et supprimer votre compte depuis les Paramètres. La suppression de votre compte retire votre profil et vos informations personnelles de notre base de données. Certains contenus, comme des messages échangés dans une conversation avec un autre utilisateur, peuvent être conservés dans l'historique de cette conversation (affichés comme provenant d'un « utilisateur supprimé »), conformément aux pratiques standards de l'industrie.",
+        section6Texte2: "Si vous souhaitez demander l'effacement complet de l'ensemble de vos données, y compris ce contenu résiduel, vous pouvez nous en faire la demande à zinkcontact8@gmail.com ; nous traiterons votre demande manuellement dans un délai raisonnable.",
+        section7Titre: "7. Âge minimum",
+        section7Texte: "Zink est réservé aux personnes âgées de 16 ans ou plus. Nous nous appuyons sur les informations fournies lors de l'inscription. Zink se réserve le droit de suspendre tout compte dont l'âge déclaré s'avère inexact.",
+        section8Titre: "8. Cookies et traceurs",
+        section8Texte: "Zink n'utilise actuellement aucun outil d'analyse ou de suivi publicitaire.",
+        section9Titre: "9. Modifications de cette politique",
+        section9Texte: "Nous pouvons mettre à jour cette politique de confidentialité. Toute modification importante vous sera communiquée.",
+        section10Titre: "10. Contact",
+        section10Texte: "Pour toute question, écrivez-nous à zinkcontact8@gmail.com."
       }
     }
   },
@@ -584,7 +624,10 @@ const resources = {
         homme: "Male",
         femme: "Female",
         autre: "Other",
-        nonPrecise: "Prefer not to say"
+        nonPrecise: "Prefer not to say",
+        accepteTexte: "By clicking Sign up, you agree to our",
+        politiqueLien: "Privacy Policy",
+        ageMinimum: "You must be at least 16 years old to create a Zink account."
       },
       navbar: {
         accueil: "Home",
@@ -994,6 +1037,43 @@ const resources = {
         version: "🔢 Version",
         description: "Zink is a social network designed to connect, play, and share with your friends. Built with passion, one phase at a time.",
         droitsReserves: "© 2026 Zink. All rights reserved."
+      },
+      publication: {
+        voirReponses: "See {{nb}} replies",
+        masquerReponses: "Hide replies",
+        repondre: "💬 Reply"
+      },
+      demandesAmi: {
+        annulerDemande: "⏳ Cancel request",
+        confirmerAnnuler: "Cancel your friend request sent to {{pseudo}}?",
+        ongletEnvoyees: "Sent",
+        aucuneDemandeEnvoyee: "No pending sent requests."
+      },
+      politique: {
+        titre: "📜 Privacy Policy",
+        derniereMaj: "Last updated: August 10, 2026",
+        sommaire: "Contents",
+        section1Titre: "1. Who we are",
+        section1Texte: "Zink is a social network published by Alpha Coulibaly. For any question about your personal data, contact us at zinkcontact8@gmail.com.",
+        section2Titre: "2. Data we collect",
+        section2Texte: "Account information (username, email, encrypted password, optional phone number), profile information (date of birth, gender, country, photo, personal status), content you post (posts, photos, videos, comments, private messages, voice messages), and technical information (online status, game-related activity).",
+        section3Titre: "3. Why we collect this data",
+        section3Texte: "We use this information to create and secure your account, enable social features (friends, messages, posts, games), personalize your experience (language, phone code based on country), and ensure moderation and platform security.",
+        section4Titre: "4. Where your data is hosted",
+        section4Texte: "Your data is hosted by our providers: Firebase (Google, North America) for profile, post, and messaging data, and Supabase (Western Europe) for video files. We do not sell or share your data with advertisers or third parties for commercial purposes.",
+        section5Titre: "5. Security",
+        section5Texte: "We implement security measures to protect your data: encryption in transit, rate limiting, and strict access rules to our database. Your passwords are never stored in plain text: they are hashed and encrypted at rest by our authentication provider (Firebase Authentication), which applies this encryption automatically and as an industry standard.",
+        section6Titre: "6. Your rights",
+        section6Texte: "You can at any time update your profile information, hide your phone number or date of birth, block other users, and delete your account from Settings. Deleting your account removes your profile and personal information from our database. Some content, such as messages exchanged in a conversation with another user, may be retained in that conversation's history (shown as coming from a \"deleted user\"), consistent with standard industry practice.",
+        section6Texte2: "If you wish to request the complete erasure of all your data, including this residual content, you may contact us at zinkcontact8@gmail.com; we will process your request manually within a reasonable timeframe.",
+        section7Titre: "7. Minimum age",
+        section7Texte: "Zink is reserved for people aged 16 or older. We rely on the information provided at registration. Zink reserves the right to suspend any account whose declared age proves inaccurate.",
+        section8Titre: "8. Cookies and trackers",
+        section8Texte: "Zink currently does not use any analytics or advertising tracking tools.",
+        section9Titre: "9. Changes to this policy",
+        section9Texte: "We may update this privacy policy. Any significant change will be communicated to you.",
+        section10Titre: "10. Contact",
+        section10Texte: "For any question, write to us at zinkcontact8@gmail.com."
       }
     }
   }

@@ -167,6 +167,18 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
     }));
   };
 
+  const annulerDemande = async (autreUser) => {
+    if (!window.confirm(t("demandesAmi.confirmerAnnuler", { pseudo: autreUser.pseudo }))) return;
+    const monRef = doc(db, "utilisateurs", user.uid);
+    const autreRef = doc(db, "utilisateurs", autreUser.id);
+    await updateDoc(monRef, { demandesEnvoyees: arrayRemove(autreUser.id) });
+    await updateDoc(autreRef, { demandesRecues: arrayRemove(user.uid) });
+    setMonProfil((prev) => ({
+      ...prev,
+      demandesEnvoyees: (prev?.demandesEnvoyees || []).filter((id) => id !== autreUser.id)
+    }));
+  };
+
   const accepterDemande = async (autreUser) => {
     const monRef = doc(db, "utilisateurs", user.uid);
     const autreRef = doc(db, "utilisateurs", autreUser.id);
@@ -199,7 +211,7 @@ function Decouvrir({ suggestionsGlobales, setSuggestionsGlobales }) {
       <button className="decouvrir-btn-ami deja-ami">{t("decouvrir.dejaAmi")}</button>
     );
     if (statut === "envoye") return (
-      <button className="decouvrir-btn-ami en-attente">{t("decouvrir.envoyee")}</button>
+      <button className="decouvrir-btn-ami en-attente" onClick={() => annulerDemande(u)}>{t("demandesAmi.annulerDemande")}</button>
     );
     if (statut === "recu") return (
       <button className="decouvrir-btn-ami recu" onClick={() => accepterDemande(u)}>

@@ -4,6 +4,7 @@ import i18n from "../i18n";
 import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
 
@@ -55,15 +56,13 @@ function Register() {
     setErreurPseudo("");
     setSuggestionsPseudo([]);
     if (!valeur.trim()) return;
-    const q = query(
-      collection(db, "utilisateurs"),
-      where("pseudo", "==", valeur.trim())
-    );
-    const snap = await getDocs(q);
-    if (!snap.empty) {
-      setErreurPseudo("Ce pseudo est déjà utilisé.");
-      setSuggestionsPseudo(genererSuggestions(valeur));
-    }
+    try {
+      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: valeur.trim() });
+      if (data.existe) {
+        setErreurPseudo("Ce pseudo est déjà utilisé.");
+        setSuggestionsPseudo(genererSuggestions(valeur));
+      }
+    } catch (e) {}
   };
 
   const handleRegister = async () => {
@@ -100,6 +99,11 @@ function Register() {
     const dateNaissance = new Date(age);
     const aujourdhui = new Date();
     const ageCalcule = Math.floor((aujourdhui - dateNaissance) / (365.25 * 24 * 60 * 60 * 1000));
+    if (ageCalcule < 16) {
+      setErreur(t("inscription.ageMinimum"));
+      setChargement(false);
+      return;
+    }
     if (!sexe) {
       setErreur("Choisis ton sexe.");
       setChargement(false);
@@ -113,29 +117,33 @@ function Register() {
       return;
     }
 
-    // Vérifier pseudo unique
-    const qPseudo = query(
-      collection(db, "utilisateurs"),
-      where("pseudo", "==", pseudo.trim())
-    );
-    const snapPseudo = await getDocs(qPseudo);
-    if (!snapPseudo.empty) {
-      setErreurPseudo("Ce pseudo est déjà utilisé.");
-      setSuggestionsPseudo(genererSuggestions(pseudo));
+    // Vérifier pseudo unique via la fonction serverless (accessible sans connexion)
+    try {
+      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: pseudo.trim() });
+      if (data.existe) {
+        setErreurPseudo("Ce pseudo est déjà utilisé.");
+        setSuggestionsPseudo(genererSuggestions(pseudo));
+        setChargement(false);
+        return;
+      }
+    } catch (e) {
+      setErreur("Erreur de vérification du pseudo. Réessaie.");
       setChargement(false);
       return;
     }
 
-    // Vérifier numéro unique
+    // Vérifier numéro unique via la même fonction serverless
     if (telephone) {
       const numeroComplet = `${paysChoisi.indicatif}${telephone.replace(/\s/g, "")}`;
-      const qTel = query(
-        collection(db, "utilisateurs"),
-        where("telephone", "==", numeroComplet)
-      );
-      const snapTel = await getDocs(qTel);
-      if (!snapTel.empty) {
-        setErreurTel("Ce numéro de téléphone est déjà utilisé.");
+      try {
+        const { data } = await axios.post("/api/verifier-pseudo", { telephone: numeroComplet });
+        if (data.existe) {
+          setErreurTel("Ce numéro de téléphone est déjà utilisé.");
+          setChargement(false);
+          return;
+        }
+      } catch (e) {
+        setErreur("Erreur de vérification du numéro. Réessaie.");
         setChargement(false);
         return;
       }
@@ -344,6 +352,17 @@ function Register() {
         >
           {chargement ? t("inscription.inscriptionEnCours") : t("inscription.sinscrire")}
         </button>
+
+        <p className="apropos-slogan" style={{ fontSize: "12px", textAlign: "center" }}>
+          {t("inscription.accepteTexte")}{" "}
+          <span
+            className="apropos-lien"
+            style={{ cursor: "pointer" }}
+            onClick={() => window.open("/politique-confidentialite", "_blank")}
+          >
+            {t("inscription.politiqueLien")}
+          </span>
+        </p>
 
         <p className="auth-lien" onClick={() => navigate("/login")}>
           {t("inscription.dejaCompte")} <span>{t("inscription.connecteToi")}</span>

@@ -36,6 +36,15 @@ function APropos({ onRetour }) {
         <p>{t("apropos.description")}</p>
       </div>
 
+      <div
+        className="apropos-item"
+        style={{ cursor: "pointer" }}
+        onClick={() => window.open("/politique-confidentialite", "_blank")}
+      >
+        <span className="apropos-label">{t("politique.titre")}</span>
+        <span className="apropos-valeur">→</span>
+      </div>
+
       <div className="apropos-footer">
         <p>{t("apropos.droitsReserves")}</p>
       </div>
