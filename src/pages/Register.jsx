@@ -5,6 +5,23 @@ import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import axios from "axios";
+
+const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
+const chargerRecaptcha = () => {
+  return new Promise((resolve) => {
+    if (window.grecaptcha) return resolve();
+    const script = document.createElement("script");
+    script.src = `https://www.google.com/recaptcha/api.js?render=${SITE_KEY}`;
+    script.onload = () => window.grecaptcha.ready(resolve);
+    document.head.appendChild(script);
+  });
+};
+
+const obtenirTokenRecaptcha = async () => {
+  await chargerRecaptcha();
+  return window.grecaptcha.execute(SITE_KEY, { action: "register" });
+};
 import { useNavigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
 
@@ -57,7 +74,8 @@ function Register() {
     setSuggestionsPseudo([]);
     if (!valeur.trim()) return;
     try {
-      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: valeur.trim() });
+      const recaptchaToken = await obtenirTokenRecaptcha();
+      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: valeur.trim(), recaptchaToken });
       if (data.existe) {
         setErreurPseudo("Ce pseudo est déjà utilisé.");
         setSuggestionsPseudo(genererSuggestions(valeur));
@@ -117,9 +135,19 @@ function Register() {
       return;
     }
 
+    // Vérification reCAPTCHA avant toute autre étape
+    let recaptchaToken;
+    try {
+      recaptchaToken = await obtenirTokenRecaptcha();
+    } catch (e) {
+      setErreur("Erreur de vérification anti-robot. Réessaie.");
+      setChargement(false);
+      return;
+    }
+
     // Vérifier pseudo unique via la fonction serverless (accessible sans connexion)
     try {
-      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: pseudo.trim() });
+      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: pseudo.trim(), recaptchaToken });
       if (data.existe) {
         setErreurPseudo("Ce pseudo est déjà utilisé.");
         setSuggestionsPseudo(genererSuggestions(pseudo));
@@ -136,7 +164,7 @@ function Register() {
     if (telephone) {
       const numeroComplet = `${paysChoisi.indicatif}${telephone.replace(/\s/g, "")}`;
       try {
-        const { data } = await axios.post("/api/verifier-pseudo", { telephone: numeroComplet });
+        const { data } = await axios.post("/api/verifier-pseudo", { telephone: numeroComplet, recaptchaToken });
         if (data.existe) {
           setErreurTel("Ce numéro de téléphone est déjà utilisé.");
           setChargement(false);

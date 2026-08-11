@@ -13,12 +13,30 @@ if (!getApps().length) {
 
 const db = getFirestore();
 
+const verifierRecaptcha = async (token) => {
+  if (!token) return false;
+  const params = new URLSearchParams();
+  params.append("secret", process.env.RECAPTCHA_SECRET_KEY);
+  params.append("response", token);
+  const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: "POST",
+    body: params,
+  });
+  const data = await response.json();
+  return data.success && data.score >= 0.5;
+};
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Méthode non autorisée" });
   }
 
-  const { pseudo, telephone } = req.body;
+  const { pseudo, telephone, recaptchaToken } = req.body;
+
+  const recaptchaValide = await verifierRecaptcha(recaptchaToken);
+  if (!recaptchaValide) {
+    return res.status(403).json({ error: "Vérification anti-robot échouée" });
+  }
 
   try {
     if (pseudo) {
