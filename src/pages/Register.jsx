@@ -141,8 +141,11 @@ function Register() {
     // Vérification reCAPTCHA avant toute autre étape
     let recaptchaToken;
     try {
+      console.log("Avant obtenirTokenRecaptcha, grecaptcha existe ?", !!window.grecaptcha);
       recaptchaToken = await obtenirTokenRecaptcha();
+      console.log("Token reçu :", recaptchaToken);
     } catch (e) {
+      console.log("Erreur recaptcha exacte :", e);
       setErreur("Erreur de vérification anti-robot. Réessaie.");
       setChargement(false);
       return;
