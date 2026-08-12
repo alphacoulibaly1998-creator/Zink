@@ -7,6 +7,7 @@ import { doc, setDoc, collection, query, where, getDocs } from "firebase/firesto
 import axios from "axios";
 
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+console.log("SITE_KEY reçue :", SITE_KEY);
 
 const chargerRecaptcha = () => {
   return new Promise((resolve) => {

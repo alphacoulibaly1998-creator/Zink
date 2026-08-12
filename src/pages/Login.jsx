@@ -21,14 +21,14 @@ function Login() {
     setErreur("");
 
     if (bloque) {
-      setErreur("Trop de tentatives. Réessaie dans 5 minutes.");
+      setErreur(t("connexion.tropTentatives"));
       return;
     }
 
     setChargement(true);
 
     if (!identifiant.trim() || !motDePasse.trim()) {
-      setErreur("Remplis tous les champs.");
+      setErreur(t("connexion.champsVides"));
       setChargement(false);
       return;
     }
@@ -44,7 +44,7 @@ function Login() {
         );
         const snap = await getDocs(q);
         if (snap.empty) {
-          setErreur("Aucun compte trouvé avec ce numéro.");
+          setErreur(t("connexion.aucunCompteNumero"));
           setChargement(false);
           return;
         }
@@ -59,16 +59,16 @@ function Login() {
         setTentatives(nouvellesTentatives);
         if (nouvellesTentatives >= 5) {
           setBloque(true);
-          setErreur("Trop de tentatives (5/5). Réessaie dans 5 minutes.");
+          setErreur(t("connexion.tropTentativesLimite"));
           setTimeout(() => {
             setBloque(false);
             setTentatives(0);
           }, 5 * 60 * 1000);
         } else {
-          setErreur(`Email, numéro ou mot de passe incorrect. (${nouvellesTentatives}/5 tentatives)`);
+          setErreur(t("connexion.identifiantIncorrect", { tentatives: nouvellesTentatives }));
         }
       } else {
-        setErreur("Une erreur est survenue. Réessaie.");
+        setErreur(t("connexion.erreurGenerale"));
       }
     }
     setChargement(false);

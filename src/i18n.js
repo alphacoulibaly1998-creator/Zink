@@ -14,7 +14,13 @@ const resources = {
         pasDeCompte: "Pas encore de compte ?",
         inscrisToi: "Inscris-toi",
         motDePasseOublie: "Mot de passe oublié ?",
-        reinitialiser: "Réinitialiser"
+        reinitialiser: "Réinitialiser",
+        champsVides: "Remplis tous les champs.",
+        tropTentatives: "Trop de tentatives. Réessaie dans 5 minutes.",
+        tropTentativesLimite: "Trop de tentatives (5/5). Réessaie dans 5 minutes.",
+        aucunCompteNumero: "Aucun compte trouvé avec ce numéro.",
+        identifiantIncorrect: "Email, numéro ou mot de passe incorrect. ({{tentatives}}/5 tentatives)",
+        erreurGenerale: "Une erreur est survenue. Réessaie."
       },
       accueil: {
         titre: "🏠 Zink",
@@ -551,7 +557,13 @@ const resources = {
         pasDeCompte: "Don't have an account?",
         inscrisToi: "Sign up",
         motDePasseOublie: "Forgot password?",
-        reinitialiser: "Reset"
+        reinitialiser: "Reset",
+        champsVides: "Fill in all fields.",
+        tropTentatives: "Too many attempts. Try again in 5 minutes.",
+        tropTentativesLimite: "Too many attempts (5/5). Try again in 5 minutes.",
+        aucunCompteNumero: "No account found with this number.",
+        identifiantIncorrect: "Email, phone number, or password incorrect. ({{tentatives}}/5 attempts)",
+        erreurGenerale: "An error occurred. Try again."
       },
       accueil: {
         titre: "🏠 Zink",
