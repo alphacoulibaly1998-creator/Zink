@@ -1,5 +1,6 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 
 if (!getApps().length) {
   initializeApp({
@@ -12,6 +13,27 @@ if (!getApps().length) {
 }
 
 const db = getFirestore();
+const auth = getAuth();
+
+const DELAI_EXPIRATION_MS = 48 * 60 * 60 * 1000; // 48 heures
+
+const nettoyerSiCompteAbandonne = async (docId) => {
+  try {
+    const userRecord = await auth.getUser(docId);
+    if (userRecord.emailVerified) return false;
+
+    const dateCreation = new Date(userRecord.metadata.creationTime).getTime();
+    const maintenant = Date.now();
+    if (maintenant - dateCreation < DELAI_EXPIRATION_MS) return false;
+
+    // Compte non vérifié ET expiré : on le supprime
+    await auth.deleteUser(docId);
+    await db.collection("utilisateurs").doc(docId).delete();
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
 
 const verifierRecaptcha = async (token) => {
   if (!token) return false;
@@ -45,7 +67,14 @@ export default async function handler(req, res) {
         .where("pseudo", "==", pseudo)
         .limit(1)
         .get();
-      return res.status(200).json({ existe: !snap.empty });
+
+      if (snap.empty) {
+        return res.status(200).json({ existe: false });
+      }
+
+      const docId = snap.docs[0].id;
+      const aEteNettoye = await nettoyerSiCompteAbandonne(docId);
+      return res.status(200).json({ existe: !aEteNettoye });
     }
 
     if (telephone) {
@@ -54,7 +83,14 @@ export default async function handler(req, res) {
         .where("telephone", "==", telephone)
         .limit(1)
         .get();
-      return res.status(200).json({ existe: !snap.empty });
+
+      if (snap.empty) {
+        return res.status(200).json({ existe: false });
+      }
+
+      const docId = snap.docs[0].id;
+      const aEteNettoye = await nettoyerSiCompteAbandonne(docId);
+      return res.status(200).json({ existe: !aEteNettoye });
     }
 
     return res.status(400).json({ error: "Pseudo ou téléphone manquant" });
