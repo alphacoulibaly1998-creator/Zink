@@ -7,22 +7,26 @@ import { doc, setDoc, collection, query, where, getDocs } from "firebase/firesto
 import axios from "axios";
 
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+let scriptRecaptchaCharge = false;
 
-const attendreRecaptchaPret = () => {
+const chargerRecaptcha = () => {
   return new Promise((resolve) => {
-    const verifier = () => {
-      if (window.grecaptcha && window.grecaptcha.execute) {
-        window.grecaptcha.ready(resolve);
-      } else {
-        setTimeout(verifier, 100);
-      }
+    if (scriptRecaptchaCharge) {
+      window.grecaptcha.ready(resolve);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = `https://www.google.com/recaptcha/api.js?render=${SITE_KEY}`;
+    script.onload = () => {
+      scriptRecaptchaCharge = true;
+      window.grecaptcha.ready(resolve);
     };
-    verifier();
+    document.head.appendChild(script);
   });
 };
 
 const obtenirTokenRecaptcha = async () => {
-  await attendreRecaptchaPret();
+  await chargerRecaptcha();
   return window.grecaptcha.execute(SITE_KEY, { action: "register" });
 };
 import { useNavigate } from "react-router-dom";
@@ -141,11 +145,8 @@ function Register() {
     // Vérification reCAPTCHA avant toute autre étape
     let recaptchaToken;
     try {
-      console.log("Avant obtenirTokenRecaptcha, grecaptcha existe ?", !!window.grecaptcha);
       recaptchaToken = await obtenirTokenRecaptcha();
-      console.log("Token reçu :", recaptchaToken);
     } catch (e) {
-      console.log("Erreur recaptcha exacte :", e);
       setErreur("Erreur de vérification anti-robot. Réessaie.");
       setChargement(false);
       return;
