@@ -1,6 +1,7 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
+import { getAppCheck } from "firebase-admin/app-check";
 
 if (!getApps().length) {
   initializeApp({
@@ -35,7 +36,7 @@ const nettoyerSiCompteAbandonne = async (docId) => {
   }
 };
 
-import { getAppCheck } from "firebase-admin/app-check";
+
 
 const verifierAppCheck = async (token) => {
   if (!token) return false;
