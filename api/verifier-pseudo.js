@@ -1,7 +1,6 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
-import { getAppCheck } from "firebase-admin/app-check";
 
 if (!getApps().length) {
   initializeApp({
@@ -38,14 +37,17 @@ const nettoyerSiCompteAbandonne = async (docId) => {
 
 
 
-const verifierAppCheck = async (token) => {
+const verifierRecaptcha = async (token) => {
   if (!token) return false;
-  try {
-    await getAppCheck().verifyToken(token);
-    return true;
-  } catch (e) {
-    return false;
-  }
+  const params = new URLSearchParams();
+  params.append("secret", process.env.RECAPTCHA_SECRET_KEY);
+  params.append("response", token);
+  const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+    method: "POST",
+    body: params,
+  });
+  const data = await response.json();
+  return data.success && data.score >= 0.5;
 };
 
 export default async function handler(req, res) {
@@ -53,11 +55,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Méthode non autorisée" });
   }
 
-  const { pseudo, telephone, appCheckToken } = req.body;
+  const { pseudo, telephone, recaptchaToken } = req.body;
 
-  const appCheckValide = await verifierAppCheck(appCheckToken);
-  if (!appCheckValide) {
-    return res.status(403).json({ error: "Vérification de sécurité échouée" });
+  const recaptchaValide = await verifierRecaptcha(recaptchaToken);
+  if (!recaptchaValide) {
+    return res.status(403).json({ error: "Vérification anti-robot échouée" });
   }
 
   try {
