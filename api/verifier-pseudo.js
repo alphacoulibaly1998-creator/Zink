@@ -35,17 +35,16 @@ const nettoyerSiCompteAbandonne = async (docId) => {
   }
 };
 
-const verifierRecaptcha = async (token) => {
+import { getAppCheck } from "firebase-admin/app-check";
+
+const verifierAppCheck = async (token) => {
   if (!token) return false;
-  const params = new URLSearchParams();
-  params.append("secret", process.env.RECAPTCHA_SECRET_KEY);
-  params.append("response", token);
-  const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
-    method: "POST",
-    body: params,
-  });
-  const data = await response.json();
-  return data.success && data.score >= 0.5;
+  try {
+    await getAppCheck().verifyToken(token);
+    return true;
+  } catch (e) {
+    return false;
+  }
 };
 
 export default async function handler(req, res) {
@@ -53,11 +52,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Méthode non autorisée" });
   }
 
-  const { pseudo, telephone, recaptchaToken } = req.body;
+  const { pseudo, telephone, appCheckToken } = req.body;
 
-  const recaptchaValide = await verifierRecaptcha(recaptchaToken);
-  if (!recaptchaValide) {
-    return res.status(403).json({ error: "Vérification anti-robot échouée" });
+  const appCheckValide = await verifierAppCheck(appCheckToken);
+  if (!appCheckValide) {
+    return res.status(403).json({ error: "Vérification de sécurité échouée" });
   }
 
   try {

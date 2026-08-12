@@ -14,9 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-console.log("Clé App Check reçue :", import.meta.env.VITE_RECAPTCHA_SITE_KEY);
-
-initializeAppCheck(app, {
+export const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
   isTokenAutoRefreshEnabled: true,
 });

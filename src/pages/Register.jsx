@@ -6,8 +6,12 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/
 import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import axios from "axios";
 
-const obtenirTokenRecaptcha = async () => {
-  return "test-temporaire";
+import { getToken } from "firebase/app-check";
+import { appCheck } from "../firebase";
+
+const obtenirTokenAppCheck = async () => {
+  const result = await getToken(appCheck, false);
+  return result.token;
 };
 import { useNavigate } from "react-router-dom";
 import { paysList } from "../indicatifs";
@@ -61,8 +65,8 @@ function Register() {
     setSuggestionsPseudo([]);
     if (!valeur.trim()) return;
     try {
-      const recaptchaToken = await obtenirTokenRecaptcha();
-      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: valeur.trim(), recaptchaToken });
+      const appCheckToken = await obtenirTokenAppCheck();
+      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: valeur.trim(), appCheckToken });
       if (data.existe) {
         setErreurPseudo("Ce pseudo est déjà utilisé.");
         setSuggestionsPseudo(genererSuggestions(valeur));
@@ -122,11 +126,18 @@ function Register() {
       return;
     }
 
-    let recaptchaToken = "test-temporaire";
+    let appCheckToken;
+    try {
+      appCheckToken = await obtenirTokenAppCheck();
+    } catch (e) {
+      setErreur("Erreur de vérification de sécurité. Réessaie.");
+      setChargement(false);
+      return;
+    }
 
     // Vérifier pseudo unique via la fonction serverless (accessible sans connexion)
     try {
-      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: pseudo.trim(), recaptchaToken });
+      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: pseudo.trim(), appCheckToken });
       if (data.existe) {
         setErreurPseudo("Ce pseudo est déjà utilisé.");
         setSuggestionsPseudo(genererSuggestions(pseudo));
@@ -143,7 +154,7 @@ function Register() {
     if (telephone) {
       const numeroComplet = `${paysChoisi.indicatif}${telephone.replace(/\s/g, "")}`;
       try {
-        const { data } = await axios.post("/api/verifier-pseudo", { telephone: numeroComplet, recaptchaToken });
+        const { data } = await axios.post("/api/verifier-pseudo", { telephone: numeroComplet, appCheckToken });
         if (data.existe) {
           setErreurTel("Ce numéro de téléphone est déjà utilisé.");
           setChargement(false);
