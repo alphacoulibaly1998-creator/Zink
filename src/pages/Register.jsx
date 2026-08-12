@@ -8,18 +8,21 @@ import axios from "axios";
 
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-const chargerRecaptcha = () => {
+const attendreRecaptchaPret = () => {
   return new Promise((resolve) => {
-    if (window.grecaptcha) return resolve();
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${SITE_KEY}`;
-    script.onload = () => window.grecaptcha.ready(resolve);
-    document.head.appendChild(script);
+    const verifier = () => {
+      if (window.grecaptcha && window.grecaptcha.execute) {
+        window.grecaptcha.ready(resolve);
+      } else {
+        setTimeout(verifier, 100);
+      }
+    };
+    verifier();
   });
 };
 
 const obtenirTokenRecaptcha = async () => {
-  await chargerRecaptcha();
+  await attendreRecaptchaPret();
   return window.grecaptcha.execute(SITE_KEY, { action: "register" });
 };
 import { useNavigate } from "react-router-dom";
