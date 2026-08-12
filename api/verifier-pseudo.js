@@ -15,7 +15,7 @@ if (!getApps().length) {
 const db = getFirestore();
 const auth = getAuth();
 
-const DELAI_EXPIRATION_MS = 2 * 60 * 1000; // TEST : 2 minutes (remettre 48h après test)
+const DELAI_EXPIRATION_MS = 48 * 60 * 60 * 1000; // 48 heures
 
 const nettoyerSiCompteAbandonne = async (docId) => {
   try {
