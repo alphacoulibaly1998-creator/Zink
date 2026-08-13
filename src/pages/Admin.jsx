@@ -183,6 +183,65 @@ function Admin({ onRetour }) {
 
       {chargement ? (
         <div className="chargement">Chargement...</div>
+      ) : onglet === "rgpd" ? (
+        <div className="param-form" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <p style={{ color: "#ff6b6b", fontSize: "13px", fontWeight: 600 }}>
+            ⚠️ Suppression complète et irréversible des données d'un utilisateur (droit à l'effacement RGPD).
+          </p>
+          <input
+            className="auth-input"
+            type="email"
+            placeholder="Email de la personne"
+            value={emailRgpd}
+            onChange={(e) => setEmailRgpd(e.target.value)}
+          />
+          <button className="auth-btn" onClick={rechercherRgpd} disabled={chargementRgpd}>
+            {chargementRgpd ? "..." : "🔍 Rechercher"}
+          </button>
+
+          {erreurRgpd && <p className="auth-erreur">{erreurRgpd}</p>}
+
+          {apercuRgpd && (
+            <div style={{ background: "#0f0f1a", borderRadius: "8px", padding: "12px" }}>
+              <p style={{ color: "#ffffff", fontSize: "14px", margin: "0 0 8px 0" }}>
+                Compte trouvé : <strong>{apercuRgpd.pseudo}</strong>
+              </p>
+              <p style={{ color: "#888", fontSize: "13px", margin: 0 }}>
+                {apercuRgpd.publications} publications, {apercuRgpd.commentaires} commentaires, {apercuRgpd.messages} messages seront supprimés définitivement.
+              </p>
+
+              <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label className="auth-label">Tape l'email exact pour confirmer :</label>
+                <input
+                  className="auth-input"
+                  type="email"
+                  value={confirmationEmail}
+                  onChange={(e) => setConfirmationEmail(e.target.value)}
+                />
+                <input
+                  className="auth-input"
+                  type="password"
+                  placeholder="Ton mot de passe admin"
+                  value={mdpAdmin}
+                  onChange={(e) => setMdpAdmin(e.target.value)}
+                />
+                <button
+                  className="profil-btn-deconnexion"
+                  onClick={confirmerSuppressionRgpd}
+                  disabled={chargementRgpd}
+                >
+                  {chargementRgpd ? "Suppression..." : "🗑️ Supprimer définitivement"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {resultatSuppression && (
+            <p className="auth-succes">
+              ✅ Suppression terminée : {resultatSuppression.publications} publications, {resultatSuppression.commentaires} commentaires, {resultatSuppression.messages} messages supprimés.
+            </p>
+          )}
+        </div>
       ) : onglet === "feedbacks" ? (
         <div className="notifs-liste">
           {feedbacks.length === 0 ? (
@@ -280,12 +339,7 @@ function Admin({ onRetour }) {
             </div>
           )}
 
-          {resultatSuppression && (
-            <p className="auth-succes">
-              ✅ Suppression terminée : {resultatSuppression.publications} publications, {resultatSuppression.commentaires} commentaires, {resultatSuppression.messages} messages supprimés.
-            </p>
-          )}
-        </div>
+          </div>
       )}
     </div>
   );
