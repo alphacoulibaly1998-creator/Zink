@@ -4,6 +4,7 @@ import { creerNotification } from "../notifications";
 import { nettoyerTexte } from "../sanitize";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import {
   doc, updateDoc, arrayUnion, arrayRemove,
   deleteDoc, getDoc, addDoc, collection,
@@ -54,10 +55,10 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
         if (snap.exists()) {
           setAuteur(snap.data());
         } else {
-          setAuteur({ pseudo: "Utilisateur inconnu", photoURL: "" });
+          setAuteur({ pseudo: t("publicationExtra.utilisateurInconnu"), photoURL: "" });
         }
       } catch (e) {
-        setAuteur({ pseudo: "Utilisateur inconnu", photoURL: "" });
+        setAuteur({ pseudo: t("publicationExtra.utilisateurInconnu"), photoURL: "" });
       }
     };
     chargerAuteur();
@@ -103,7 +104,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
     if (maintenant - dernierCommentaire.current < 1000) return;
     dernierCommentaire.current = maintenant;
     const snap = await getDoc(doc(db, "utilisateurs", user.uid));
-    const pseudo = snap.exists() ? snap.data().pseudo : "Inconnu";
+    const pseudo = snap.exists() ? snap.data().pseudo : t("publicationExtra.inconnu");
     const parentId = reponseA ? (reponseA.commentaireParentId || reponseA.id) : null;
     await addDoc(collection(db, "publications", pub.id, "commentaires"), {
       userId: user.uid,
@@ -135,7 +136,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
 
   const supprimerCommentaire = async (c) => {
     setMenuCommentaire(null);
-    if (window.confirm("Supprimer ce commentaire ?")) {
+    if (window.confirm(t("publicationExtra.confirmerSupprimerCommentaire"))) {
       await deleteDoc(
         doc(db, "publications", pub.id, "commentaires", c.id)
       );
@@ -162,7 +163,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
 
   const supprimer = async () => {
     setMenuOuvert(false);
-    if (window.confirm("Supprimer cette publication ?")) {
+    if (window.confirm(t("publicationExtra.confirmerSupprimerPub"))) {
       await deleteDoc(doc(db, "publications", pub.id));
       if (onSupprime) onSupprime(pub.id);
     }
@@ -180,7 +181,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
   const enregistrerPhoto = async () => {
     setMenuOuvert(false);
     if (!pub.imageUrl) {
-      alert("Aucune photo à enregistrer.");
+      alert(t("publicationExtra.aucunePhotoAEnregistrer"));
       return;
     }
     try {
@@ -193,7 +194,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
-      alert("Impossible d'enregistrer la photo.");
+      alert(t("publicationExtra.erreurEnregistrementPhoto"));
     }
   };
 
@@ -203,7 +204,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
   };
 
   const partager = async () => {
-    const texte = pub.description || "Regarde cette publication sur Zink !";
+    const texte = pub.description || t("publicationExtra.regardeCettePublication");
     const url = window.location.href;
     if (navigator.share) {
       try {
@@ -211,7 +212,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
       } catch (e) {}
     } else {
       navigator.clipboard.writeText(`${texte} - ${url}`);
-      alert("Lien copié dans le presse-papier !");
+      alert(t("publicationExtra.lienCopie"));
     }
   };
 
@@ -260,17 +261,18 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
       statut: "envoye"
     });
     await updateDoc(convRef, {
-      dernierMessage: { texte: "📸 Publication partagée", createdAt: new Date() },
+      dernierMessage: { texte: t("publicationExtra.publicationPartagee"), createdAt: new Date() },
       [`nonLu.${ami.id}`]: (convSnap.data()?.nonLu?.[ami.id] || 0) + 1
     });
     setPartagerOuvert(false);
-    alert(`Publication partagée à ${ami.pseudo} !`);
+    alert(t("publicationExtra.publicationPartageeA", { pseudo: ami.pseudo }));
   };
 
   const formaterDate = (timestamp) => {
     if (!timestamp) return "";
     const date = timestamp.toDate();
-    return date.toLocaleDateString("fr-FR", {
+    const locale = i18n.language === "en" ? "en-US" : "fr-FR";
+    return date.toLocaleDateString(locale, {
       day: "numeric", month: "short",
       hour: "2-digit", minute: "2-digit"
     });
@@ -346,7 +348,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
             <span className="commentaire-texte">
               {c.texte}
               {c.modifie && (
-                <span className="commentaire-modifie"> (modifié)</span>
+                <span className="commentaire-modifie"> {t("publicationExtra.modifie")}</span>
               )}
             </span>
             <div className="commentaire-actions">
@@ -395,7 +397,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                             setMenuCommentaire(null);
                           }
                         }}>
-                          ✏️ Modifier
+                          {t("publicationExtra.modifier")}
                         </button>
                         <button
                           className="menu-suppr"
@@ -405,7 +407,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                             supprimerCommentaire(c);
                           }}
                         >
-                          🗑️ Supprimer
+                          {t("publicationExtra.supprimer")}
                         </button>
                       </>
                     )}
@@ -415,7 +417,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                         else setMenuCommentaire(null);
                         signalerCommentaire(c.id);
                       }}>
-                        🚩 Signaler
+                        {t("publicationExtra.signaler")}
                       </button>
                     )}
                   </div>
@@ -473,7 +475,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
             <div className={`pub-menu ${menuOuvertVersHaut ? "vers-haut" : ""}`}>
               {pub.imageUrl && (
                 <button onClick={enregistrerPhoto}>
-                  💾 Enregistrer la photo
+                  {t("publicationExtra.enregistrerPhoto")}
                 </button>
               )}
               {pub.userId === user.uid && (
@@ -482,15 +484,15 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
                   setPubEnEdition(true);
                   setMenuOuvert(false);
                 }}>
-                  ✏️ Modifier
+                  {t("publicationExtra.modifier")}
                 </button>
               )}
               <button onClick={signaler}>
-                🚩 Signaler
+                {t("publicationExtra.signaler")}
               </button>
               {pub.userId === user.uid && (
                 <button onClick={supprimer} className="menu-suppr">
-                  🗑️ Supprimer
+                  {t("publicationExtra.supprimer")}
                 </button>
               )}
             </div>
@@ -509,13 +511,13 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
           />
           <div className="pub-edition-actions">
             <button className="auth-btn" onClick={sauvegarderEditionPub}>
-              💾 Sauvegarder
+              {t("publicationExtra.sauvegarder")}
             </button>
             <button
               className="profil-btn-annuler"
               onClick={() => setPubEnEdition(false)}
             >
-              Annuler
+              {t("publicationExtra.annuler")}
             </button>
           </div>
         </div>
@@ -525,7 +527,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
             <p className="pub-description">
               {pub.description}
               {pub.modifie && (
-                <span className="commentaire-modifie"> (modifié)</span>
+                <span className="commentaire-modifie"> {t("publicationExtra.modifie")}</span>
               )}
             </p>
           )}
@@ -602,20 +604,20 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
               onClick={() => setVoirTousCommentaires(!voirTousCommentaires)}
             >
               {voirTousCommentaires
-                ? "Masquer les commentaires"
-                : `Voir les ${commentairesPrincipaux.length - 2} autres commentaires`}
+                ? t("publicationExtra.masquerCommentaires")
+                : t("publicationExtra.voirAutresCommentaires", { nb: commentairesPrincipaux.length - 2 })}
             </button>
           )}
           {reponseA && (
             <div className="commentaire-reponse-preview">
-              <span>↩️ Répondre à {reponseA.pseudo}</span>
+              <span>{t("publicationExtra.repondreAAffichage", { pseudo: reponseA.pseudo })}</span>
               <button onClick={() => { setReponseA(null); setCommentaire(""); }}>✕</button>
             </div>
           )}
           <div className="commentaire-input">
             <input
               type="text"
-              placeholder={reponseA ? `Répondre à ${reponseA.pseudo}...` : "Ajoute un commentaire..."}
+              placeholder={reponseA ? t("publicationExtra.repondreA", { pseudo: reponseA.pseudo }) : t("publicationExtra.ajouteCommentaire")}
               value={commentaire}
               onChange={(e) => setCommentaire(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && envoyerCommentaire()}
@@ -629,13 +631,13 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
         <div className="partage-overlay" onClick={() => setPartagerOuvert(false)}>
           <div className="partage-modal" onClick={(e) => e.stopPropagation()}>
             <div className="partage-header">
-              <h3>Envoyer à un ami</h3>
+              <h3>{t("publicationExtra.envoyerAUnAmi")}</h3>
               <button onClick={() => setPartagerOuvert(false)}>✕</button>
             </div>
             <div className="partage-liste">
               {mesAmis.length === 0 ? (
                 <p style={{ color: "#888", textAlign: "center", padding: "20px" }}>
-                  Tu n'as pas encore d'amis à qui partager.
+                  {t("publicationExtra.aucunAmiAPartager")}
                 </p>
               ) : (
                 mesAmis.map((ami) => (

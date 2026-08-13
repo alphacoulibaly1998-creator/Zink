@@ -543,6 +543,32 @@ const resources = {
         section9Texte: "Nous pouvons mettre à jour cette politique de confidentialité. Toute modification importante vous sera communiquée.",
         section10Titre: "10. Contact",
         section10Texte: "Pour toute question, écrivez-nous à zinkcontact8@gmail.com."
+      },
+      publicationExtra: {
+        utilisateurInconnu: "Utilisateur inconnu",
+        inconnu: "Inconnu",
+        confirmerSupprimerCommentaire: "Supprimer ce commentaire ?",
+        confirmerSupprimerPub: "Supprimer cette publication ?",
+        aucunePhotoAEnregistrer: "Aucune photo à enregistrer.",
+        erreurEnregistrementPhoto: "Impossible d'enregistrer la photo.",
+        regardeCettePublication: "Regarde cette publication sur Zink !",
+        lienCopie: "Lien copié dans le presse-papier !",
+        publicationPartagee: "📸 Publication partagée",
+        publicationPartageeA: "Publication partagée à {{pseudo}} !",
+        enregistrerPhoto: "💾 Enregistrer la photo",
+        modifier: "✏️ Modifier",
+        signaler: "🚩 Signaler",
+        supprimer: "🗑️ Supprimer",
+        sauvegarder: "💾 Sauvegarder",
+        annuler: "Annuler",
+        modifie: "(modifié)",
+        envoyerAUnAmi: "Envoyer à un ami",
+        aucunAmiAPartager: "Tu n'as pas encore d'amis à qui partager.",
+        ajouteCommentaire: "Ajoute un commentaire...",
+        repondreA: "Répondre à {{pseudo}}...",
+        repondreAAffichage: "↩️ Répondre à {{pseudo}}",
+        masquerCommentaires: "Masquer les commentaires",
+        voirAutresCommentaires: "Voir les {{nb}} autres commentaires"
       }
     }
   },
@@ -1086,6 +1112,32 @@ const resources = {
         section9Texte: "We may update this privacy policy. Any significant change will be communicated to you.",
         section10Titre: "10. Contact",
         section10Texte: "For any question, write to us at zinkcontact8@gmail.com."
+      },
+      publicationExtra: {
+        utilisateurInconnu: "Unknown user",
+        inconnu: "Unknown",
+        confirmerSupprimerCommentaire: "Delete this comment?",
+        confirmerSupprimerPub: "Delete this post?",
+        aucunePhotoAEnregistrer: "No photo to save.",
+        erreurEnregistrementPhoto: "Unable to save the photo.",
+        regardeCettePublication: "Check out this post on Zink!",
+        lienCopie: "Link copied to clipboard!",
+        publicationPartagee: "📸 Shared post",
+        publicationPartageeA: "Post shared with {{pseudo}}!",
+        enregistrerPhoto: "💾 Save photo",
+        modifier: "✏️ Edit",
+        signaler: "🚩 Report",
+        supprimer: "🗑️ Delete",
+        sauvegarder: "💾 Save",
+        annuler: "Cancel",
+        modifie: "(edited)",
+        envoyerAUnAmi: "Send to a friend",
+        aucunAmiAPartager: "You don't have any friends to share with yet.",
+        ajouteCommentaire: "Add a comment...",
+        repondreA: "Reply to {{pseudo}}...",
+        repondreAAffichage: "↩️ Reply to {{pseudo}}",
+        masquerCommentaires: "Hide comments",
+        voirAutresCommentaires: "See {{nb}} more comments"
       }
     }
   }
