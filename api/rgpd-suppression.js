@@ -52,12 +52,35 @@ const supprimerToutesLesDonnees = async (uid, docId) => {
     db.collectionGroup("messages").where("userId", "==", uid).get(),
   ]);
 
+  // Compter les commentaires par publication parente pour ajuster nbCommentaires
+  const decompteParPub = {};
+  commentairesSnap.docs.forEach((d) => {
+    const pubRef = d.ref.parent.parent;
+    if (pubRef) {
+      decompteParPub[pubRef.id] = (decompteParPub[pubRef.id] || 0) + 1;
+    }
+  });
+
   const batch = db.batch();
   pubsSnap.docs.forEach((d) => batch.delete(d.ref));
   commentairesSnap.docs.forEach((d) => batch.delete(d.ref));
   messagesSnap.docs.forEach((d) => batch.delete(d.ref));
   batch.delete(db.collection("utilisateurs").doc(docId));
   await batch.commit();
+
+  // Mettre à jour nbCommentaires sur les publications restantes (pas déjà supprimées)
+  const idsPubsSupprimes = new Set(pubsSnap.docs.map((d) => d.id));
+  const updates = Object.entries(decompteParPub)
+    .filter(([pubId]) => !idsPubsSupprimes.has(pubId))
+    .map(async ([pubId, count]) => {
+      const pubRef = db.collection("publications").doc(pubId);
+      const pubSnap = await pubRef.get();
+      if (pubSnap.exists) {
+        const actuel = pubSnap.data().nbCommentaires || 0;
+        await pubRef.update({ nbCommentaires: Math.max(actuel - count, 0) });
+      }
+    });
+  await Promise.all(updates);
 
   try {
     await auth.deleteUser(docId);
