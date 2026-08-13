@@ -116,6 +116,7 @@ export default async function handler(req, res) {
 
     return res.status(400).json({ error: "Action invalide" });
   } catch (error) {
-    return res.status(500).json({ error: "Erreur serveur", details: error.message });
+    console.log("ERREUR RGPD DETAILLEE:", error);
+    return res.status(500).json({ error: "Erreur serveur", details: error.message, stack: error.stack });
   }
 }
