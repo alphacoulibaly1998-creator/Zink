@@ -4,14 +4,21 @@ import { collection, query, orderBy, getDocs, doc, getDoc } from "firebase/fires
 import { reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import axios from "axios";
 
-const EMAIL_ADMIN = "alphacoulibaly1998@gmail.com";
-
 function Admin({ onRetour }) {
   const [feedbacks, setFeedbacks] = useState([]);
   const [signalements, setSignalements] = useState([]);
   const [onglet, setOnglet] = useState("feedbacks");
   const [chargement, setChargement] = useState(true);
+  const [estAdmin, setEstAdmin] = useState(null);
   const user = auth.currentUser;
+
+  useEffect(() => {
+    const verifierRole = async () => {
+      const snap = await getDoc(doc(db, "utilisateurs", user.uid));
+      setEstAdmin(snap.exists() && snap.data().role === "admin");
+    };
+    verifierRole();
+  }, []);
 
   const [emailRgpd, setEmailRgpd] = useState("");
   const [apercuRgpd, setApercuRgpd] = useState(null);
@@ -139,7 +146,11 @@ function Admin({ onRetour }) {
     });
   };
 
-  if (user?.email !== EMAIL_ADMIN) {
+  if (estAdmin === null) {
+    return <div className="chargement">Chargement...</div>;
+  }
+
+  if (!estAdmin) {
     return (
       <div className="jeu-container">
         <div className="jeu-header">

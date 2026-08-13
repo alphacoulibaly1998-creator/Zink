@@ -10,13 +10,11 @@ import { doc, deleteDoc, getDoc, updateDoc, arrayRemove } from "firebase/firesto
 import { useNavigate } from "react-router-dom";
 import APropos from "./APropos";
 import Admin from "./Admin";
-import { auth as authAdmin } from "../firebase";
-
-const EMAIL_ADMIN = "alphacoulibaly1998@gmail.com";
 
 function Parametres() {
   const { t, i18n } = useTranslation();
   const [section, setSection] = useState(null);
+  const [estAdmin, setEstAdmin] = useState(false);
   const [mdpActuel, setMdpActuel] = useState("");
   const [nouveauMdp, setNouveauMdp] = useState("");
   const [nouvelEmail, setNouvelEmail] = useState("");
@@ -43,6 +41,7 @@ function Parametres() {
     const chargerBloques = async () => {
       const snap = await getDoc(doc(db, "utilisateurs", user.uid));
       if (!snap.exists()) return;
+      setEstAdmin(snap.data().role === "admin");
       const bloquesIds = snap.data().bloques || [];
       const bloquesData = await Promise.all(
         bloquesIds.map(async (id) => {
@@ -408,7 +407,7 @@ function Parametres() {
           <span className="param-fleche">→</span>
         </div>
 
-        {authAdmin.currentUser?.email === EMAIL_ADMIN && (
+        {estAdmin && (
           <div
             className="param-item"
             onClick={() => setAfficherAdmin(true)}

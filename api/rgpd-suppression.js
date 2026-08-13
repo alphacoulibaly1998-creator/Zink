@@ -14,13 +14,13 @@ if (!getApps().length) {
 
 const db = getFirestore();
 const auth = getAuth();
-const EMAIL_ADMIN = "alphacoulibaly1998@gmail.com";
 
 const verifierAdmin = async (idToken) => {
   if (!idToken) return false;
   try {
     const decoded = await auth.verifyIdToken(idToken);
-    return decoded.email === EMAIL_ADMIN;
+    const snap = await db.collection("utilisateurs").doc(decoded.uid).get();
+    return snap.exists && snap.data().role === "admin";
   } catch (e) {
     return false;
   }
