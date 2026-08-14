@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { db, auth } from "../firebase";
 import { collection, query, orderBy, getDocs, doc, getDoc } from "firebase/firestore";
 import { reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import axios from "axios";
 
 function Admin({ onRetour }) {
+  const { t, i18n } = useTranslation();
   const [feedbacks, setFeedbacks] = useState([]);
   const [signalements, setSignalements] = useState([]);
   const [onglet, setOnglet] = useState("feedbacks");
@@ -147,7 +149,7 @@ function Admin({ onRetour }) {
   };
 
   if (estAdmin === null) {
-    return <div className="chargement">Chargement...</div>;
+    return <div className="chargement">{t("admin.chargement")}</div>;
   }
 
   if (!estAdmin) {
@@ -155,10 +157,10 @@ function Admin({ onRetour }) {
       <div className="jeu-container">
         <div className="jeu-header">
           <button className="chat-retour" onClick={onRetour}>←</button>
-          <h2 className="jeu-titre">🔒 Accès refusé</h2>
+          <h2 className="jeu-titre">{t("admin.accesRefuse")}</h2>
         </div>
         <p style={{ color: "#888", textAlign: "center" }}>
-          Cette page est réservée à l'administrateur.
+          {t("admin.pageReservee")}
         </p>
       </div>
     );
@@ -168,7 +170,7 @@ function Admin({ onRetour }) {
     <div className="parametres-container">
       <div className="jeu-header">
         <button className="chat-retour" onClick={onRetour}>←</button>
-        <h2 className="jeu-titre">🛠️ Admin</h2>
+        <h2 className="jeu-titre">{t("admin.titre")}</h2>
       </div>
 
       <div className="amis-onglets">
@@ -176,19 +178,19 @@ function Admin({ onRetour }) {
           className={`onglet-btn ${onglet === "feedbacks" ? "actif" : ""}`}
           onClick={() => setOnglet("feedbacks")}
         >
-          💬 Feedbacks {feedbacks.length > 0 && <span className="onglet-badge">{feedbacks.length}</span>}
+          {t("admin.onglFeedbacks")} {feedbacks.length > 0 && <span className="onglet-badge">{feedbacks.length}</span>}
         </button>
         <button
           className={`onglet-btn ${onglet === "signalements" ? "actif" : ""}`}
           onClick={() => setOnglet("signalements")}
         >
-          🚩 Signalements {signalements.length > 0 && <span className="onglet-badge">{signalements.length}</span>}
+          {t("admin.onglSignalements")} {signalements.length > 0 && <span className="onglet-badge">{signalements.length}</span>}
         </button>
         <button
           className={`onglet-btn ${onglet === "rgpd" ? "actif" : ""}`}
           onClick={() => setOnglet("rgpd")}
         >
-          🗑️ RGPD
+          {t("admin.onglRgpd")}
         </button>
       </div>
 
@@ -197,17 +199,17 @@ function Admin({ onRetour }) {
       ) : onglet === "rgpd" ? (
         <div className="param-form" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <p style={{ color: "#ff6b6b", fontSize: "13px", fontWeight: 600 }}>
-            ⚠️ Suppression complète et irréversible des données d'un utilisateur (droit à l'effacement RGPD).
+            {t("admin.avertissementRgpd")}
           </p>
           <input
             className="auth-input"
             type="email"
-            placeholder="Email de la personne"
+            placeholder={t("admin.emailPlaceholder")}
             value={emailRgpd}
             onChange={(e) => setEmailRgpd(e.target.value)}
           />
           <button className="auth-btn" onClick={rechercherRgpd} disabled={chargementRgpd}>
-            {chargementRgpd ? "..." : "🔍 Rechercher"}
+            {chargementRgpd ? "..." : t("admin.rechercher")}
           </button>
 
           {erreurRgpd && <p className="auth-erreur">{erreurRgpd}</p>}
@@ -215,14 +217,14 @@ function Admin({ onRetour }) {
           {apercuRgpd && (
             <div style={{ background: "#0f0f1a", borderRadius: "8px", padding: "12px" }}>
               <p style={{ color: "#ffffff", fontSize: "14px", margin: "0 0 8px 0" }}>
-                Compte trouvé : <strong>{apercuRgpd.pseudo}</strong>
+                {t("admin.compteTrouve")} <strong>{apercuRgpd.pseudo}</strong>
               </p>
               <p style={{ color: "#888", fontSize: "13px", margin: 0 }}>
-                {apercuRgpd.publications} publications, {apercuRgpd.commentaires} commentaires, {apercuRgpd.messages} messages seront supprimés définitivement.
+                {t("admin.resumeSuppression", { pub: apercuRgpd.publications, com: apercuRgpd.commentaires, msg: apercuRgpd.messages })}
               </p>
 
               <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <label className="auth-label">Tape l'email exact pour confirmer :</label>
+                <label className="auth-label">{t("admin.confirmerEmail")}</label>
                 <input
                   className="auth-input"
                   type="email"
@@ -232,7 +234,7 @@ function Admin({ onRetour }) {
                 <input
                   className="auth-input"
                   type="password"
-                  placeholder="Ton mot de passe admin"
+                  placeholder={t("admin.mdpAdminPlaceholder")}
                   value={mdpAdmin}
                   onChange={(e) => setMdpAdmin(e.target.value)}
                 />
@@ -241,7 +243,7 @@ function Admin({ onRetour }) {
                   onClick={confirmerSuppressionRgpd}
                   disabled={chargementRgpd}
                 >
-                  {chargementRgpd ? "Suppression..." : "🗑️ Supprimer définitivement"}
+                  {chargementRgpd ? t("admin.suppressionEnCours") : t("admin.supprimerDefinitivement")}
                 </button>
               </div>
             </div>
@@ -249,14 +251,14 @@ function Admin({ onRetour }) {
 
           {resultatSuppression && (
             <p className="auth-succes">
-              ✅ Suppression terminée : {resultatSuppression.publications} publications, {resultatSuppression.commentaires} commentaires, {resultatSuppression.messages} messages supprimés.
+              {t("admin.suppressionTerminee", { pub: resultatSuppression.publications, com: resultatSuppression.commentaires, msg: resultatSuppression.messages })}
             </p>
           )}
         </div>
       ) : onglet === "feedbacks" ? (
         <div className="notifs-liste">
           {feedbacks.length === 0 ? (
-            <p className="param-info">Aucun feedback pour l'instant.</p>
+            <p className="param-info">{t("admin.aucunFeedback")}</p>
           ) : (
             feedbacks.map((f) => (
               <div key={f.id} className="notif-item" style={{ cursor: "default" }}>
@@ -271,7 +273,7 @@ function Admin({ onRetour }) {
       ) : (
         <div className="notifs-liste">
           {signalements.length === 0 ? (
-            <p className="param-info">Aucun signalement pour l'instant.</p>
+            <p className="param-info">{t("admin.aucunSignalement")}</p>
           ) : (
             signalements.map((s) => (
               <div key={s.id} className="notif-item" style={{ cursor: "default", flexDirection: "column", alignItems: "flex-start" }}>
@@ -285,13 +287,13 @@ function Admin({ onRetour }) {
                     </p>
                   )}
                   <div style={{ background: "#0f0f1a", borderRadius: "8px", padding: "10px", marginTop: "8px" }}>
-                    <p style={{ color: "#a855f7", fontSize: "12px", margin: "0 0 4px 0" }}>Contenu signalé :</p>
+                    <p style={{ color: "#a855f7", fontSize: "12px", margin: "0 0 4px 0" }}>{t("admin.contenuSignale")}</p>
                     <p style={{ color: "#ffffff", fontSize: "13px", margin: 0 }}>{s.contenu}</p>
                     {s.contexte && (
                       <p style={{ color: "#888", fontSize: "12px", margin: "4px 0 0 0" }}>{s.contexte}</p>
                     )}
                   </div>
-                  <span className="notif-date">Signalé par {s.auteurSignaleur} — {formaterDate(s.createdAt)}</span>
+                  <span className="notif-date">{t("admin.signalePar", { pseudo: s.auteurSignaleur, date: formaterDate(s.createdAt) })}</span>
                 </div>
               </div>
             ))
