@@ -34,6 +34,7 @@ export const paysList = [
   { nom: "Emirats Arabes Unis", nomEn: "United Arab Emirates", indicatif: "+971", chiffres: 9 },
   { nom: "Espagne", nomEn: "Spain", indicatif: "+34", chiffres: 9 },
   { nom: "Estonie", nomEn: "Estonia", indicatif: "+372", chiffres: 8 },
+  { nom: "États-Unis", nomEn: "United States", indicatif: "+1", chiffres: 10 },
   { nom: "Ethiopie", nomEn: "Ethiopia", indicatif: "+251", chiffres: 9 },
   { nom: "Finlande", nomEn: "Finland", indicatif: "+358", chiffres: 9 },
   { nom: "France", nomEn: "France", indicatif: "+33", chiffres: 9 },
