@@ -17,6 +17,10 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Photos et scripts de génération de profils démo (usage local uniquement)
+photos-demo/
+scripts/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
