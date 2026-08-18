@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { db, auth } from "../firebase";
+import axios from "axios";
+import { supabase } from "../supabase";
 import { creerNotification } from "../notifications";
 import { nettoyerTexte } from "../sanitize";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +27,11 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
   const [texteEdition, setTexteEdition] = useState("");
   const [pubEnEdition, setPubEnEdition] = useState(false);
   const [texteEditionPub, setTexteEditionPub] = useState("");
+  const [fichierEdition, setFichierEdition] = useState(null);
+  const [apercuEdition, setApercuEdition] = useState(null);
+  const [typeFichierEdition, setTypeFichierEdition] = useState("");
+  const [chargementEdition, setChargementEdition] = useState(false);
+  const [erreurEdition, setErreurEdition] = useState("");
  const [reponseA, setReponseA] = useState(null);
  const [partagerOuvert, setPartagerOuvert] = useState(false);
   const [mesAmis, setMesAmis] = useState([]);
@@ -170,12 +177,70 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
   };
 
   const sauvegarderEditionPub = async () => {
-    if (!texteEditionPub.trim()) return;
-    await updateDoc(doc(db, "publications", pub.id), {
-      description: texteEditionPub.trim(),
-      modifie: true
-    });
-    setPubEnEdition(false);
+    if (!texteEditionPub.trim() && !fichierEdition && !pub.imageUrl && !pub.videoUrl) return;
+    setChargementEdition(true);
+    try {
+      let imageUrl = pub.imageUrl || "";
+      let videoUrl = pub.videoUrl || "";
+
+      if (fichierEdition === "supprime") {
+        imageUrl = "";
+        videoUrl = "";
+      }
+
+      if (fichierEdition && fichierEdition !== "supprime" && typeFichierEdition === "image") {
+        const reader = new FileReader();
+        const base64 = await new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(fichierEdition);
+        });
+        const res = await axios.post("/api/upload-image", { imageBase64: base64 });
+        imageUrl = res.data.url;
+        videoUrl = "";
+      }
+
+      if (fichierEdition && fichierEdition !== "supprime" && typeFichierEdition === "video") {
+        const nomFichier = `pub_video_${Date.now()}.mp4`;
+        const { data } = await axios.post("/api/upload-video", { nomFichier });
+        await axios.put(data.signedUrl, fichierEdition, {
+          headers: { "Content-Type": fichierEdition.type }
+        });
+        const { data: urlData } = supabase.storage.from("zink").getPublicUrl(nomFichier);
+        videoUrl = urlData.publicUrl;
+        imageUrl = "";
+      }
+
+      await updateDoc(doc(db, "publications", pub.id), {
+        description: texteEditionPub.trim(),
+        imageUrl,
+        videoUrl,
+        modifie: true
+      });
+      setPubEnEdition(false);
+      setFichierEdition(null);
+      setApercuEdition(null);
+      setTypeFichierEdition("");
+    } catch (e) {
+      setErreurEdition(t("publier.erreurGenerale"));
+    }
+    setChargementEdition(false);
+  };
+
+  const handleFichierEdition = (e, type) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (type === "image" && f.size > 5 * 1024 * 1024) {
+      setErreurEdition(t("publier.erreurTaille"));
+      return;
+    }
+    if (type === "video" && f.size > 50 * 1024 * 1024) {
+      setErreurEdition(t("publier.erreurTailleVideo"));
+      return;
+    }
+    setFichierEdition(f);
+    setApercuEdition(URL.createObjectURL(f));
+    setTypeFichierEdition(type);
+    setErreurEdition("");
   };
 
   const enregistrerPhoto = async () => {
@@ -457,6 +522,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
           <span className="pub-date">{formaterDate(pub.createdAt)}</span>
         </div>
 
+        {!pubEnEdition && (
         <div className="pub-menu-container" ref={menuRef}>
           <button
             className="pub-btn-menu"
@@ -498,6 +564,7 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
             </div>
           )}
         </div>
+        )}
       </div>
 
       {pubEnEdition ? (
@@ -509,13 +576,71 @@ function Publication({ pub, onSupprime, onVoirProfil }) {
             rows={3}
             autoFocus
           />
+
+          {(apercuEdition || (!fichierEdition && (pub.imageUrl || pub.videoUrl))) && (
+            <div className="pub-apercu">
+              {apercuEdition ? (
+                typeFichierEdition === "image" ? (
+                  <img src={apercuEdition} alt="aperçu" />
+                ) : (
+                  <video src={apercuEdition} controls />
+                )
+              ) : pub.imageUrl ? (
+                <img src={pub.imageUrl} alt="actuel" />
+              ) : (
+                <video src={pub.videoUrl} controls />
+              )}
+              <button
+                className="pub-suppr-img"
+                onClick={() => {
+                  setFichierEdition("supprime");
+                  setApercuEdition(null);
+                  setTypeFichierEdition("");
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {erreurEdition && <p className="auth-erreur">{erreurEdition}</p>}
+
+          <div className="pub-actions">
+            <div className="pub-btns-media">
+              <label className="pub-btn-photo">
+                📷
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFichierEdition(e, "image")}
+                  style={{ display: "none" }}
+                />
+              </label>
+              <label className="pub-btn-photo">
+                🎥
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => handleFichierEdition(e, "video")}
+                  style={{ display: "none" }}
+                />
+              </label>
+            </div>
+          </div>
+
           <div className="pub-edition-actions">
-            <button className="auth-btn" onClick={sauvegarderEditionPub}>
-              {t("publicationExtra.sauvegarder")}
+            <button className="auth-btn" onClick={sauvegarderEditionPub} disabled={chargementEdition}>
+              {chargementEdition ? "..." : t("publicationExtra.sauvegarder")}
             </button>
             <button
               className="profil-btn-annuler"
-              onClick={() => setPubEnEdition(false)}
+              onClick={() => {
+                setPubEnEdition(false);
+                setFichierEdition(null);
+                setApercuEdition(null);
+                setTypeFichierEdition("");
+                setErreurEdition("");
+              }}
             >
               {t("publicationExtra.annuler")}
             </button>
