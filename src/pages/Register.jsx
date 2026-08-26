@@ -161,7 +161,7 @@ function Register() {
         return;
       }
     } catch (e) {
-      setErreur("Erreur de vérification du pseudo. Réessaie.");
+      setErreur(t("inscription.erreurVerificationSecurite"));
       setChargement(false);
       return;
     }
@@ -177,7 +177,7 @@ function Register() {
           return;
         }
       } catch (e) {
-        setErreur("Erreur de vérification du numéro. Réessaie.");
+        setErreur(t("inscription.erreurVerificationSecurite"));
         setChargement(false);
         return;
       }

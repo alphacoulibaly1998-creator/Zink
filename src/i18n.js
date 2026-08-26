@@ -96,7 +96,8 @@ const resources = {
         nonPrecise: "Préfère ne pas préciser",
         accepteTexte: "En cliquant sur S'inscrire, vous acceptez notre",
         politiqueLien: "Politique de confidentialité",
-        ageMinimum: "Tu dois avoir au moins 16 ans pour créer un compte sur Zink."
+        ageMinimum: "Tu dois avoir au moins 16 ans pour créer un compte sur Zink.",
+        erreurVerificationSecurite: "Échec de la vérification de sécurité. Réessaie dans quelques instants.",
       },
       navbar: {
         accueil: "Accueil",
@@ -693,8 +694,9 @@ const resources = {
         nonPrecise: "Prefer not to say",
         accepteTexte: "By clicking Sign up, you agree to our",
         politiqueLien: "Privacy Policy",
-        ageMinimum: "You must be at least 16 years old to create a Zink account."
-      },
+        ageMinimum: "You must be at least 16 years old to create a Zink account.",
+      erreurVerificationSecurite: "Security check failed. Please try again in a moment.",
+    },
       navbar: {
         accueil: "Home",
         profil: "Profile",
