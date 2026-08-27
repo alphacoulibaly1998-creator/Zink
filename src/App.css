@@ -957,6 +957,7 @@ body {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 80px);
+  height: calc(100dvh - 80px);
   margin: -20px;
 }
 
@@ -1401,6 +1402,7 @@ body {
   .chat-container {
     margin: -16px;
     height: calc(100vh - 65px);
+    height: calc(100dvh - 65px);
   }
 
   .conv-item {

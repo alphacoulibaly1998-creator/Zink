@@ -597,6 +597,11 @@ const msgData = {
             onChange={(e) => setTexte(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && envoyerMessage()}
             onClick={(e) => e.stopPropagation()}
+            onFocus={(e) => {
+              setTimeout(() => {
+                e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 300);
+            }}
           />
         </div>
 
