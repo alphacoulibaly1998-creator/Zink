@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import React from "react";
 import { auth, db } from "./firebase";
@@ -30,6 +30,38 @@ const routeProtegee = (utilisateur, element) => {
   if (!utilisateur.emailVerified) return <Navigate to="/verifier-email" />;
   return element;
 };
+
+function ContenuApp({ utilisateur, suggestionsGlobales, setSuggestionsGlobales }) {
+  const location = useLocation();
+  const estDansChat = /^\/messages\/[^/]+$/.test(location.pathname);
+
+  return (
+    <div className="app-container">
+      <div className="page-content">
+        <Routes>
+          <Route path="/login" element={!utilisateur ? <Login /> : <Navigate to="/" />} />
+          <Route path="/register" element={!utilisateur ? <Register /> : <Navigate to="/" />} />
+          <Route path="/verifier-email" element={utilisateur && !utilisateur.emailVerified ? <VerifierEmail /> : <Navigate to="/" />} />
+         <Route path="/mot-de-passe-oublie" element={!utilisateur ? <MotDePasseOublie /> : <Navigate to="/" />} />
+          <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
+          <Route path="/" element={utilisateur ? (utilisateur.emailVerified ? <Accueil /> : <Navigate to="/verifier-email" />) : <Navigate to="/login" />} />
+          <Route path="/profil" element={routeProtegee(utilisateur, <Profil />)} />
+          <Route path="/amis" element={routeProtegee(utilisateur, <Amis />)} />
+          <Route path="/messages" element={routeProtegee(utilisateur, <Messages />)} />
+          <Route path="/messages/:convId" element={routeProtegee(utilisateur, <Messages />)} />
+          <Route path="/jeux" element={routeProtegee(utilisateur, <Jeux />)} />
+          <Route path="/decouvrir" element={routeProtegee(utilisateur, <Decouvrir suggestionsGlobales={suggestionsGlobales} setSuggestionsGlobales={setSuggestionsGlobales} />)} />
+          <Route path="/attaques" element={routeProtegee(utilisateur, <AttaquesSonores />)} />
+          <Route path="/profil/:userId" element={routeProtegee(utilisateur, <ProfilPublic />)} />
+          <Route path="/signalement" element={routeProtegee(utilisateur, <PageSignalement />)} />
+          <Route path="/parametres" element={routeProtegee(utilisateur, <Parametres />)} />
+          <Route path="/notifications" element={routeProtegee(utilisateur, <Notifications />)} />
+        </Routes>
+      </div>
+      {utilisateur && utilisateur.emailVerified && !estDansChat && <NavBar />}
+    </div>
+  );
+}
 
 function App() {
   const [utilisateur, setUtilisateur] = useState(null);
@@ -94,32 +126,11 @@ function App() {
   return (
     <SignalementContext.Provider value={null}>
     <BrowserRouter>
-      <div className="app-container">
-        <div className="page-content">
-          <Routes>
-            <Route path="/login" element={!utilisateur ? <Login /> : <Navigate to="/" />} />
-            <Route path="/register" element={!utilisateur ? <Register /> : <Navigate to="/" />} />
-            <Route path="/verifier-email" element={utilisateur && !utilisateur.emailVerified ? <VerifierEmail /> : <Navigate to="/" />} />
-           <Route path="/mot-de-passe-oublie" element={!utilisateur ? <MotDePasseOublie /> : <Navigate to="/" />} />
-            <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
-            <Route path="/" element={utilisateur ? (utilisateur.emailVerified ? <Accueil /> : <Navigate to="/verifier-email" />) : <Navigate to="/login" />} />
-            <Route path="/profil" element={routeProtegee(utilisateur, <Profil />)} />
-            <Route path="/amis" element={routeProtegee(utilisateur, <Amis />)} />
-            <Route path="/messages" element={routeProtegee(utilisateur, <Messages />)} />
-            <Route path="/messages/:convId" element={routeProtegee(utilisateur, <Messages />)} />
-            <Route path="/jeux" element={routeProtegee(utilisateur, <Jeux />)} />
-            <Route path="/decouvrir" element={routeProtegee(utilisateur, <Decouvrir suggestionsGlobales={suggestionsGlobales} setSuggestionsGlobales={setSuggestionsGlobales} />)} />
-            <Route path="/attaques" element={routeProtegee(utilisateur, <AttaquesSonores />)} />
-            <Route path="/profil/:userId" element={routeProtegee(utilisateur, <ProfilPublic />)} />
-            <Route path="/signalement" element={routeProtegee(utilisateur, <PageSignalement />)} />
-            <Route path="/parametres" element={routeProtegee(utilisateur, <Parametres />)} />
-            <Route path="/notifications" element={routeProtegee(utilisateur, <Notifications />)} />
-            <Route path="/messages/:convId" element={utilisateur ? <Messages /> : <Navigate to="/login" />} />
-          </Routes>
-        </div>
-        {utilisateur && utilisateur.emailVerified && <NavBar />}
-      </div>
-      
+      <ContenuApp
+        utilisateur={utilisateur}
+        suggestionsGlobales={suggestionsGlobales}
+        setSuggestionsGlobales={setSuggestionsGlobales}
+      />
     </BrowserRouter>
     </SignalementContext.Provider>
   );
