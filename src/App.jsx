@@ -37,7 +37,7 @@ function ContenuApp({ utilisateur, suggestionsGlobales, setSuggestionsGlobales }
 
   return (
     <div className="app-container">
-      <div className="page-content">
+      <div className="page-content" style={estDansChat ? { padding: 0 } : undefined}>
         <Routes>
           <Route path="/login" element={!utilisateur ? <Login /> : <Navigate to="/" />} />
           <Route path="/register" element={!utilisateur ? <Register /> : <Navigate to="/" />} />
