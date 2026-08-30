@@ -16,10 +16,15 @@ const EMOJIS = ["😀","😂","😍","🥰","😎","😭","😱","🤔","👍","
 function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
   const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
-  const [hauteurEcran, setHauteurEcran] = useState(window.innerHeight);
+  const [hauteurEcran, setHauteurEcran] = useState(
+    window.visualViewport?.height || window.innerHeight
+  );
 
   useEffect(() => {
-    const ajusterHauteur = () => setHauteurEcran(window.innerHeight);
+    const ajusterHauteur = () => {
+      setHauteurEcran(window.visualViewport?.height || window.innerHeight);
+    };
+    ajusterHauteur();
     window.addEventListener("resize", ajusterHauteur);
     window.visualViewport?.addEventListener("resize", ajusterHauteur);
     return () => {
