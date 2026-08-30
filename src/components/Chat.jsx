@@ -16,13 +16,10 @@ const EMOJIS = ["😀","😂","😍","🥰","😎","😭","😱","🤔","👍","
 function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
   const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
-  const [hauteurEcran, setHauteurEcran] = useState(
-    window.visualViewport?.height || window.innerHeight
-  );
-
   useEffect(() => {
     const ajusterHauteur = () => {
-      setHauteurEcran(window.visualViewport?.height || window.innerHeight);
+      const vh = (window.visualViewport?.height || window.innerHeight) * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
     };
     ajusterHauteur();
     window.addEventListener("resize", ajusterHauteur);
@@ -395,7 +392,7 @@ const msgData = {
   };
 
   return (
-    <div className="chat-container" style={{ height: `${hauteurEcran}px` }}>
+    <div className="chat-container">
       <div className="chat-header" onClick={(e) => e.stopPropagation()}>
         <button className="chat-retour" onClick={onRetour}>←</button>
         <div

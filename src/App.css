@@ -9,7 +9,7 @@ html, body {
   background: #0f0f1a;
   color: #ffffff;
   min-height: 100%;
-  overscroll-behavior-x: none;
+  overflow-x: hidden;
 }
 
 .app-container {
@@ -957,8 +957,7 @@ html, body {
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
+  height: calc(var(--vh, 1vh) * 100);
   margin: -20px;
 }
 
@@ -1402,8 +1401,7 @@ html, body {
 
   .chat-container {
     margin: -16px;
-    height: 100vh;
-    height: 100dvh;
+    height: calc(var(--vh, 1vh) * 100);
   }
 
   .conv-item {
