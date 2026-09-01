@@ -22,9 +22,17 @@ function Chat({ convId, autre, autreId, onRetour, onVoirProfil }) {
       document.documentElement.style.setProperty("--vh", `${vh}px`);
     };
     ajusterHauteur();
+    window.scrollTo(0, 1);
+    window.scrollTo(0, 0);
+    const timer1 = setTimeout(ajusterHauteur, 50);
+    const timer2 = setTimeout(ajusterHauteur, 200);
+    const timer3 = setTimeout(ajusterHauteur, 500);
     window.addEventListener("resize", ajusterHauteur);
     window.visualViewport?.addEventListener("resize", ajusterHauteur);
     return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
       window.removeEventListener("resize", ajusterHauteur);
       window.visualViewport?.removeEventListener("resize", ajusterHauteur);
     };
