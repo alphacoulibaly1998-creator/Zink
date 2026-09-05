@@ -84,7 +84,7 @@ function Register() {
       const recaptchaToken = await obtenirTokenRecaptcha();
       const { data } = await axios.post("/api/verifier-pseudo", { pseudo: valeur.trim(), recaptchaToken });
       if (data.existe) {
-        setErreurPseudo("Ce pseudo est déjà utilisé.");
+        setErreurPseudo(t("inscription.pseudoDejaUtilise"));
         setSuggestionsPseudo(genererSuggestions(valeur));
       }
     } catch (e) {}
@@ -98,26 +98,26 @@ function Register() {
     setChargement(true);
 
     if (!pseudo.trim()) {
-      setErreurPseudo("Le pseudo est obligatoire.");
+      setErreurPseudo(t("inscription.pseudoObligatoire"));
       setChargement(false);
       return;
     }
 
     const mdpRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!mdpRegex.test(motDePasse)) {
-      setErreur("Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.");
+      setErreur(t("inscription.mdpTropFaible"));
       setChargement(false);
       return;
     }
 
     if (!paysChoisi) {
-      setErreur("Choisis ton pays.");
+      setErreur(t("inscription.choisirPaysErreur"));
       setChargement(false);
       return;
     }
 
    if (!age) {
-      setErreur("Entre ta date de naissance.");
+      setErreur(t("inscription.entrerDateNaissance"));
       setChargement(false);
       return;
     }
@@ -130,32 +130,24 @@ function Register() {
       return;
     }
     if (!sexe) {
-      setErreur("Choisis ton sexe.");
+      setErreur(t("inscription.choisirSexeErreur"));
       setChargement(false);
       return;
     }
     if (!validerTelephone()) {
       setErreurTel(
-        `Numéro invalide. Le ${paysChoisi.nom} nécessite exactement ${paysChoisi.chiffres} chiffres.`
+        t("inscription.numeroInvalide", { pays: paysChoisi.nom, chiffres: paysChoisi.chiffres })
       );
-      setChargement(false);
-      return;
-    }
-
-    let recaptchaToken;
-    try {
-      recaptchaToken = await obtenirTokenRecaptcha();
-    } catch (e) {
-      setErreur("Erreur de vérification anti-robot. Réessaie.");
       setChargement(false);
       return;
     }
 
     // Vérifier pseudo unique via la fonction serverless (accessible sans connexion)
     try {
-      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: pseudo.trim(), recaptchaToken });
+      const tokenPseudo = await obtenirTokenRecaptcha();
+      const { data } = await axios.post("/api/verifier-pseudo", { pseudo: pseudo.trim(), recaptchaToken: tokenPseudo });
       if (data.existe) {
-        setErreurPseudo("Ce pseudo est déjà utilisé.");
+        setErreurPseudo(t("inscription.pseudoDejaUtilise"));
         setSuggestionsPseudo(genererSuggestions(pseudo));
         setChargement(false);
         return;
@@ -166,13 +158,14 @@ function Register() {
       return;
     }
 
-    // Vérifier numéro unique via la même fonction serverless
+    // Vérifier numéro unique via la même fonction serverless (nouveau token, evite l'expiration)
     if (telephone) {
       const numeroComplet = `${paysChoisi.indicatif}${telephone.replace(/\s/g, "")}`;
       try {
-        const { data } = await axios.post("/api/verifier-pseudo", { telephone: numeroComplet, recaptchaToken });
+        const tokenTel = await obtenirTokenRecaptcha();
+        const { data } = await axios.post("/api/verifier-pseudo", { telephone: numeroComplet, recaptchaToken: tokenTel });
         if (data.existe) {
-          setErreurTel("Ce numéro de téléphone est déjà utilisé.");
+          setErreurTel(t("inscription.numeroDejaUtilise"));
           setChargement(false);
           return;
         }
@@ -212,13 +205,13 @@ function Register() {
       navigate("/");
     } catch (e) {
       if (e.code === "auth/email-already-in-use") {
-        setErreur("Cet email est déjà utilisé par un autre compte.");
+        setErreur(t("inscription.emailDejaUtilise"));
       } else if (e.code === "auth/invalid-email") {
-        setErreur("L'adresse email n'est pas valide.");
+        setErreur(t("inscription.emailInvalide"));
       } else if (e.code === "auth/weak-password") {
-        setErreur("Le mot de passe doit contenir au moins 6 caractères.");
+        setErreur(t("inscription.mdpTropCourt"));
       } else {
-        setErreur("Une erreur est survenue. Réessaie.");
+        setErreur(t("inscription.erreurGenerale"));
       }
     }
     setChargement(false);
@@ -252,7 +245,7 @@ function Register() {
           )}
           {suggestionsPseudo.length > 0 && (
             <div className="suggestions-container">
-              <p className="suggestions-titre">Suggestions :</p>
+              <p className="suggestions-titre">{t("inscription.suggestionsTitre")}</p>
               {suggestionsPseudo.map((s) => (
                 <button
                   key={s}
