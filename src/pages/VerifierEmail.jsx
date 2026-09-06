@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { auth } from "../firebase";
 import { sendEmailVerification, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 function VerifierEmail() {
+  const { t } = useTranslation();
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [message, setMessage] = useState("");
   const [verification, setVerification] = useState(false);
@@ -26,9 +28,9 @@ function VerifierEmail() {
     setMessage("");
     try {
       await sendEmailVerification(user);
-      setMessage("✅ Email renvoyé ! Vérifie ta boîte mail et tes spams.");
+      setMessage(t("verifierEmail.emailRenvoye"));
     } catch (e) {
-      setMessage("⏳ Attends un peu avant de redemander un email.");
+      setMessage(t("verifierEmail.attendsUnPeu"));
     }
     setEnvoiEnCours(false);
   };
@@ -39,7 +41,7 @@ function VerifierEmail() {
     if (user.emailVerified) {
       window.location.href = "/";
     } else {
-      setMessage("Ton email n'est pas encore vérifié. Vérifie ta boîte mail.");
+      setMessage(t("verifierEmail.pasEncoreVerifie"));
     }
     setVerification(false);
   };
@@ -53,15 +55,14 @@ function VerifierEmail() {
     <div className="auth-container">
       <div className="auth-box">
         <h1 className="auth-titre">Zink</h1>
-        <p className="auth-sous-titre">Vérifie ton email</p>
+        <p className="auth-sous-titre">{t("verifierEmail.titre")}</p>
 
         <div style={{ textAlign: "center", padding: "10px 0" }}>
           <span style={{ fontSize: "48px" }}>📧</span>
         </div>
 
         <p style={{ color: "#dddddd", fontSize: "14px", textAlign: "center", lineHeight: "1.6" }}>
-          Nous avons envoyé un email de vérification à <strong>{user?.email}</strong>.
-          Clique sur le lien dans l'email (vérifie aussi tes spams) pour activer ton compte.
+          {t("verifierEmail.texteIntro", { email: user?.email })}
         </p>
 
         {message && (
@@ -75,7 +76,7 @@ function VerifierEmail() {
           onClick={verifierMaintenant}
           disabled={verification}
         >
-          {verification ? "Vérification..." : "✅ J'ai vérifié mon email"}
+          {verification ? t("verifierEmail.verificationEnCours") : t("verifierEmail.jaiVerifie")}
         </button>
 
         <button
@@ -83,11 +84,11 @@ function VerifierEmail() {
           onClick={renvoyerEmail}
           disabled={envoiEnCours}
         >
-          {envoiEnCours ? "Envoi..." : "📤 Renvoyer l'email"}
+          {envoiEnCours ? t("verifierEmail.envoiEnCours") : t("verifierEmail.renvoyerEmail")}
         </button>
 
         <p className="auth-lien" onClick={deconnexion}>
-          🚪 Se déconnecter
+          {t("verifierEmail.seDeconnecter")}
         </p>
       </div>
     </div>

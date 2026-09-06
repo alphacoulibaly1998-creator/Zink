@@ -611,6 +611,18 @@ const resources = {
         mdpAdminIncorrect: "Mot de passe admin incorrect.",
         erreurRecherche: "Erreur lors de la recherche.",
         erreurSuppression: "Erreur lors de la suppression."
+      },
+      verifierEmail: {
+        titre: "Vérifie ton email",
+        texteIntro: "Nous avons envoyé un email de vérification à {{email}}. Clique sur le lien dans l'email (vérifie aussi tes spams) pour activer ton compte.",
+        emailRenvoye: "✅ Email renvoyé ! Vérifie ta boîte mail et tes spams.",
+        attendsUnPeu: "⏳ Attends un peu avant de redemander un email.",
+        pasEncoreVerifie: "Ton email n'est pas encore vérifié. Vérifie ta boîte mail.",
+        jaiVerifie: "✅ J'ai vérifié mon email",
+        verificationEnCours: "Vérification...",
+        renvoyerEmail: "📤 Renvoyer l'email",
+        envoiEnCours: "Envoi...",
+        seDeconnecter: "🚪 Se déconnecter"
       }
     }
   },
@@ -1222,6 +1234,18 @@ const resources = {
         mdpAdminIncorrect: "Incorrect admin password.",
         erreurRecherche: "Error during search.",
         erreurSuppression: "Error during deletion."
+      },
+      verifierEmail: {
+        titre: "Verify your email",
+        texteIntro: "We sent a verification email to {{email}}. Click the link in the email (check your spam folder too) to activate your account.",
+        emailRenvoye: "✅ Email resent! Check your inbox and spam folder.",
+        attendsUnPeu: "⏳ Wait a moment before requesting another email.",
+        pasEncoreVerifie: "Your email isn't verified yet. Check your inbox.",
+        jaiVerifie: "✅ I've verified my email",
+        verificationEnCours: "Verifying...",
+        renvoyerEmail: "📤 Resend email",
+        envoiEnCours: "Sending...",
+        seDeconnecter: "🚪 Log out"
       }
     }
   }
