@@ -623,6 +623,17 @@ const resources = {
         renvoyerEmail: "📤 Renvoyer l'email",
         envoiEnCours: "Envoi...",
         seDeconnecter: "🚪 Se déconnecter"
+      },
+      mdpOublie: {
+        titre: "Réinitialiser le mot de passe",
+        emailPlaceholder: "Ton email",
+        entrerEmail: "Entre ton email.",
+        emailEnvoye: "✅ Email envoyé ! Vérifie ta boîte mail et tes spams.",
+        aucunCompte: "Aucun compte trouvé avec cet email.",
+        erreurGenerale: "Une erreur est survenue. Réessaie.",
+        envoiEnCours: "Envoi...",
+        envoyerLien: "📧 Envoyer le lien",
+        retourConnexion: "← Retour à la connexion"
       }
     }
   },
@@ -1246,6 +1257,17 @@ const resources = {
         renvoyerEmail: "📤 Resend email",
         envoiEnCours: "Sending...",
         seDeconnecter: "🚪 Log out"
+      },
+      mdpOublie: {
+        titre: "Reset your password",
+        emailPlaceholder: "Your email",
+        entrerEmail: "Enter your email.",
+        emailEnvoye: "✅ Email sent! Check your inbox and spam folder.",
+        aucunCompte: "No account found with this email.",
+        erreurGenerale: "An error occurred. Try again.",
+        envoiEnCours: "Sending...",
+        envoyerLien: "📧 Send link",
+        retourConnexion: "← Back to login"
       }
     }
   }

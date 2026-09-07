@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { auth } from "../firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 function MotDePasseOublie() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [erreur, setErreur] = useState("");
@@ -14,18 +16,18 @@ function MotDePasseOublie() {
     setErreur("");
     setMessage("");
     if (!email.trim()) {
-      setErreur("Entre ton email.");
+      setErreur(t("mdpOublie.entrerEmail"));
       return;
     }
     setChargement(true);
     try {
       await sendPasswordResetEmail(auth, email.trim());
-      setMessage("✅ Email envoyé ! Vérifie ta boîte mail et tes spams.");
+      setMessage(t("mdpOublie.emailEnvoye"));
     } catch (e) {
       if (e.code === "auth/user-not-found") {
-        setErreur("Aucun compte trouvé avec cet email.");
+        setErreur(t("mdpOublie.aucunCompte"));
       } else {
-        setErreur("Une erreur est survenue. Réessaie.");
+        setErreur(t("mdpOublie.erreurGenerale"));
       }
     }
     setChargement(false);
@@ -35,12 +37,12 @@ function MotDePasseOublie() {
     <div className="auth-container">
       <div className="auth-box">
         <h1 className="auth-titre">Zink</h1>
-        <p className="auth-sous-titre">Réinitialiser le mot de passe</p>
+        <p className="auth-sous-titre">{t("mdpOublie.titre")}</p>
 
         <input
           className="auth-input"
           type="email"
-          placeholder="Ton email"
+          placeholder={t("mdpOublie.emailPlaceholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -53,11 +55,11 @@ function MotDePasseOublie() {
           onClick={envoyer}
           disabled={chargement}
         >
-          {chargement ? "Envoi..." : "📧 Envoyer le lien"}
+          {chargement ? t("mdpOublie.envoiEnCours") : t("mdpOublie.envoyerLien")}
         </button>
 
         <p className="auth-lien" onClick={() => navigate("/login")}>
-          ← Retour à la connexion
+          {t("mdpOublie.retourConnexion")}
         </p>
       </div>
     </div>
