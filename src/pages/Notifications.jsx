@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { db, auth } from "../firebase";
 import {
   collection, query, where, onSnapshot,
@@ -28,7 +29,7 @@ function Notifications() {
           const data = { id: d.id, ...d.data() };
           if (data.auteurId) {
             const auteurSnap = await getDoc(doc(db, "utilisateurs", data.auteurId));
-            data.auteur = auteurSnap.exists() ? auteurSnap.data() : { pseudo: "Inconnu" };
+            data.auteur = auteurSnap.exists() ? auteurSnap.data() : { pseudo: t("notifications.inconnu") };
           }
           return data;
         })
@@ -50,7 +51,6 @@ function Notifications() {
       setProfilOuvert(notif.auteurId);
     }
     if (notif.type === "like" || notif.type === "commentaire") {
-      onRetour();
       navigate("/");
     }
   };
@@ -93,10 +93,11 @@ function Notifications() {
     const date = timestamp.toDate();
     const now = new Date();
     const diff = now - date;
-    if (diff < 60000) return "À l'instant";
-    if (diff < 3600000) return `${Math.floor(diff / 60000)} min`;
+    if (diff < 60000) return t("notifications.aLinstant");
+    if (diff < 3600000) return `${Math.floor(diff / 60000)} ${t("notifications.min")}`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h`;
-    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+    const locale = i18n.language === "en" ? "en-US" : "fr-FR";
+    return date.toLocaleDateString(locale, { day: "numeric", month: "short" });
   };
 
   if (profilOuvert) return (

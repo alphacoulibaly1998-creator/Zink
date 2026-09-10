@@ -63,7 +63,10 @@ const resources = {
         attaque: "t'a envoyé une attaque sonore",
         like: "a aimé ta publication",
         commentaire: "a commenté ta publication",
-        quelquUn: "Quelqu'un"
+        quelquUn: "Quelqu'un",
+        inconnu: "Inconnu",
+        aLinstant: "À l'instant",
+        min: "min"
       },
       publier: {
         placeholder: "Quoi de neuf ? 😊",
@@ -697,7 +700,10 @@ const resources = {
         attaque: "sent you a sound attack",
         like: "liked your post",
         commentaire: "commented on your post",
-        quelquUn: "Someone"
+        quelquUn: "Someone",
+        inconnu: "Unknown",
+        aLinstant: "Just now",
+        min: "min"
       },
       publier: {
         placeholder: "What's new? 😊",
