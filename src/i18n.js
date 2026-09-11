@@ -637,6 +637,30 @@ const resources = {
         envoiEnCours: "Envoi...",
         envoyerLien: "📧 Envoyer le lien",
         retourConnexion: "← Retour à la connexion"
+      },
+      signalement: {
+        titre: "🚩 Signaler",
+        sousTitre: "Pourquoi tu signales ce contenu ?",
+        detailsPlaceholder: "Décris le problème en détail...",
+        envoiEnCours: "Envoi...",
+        envoyerSignalement: "🚩 Envoyer le signalement",
+        succesTitre: "Signalement envoyé",
+        succesTexte: "Merci pour ton retour. Nous allons examiner ce contenu.",
+        retour: "Retour",
+        autreRaison: "Autre raison",
+        profilFausseIdentite: "Fausse identité / Usurpation",
+        profilContenuInapproprie: "Contenu inapproprié sur le profil",
+        harcelement: "Harcèlement ou intimidation",
+        spamArnaque: "Spam ou arnaque",
+        contenuHaineux: "Contenu haineux",
+        pubContenuViolent: "Contenu violent ou choquant",
+        pubContenuSexuel: "Contenu sexuel inapproprié",
+        faussesInfos: "Fausses informations",
+        spamPublicite: "Spam ou publicité",
+        spam: "Spam",
+        langageAbusif: "Langage abusif",
+        msgContenuInapproprie: "Contenu inapproprié",
+        menaces: "Menaces"
       }
     }
   },
@@ -1274,6 +1298,30 @@ const resources = {
         envoiEnCours: "Sending...",
         envoyerLien: "📧 Send link",
         retourConnexion: "← Back to login"
+      },
+      signalement: {
+        titre: "🚩 Report",
+        sousTitre: "Why are you reporting this content?",
+        detailsPlaceholder: "Describe the issue in detail...",
+        envoiEnCours: "Sending...",
+        envoyerSignalement: "🚩 Send report",
+        succesTitre: "Report sent",
+        succesTexte: "Thanks for your feedback. We'll review this content.",
+        retour: "Back",
+        autreRaison: "Other reason",
+        profilFausseIdentite: "Fake identity / Impersonation",
+        profilContenuInapproprie: "Inappropriate profile content",
+        harcelement: "Harassment or intimidation",
+        spamArnaque: "Spam or scam",
+        contenuHaineux: "Hateful content",
+        pubContenuViolent: "Violent or shocking content",
+        pubContenuSexuel: "Inappropriate sexual content",
+        faussesInfos: "False information",
+        spamPublicite: "Spam or advertising",
+        spam: "Spam",
+        langageAbusif: "Abusive language",
+        msgContenuInapproprie: "Inappropriate content",
+        menaces: "Threats"
       }
     }
   }
