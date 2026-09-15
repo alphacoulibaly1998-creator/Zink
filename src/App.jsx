@@ -21,6 +21,7 @@ import VerifierEmail from "./pages/VerifierEmail";
 import Parametres from "./pages/Parametres";
 import Notifications from "./pages/Notifications";
 import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
+import i18n from "./i18n";
 import "./App.css";
 
 export const SignalementContext = React.createContext(null);
@@ -121,7 +122,7 @@ function App() {
     return () => unsub();
   }, []);
 
-  if (chargement) return <div className="chargement">Chargement...</div>;
+  if (chargement) return <div className="chargement">{i18n.t("accueil.chargement")}</div>;
 
   return (
     <SignalementContext.Provider value={null}>
