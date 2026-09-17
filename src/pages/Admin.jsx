@@ -47,7 +47,7 @@ function Admin({ onRetour }) {
       });
       setApercuRgpd(data);
     } catch (e) {
-      setErreurRgpd(e.response?.data?.error || "Erreur lors de la recherche.");
+      setErreurRgpd(e.response?.data?.error || t("admin.erreurRecherche"));
     }
     setChargementRgpd(false);
   };
@@ -55,11 +55,11 @@ function Admin({ onRetour }) {
   const confirmerSuppressionRgpd = async () => {
     setErreurRgpd("");
     if (confirmationEmail.trim() !== emailRgpd.trim()) {
-      setErreurRgpd("L'email tapé ne correspond pas exactement.");
+      setErreurRgpd(t("admin.emailNeCorrespondPasExact"));
       return;
     }
     if (!mdpAdmin) {
-      setErreurRgpd("Entre ton mot de passe admin pour confirmer.");
+      setErreurRgpd(t("admin.entrerMdpConfirmer"));
       return;
     }
     setChargementRgpd(true);
@@ -67,7 +67,7 @@ function Admin({ onRetour }) {
       const credential = EmailAuthProvider.credential(user.email, mdpAdmin);
       await reauthenticateWithCredential(user, credential);
     } catch (e) {
-      setErreurRgpd("Mot de passe admin incorrect.");
+      setErreurRgpd(t("admin.mdpAdminIncorrectCourt"));
       setChargementRgpd(false);
       return;
     }
@@ -84,7 +84,7 @@ function Admin({ onRetour }) {
       setConfirmationEmail("");
       setMdpAdmin("");
     } catch (e) {
-      setErreurRgpd(e.response?.data?.error || "Erreur lors de la suppression.");
+      setErreurRgpd(e.response?.data?.error || t("admin.erreurSuppression"));
     }
     setChargementRgpd(false);
   };
@@ -92,28 +92,28 @@ function Admin({ onRetour }) {
   const chargerContenuSignale = async (signalement) => {
     try {
       const auteurSnap = await getDoc(doc(db, "utilisateurs", signalement.auteurId));
-      const auteur = auteurSnap.exists() ? auteurSnap.data().pseudo : "Inconnu";
+      const auteur = auteurSnap.exists() ? auteurSnap.data().pseudo : t("admin.inconnu");
 
-      let contenu = "Contenu introuvable";
+      let contenu = t("admin.contenuIntrouvable");
       let contexte = "";
 
       if (signalement.type === "profil") {
         const profilSnap = await getDoc(doc(db, "utilisateurs", signalement.cibleId));
         if (profilSnap.exists()) {
-          contenu = `Profil : ${profilSnap.data().pseudo}`;
+          contenu = t("admin.profilLabel", { pseudo: profilSnap.data().pseudo });
           contexte = profilSnap.data().statut || "";
         }
       } else if (signalement.type === "publication") {
         const pubSnap = await getDoc(doc(db, "publications", signalement.cibleId));
         if (pubSnap.exists()) {
-          contenu = pubSnap.data().description || "(Publication avec média uniquement)";
-          contexte = pubSnap.data().imageUrl ? "📷 Contient une image" : pubSnap.data().videoUrl ? "🎥 Contient une vidéo" : "";
+          contenu = pubSnap.data().description || t("admin.pubMediaUniquement");
+          contexte = pubSnap.data().imageUrl ? t("admin.contientImage") : pubSnap.data().videoUrl ? t("admin.contientVideo") : "";
         }
       }
 
       return { auteurSignaleur: auteur, contenu, contexte };
     } catch (e) {
-      return { auteurSignaleur: "Inconnu", contenu: "Erreur de chargement", contexte: "" };
+      return { auteurSignaleur: t("admin.inconnu"), contenu: t("admin.erreurChargementContenu"), contexte: "" };
     }
   };
 
@@ -142,7 +142,8 @@ function Admin({ onRetour }) {
   const formaterDate = (timestamp) => {
     if (!timestamp) return "";
     const date = timestamp.toDate();
-    return date.toLocaleDateString("fr-FR", {
+    const locale = i18n.language === "en" ? "en-US" : "fr-FR";
+    return date.toLocaleDateString(locale, {
       day: "numeric", month: "short", year: "numeric",
       hour: "2-digit", minute: "2-digit"
     });
@@ -195,7 +196,7 @@ function Admin({ onRetour }) {
       </div>
 
       {chargement ? (
-        <div className="chargement">Chargement...</div>
+        <div className="chargement">{t("admin.chargementCourt")}</div>
       ) : onglet === "rgpd" ? (
         <div className="param-form" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <p style={{ color: "#ff6b6b", fontSize: "13px", fontWeight: 600 }}>

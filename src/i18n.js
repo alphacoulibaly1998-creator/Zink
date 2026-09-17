@@ -613,7 +613,18 @@ const resources = {
         entrerMdpConfirmer: "Entre ton mot de passe admin pour confirmer.",
         mdpAdminIncorrect: "Mot de passe admin incorrect.",
         erreurRecherche: "Erreur lors de la recherche.",
-        erreurSuppression: "Erreur lors de la suppression."
+        erreurSuppression: "Erreur lors de la suppression.",
+        emailNeCorrespondPasExact: "L'email tapé ne correspond pas exactement.",
+        entrerMdpConfirmer: "Entre ton mot de passe admin pour confirmer.",
+        mdpAdminIncorrectCourt: "Mot de passe admin incorrect.",
+        inconnu: "Inconnu",
+        contenuIntrouvable: "Contenu introuvable",
+        profilLabel: "Profil : {{pseudo}}",
+        pubMediaUniquement: "(Publication avec média uniquement)",
+        contientImage: "📷 Contient une image",
+        contientVideo: "🎥 Contient une vidéo",
+        erreurChargementContenu: "Erreur de chargement",
+        chargementCourt: "Chargement..."
       },
       verifierEmail: {
         titre: "Vérifie ton email",
@@ -1274,7 +1285,18 @@ const resources = {
         entrerMdpConfirmer: "Enter your admin password to confirm.",
         mdpAdminIncorrect: "Incorrect admin password.",
         erreurRecherche: "Error during search.",
-        erreurSuppression: "Error during deletion."
+        erreurSuppression: "Error during deletion.",
+        emailNeCorrespondPasExact: "The typed email doesn't match exactly.",
+        entrerMdpConfirmer: "Enter your admin password to confirm.",
+        mdpAdminIncorrectCourt: "Incorrect admin password.",
+        inconnu: "Unknown",
+        contenuIntrouvable: "Content not found",
+        profilLabel: "Profile: {{pseudo}}",
+        pubMediaUniquement: "(Media-only post)",
+        contientImage: "📷 Contains an image",
+        contientVideo: "🎥 Contains a video",
+        erreurChargementContenu: "Loading error",
+        chargementCourt: "Loading..."
       },
       verifierEmail: {
         titre: "Verify your email",
