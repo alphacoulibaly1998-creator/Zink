@@ -45,7 +45,7 @@ function Messages() {
           setConvActiveData({
             id: convIdParam,
             autreId,
-            autre: autreSnap.exists() ? autreSnap.data() : { pseudo: "Inconnu" }
+            autre: autreSnap.exists() ? autreSnap.data() : { pseudo: t("messagesPage.inconnu") }
           });
         } else {
           const ids = convIdParam.split("_");
