@@ -106,7 +106,6 @@ function AttaquesSonores() {
         auteurId: user.uid,
         cibleId: amiChoisi.id,
         sonId: sonChoisi.id,
-        sonNom: t(sonChoisi.nomKey),
         sonIcon: sonChoisi.icon,
         lu: false,
         createdAt: serverTimestamp()
@@ -218,7 +217,9 @@ function AttaquesSonores() {
                 <span className="attaque-icon">{a.sonIcon}</span>
                 <div className="attaque-infos">
                   <span className="attaque-auteur">{a.auteur?.pseudo}</span>
-                  <span className="attaque-son">{t("attaques.taEnvoye", { son: a.sonNom })}</span>
+                  <span className="attaque-son">
+                    {t("attaques.taEnvoye", { son: t(SONS.find((s) => s.id === a.sonId)?.nomKey || "attaques.sonAirhorn") })}
+                  </span>
                   <span className="attaque-date">{formaterDate(a.createdAt)}</span>
                 </div>
                 <button
