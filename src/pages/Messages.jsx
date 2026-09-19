@@ -194,7 +194,19 @@ function Messages() {
                 <div className="conv-infos">
                   <span className="conv-pseudo">{conv.autre?.pseudo}</span>
                   <span className="conv-dernier">
-                    {conv.dernierMessage?.texte || t("messagesPage.nouvelleConversation")}
+                    {(() => {
+                      const dm = conv.dernierMessage;
+                      if (!dm) return t("messagesPage.nouvelleConversation");
+                      if (dm.texte) return dm.texte;
+                      switch (dm.type) {
+                        case "photo": return t("messagesPage.typePhoto");
+                        case "video": return t("messagesPage.typeVideo");
+                        case "vocal": return t("messagesPage.typeVocal");
+                        case "supprime": return t("messagesPage.typeSupprime");
+                        case "vide": return t("messagesPage.typeVide");
+                        default: return t("messagesPage.nouvelleConversation");
+                      }
+                    })()}
                   </span>
                 </div>
                 <div className="conv-meta">

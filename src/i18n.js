@@ -246,7 +246,12 @@ const resources = {
         bloqueAlert: "{{pseudo}} a été bloqué.",
         aLinstant: "À l'instant",
         min: "min",
-        inconnu: "Inconnu"
+        inconnu: "Inconnu",
+        typePhoto: "📷 Photo",
+        typeVideo: "🎥 Vidéo",
+        typeVocal: "🎤 Vocal",
+        typeSupprime: "Message supprimé",
+        typeVide: "Aucun message"
       },
       chat: {
         enLigne: "● En ligne",
@@ -918,7 +923,12 @@ const resources = {
         bloqueAlert: "{{pseudo}} has been blocked.",
         aLinstant: "Just now",
         min: "min",
-        inconnu: "Unknown"
+        inconnu: "Unknown",
+        typePhoto: "📷 Photo",
+        typeVideo: "🎥 Video",
+        typeVocal: "🎤 Voice message",
+        typeSupprime: "Message deleted",
+        typeVide: "No message"
       },
       chat: {
         enLigne: "● Online",

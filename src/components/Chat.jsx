@@ -168,7 +168,8 @@ const msgData = {
     const nonLuActuel = convSnap.data()?.nonLu?.[autreId] || 0;
     await updateDoc(convRef, {
       dernierMessage: {
-        texte: type === "texte" ? valeur : type === "photo" ? t("chat.photoLabel") : type === "video" ? t("chat.videoLabel") : t("chat.vocalLabel"),
+        texte: type === "texte" ? valeur : "",
+        type: type === "texte" ? "texte" : type,
         createdAt: new Date()
       },
       [`nonLu.${autreId}`]: nonLuActuel + 1
@@ -265,7 +266,8 @@ const msgData = {
     const nonLuActuel = convSnap.data()?.nonLu?.[autreId] || 0;
     await updateDoc(convRef, {
       dernierMessage: {
-        texte: legende || (type === "photo" ? t("chat.photoLabel") : t("chat.videoLabel")),
+        texte: legende || "",
+        type: legende ? "texte" : type,
         createdAt: new Date()
       },
       [`nonLu.${autreId}`]: nonLuActuel + 1
@@ -352,7 +354,8 @@ const msgData = {
     if (pourTous) {
       await updateDoc(ref, { supprimePourTous: true, texte: t("chat.messageSupprime") });
       await updateDoc(doc(db, "conversations", convId), {
-        "dernierMessage.texte": t("chat.messageSupprime")
+        "dernierMessage.texte": "",
+        "dernierMessage.type": "supprime"
       });
     } else {
       await updateDoc(ref, {
@@ -373,11 +376,18 @@ const msgData = {
             !data.supprimePour?.includes(user.uid) &&
             !data.supprimePourTous;
         });
-        await updateDoc(convRef, {
-          "dernierMessage.texte": precedent
-            ? precedent.data().texte || t("chat.photoLabel")
-            : t("chat.aucunMessage")
-        });
+        if (precedent) {
+          const dataPrecedent = precedent.data();
+          await updateDoc(convRef, {
+            "dernierMessage.texte": dataPrecedent.texte || "",
+            "dernierMessage.type": dataPrecedent.texte ? "texte" : (dataPrecedent.type || "photo")
+          });
+        } else {
+          await updateDoc(convRef, {
+            "dernierMessage.texte": "",
+            "dernierMessage.type": "vide"
+          });
+        }
       }
     }
   };
