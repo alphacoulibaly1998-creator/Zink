@@ -2133,6 +2133,30 @@ html, body {
 .bn-case.touche { background: #ff6b6b; }
 .bn-case.rate { background: #3b82f6; }
 
+.bn-bateau {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #10b981;
+  border: 2px solid #0f0f1a;
+  border-radius: 6px;
+  font-size: 16px;
+  z-index: 2;
+}
+
+.bn-bateau.coule {
+  background: #4b0000;
+  opacity: 0.9;
+}
+
+.bn-bateau.horizontal {
+  border-radius: 10px;
+}
+
+.bn-bateau.vertical {
+  border-radius: 10px;
+}
+
 /* Crazy Eights */
 .ce-centre {
   display: flex;

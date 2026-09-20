@@ -11,6 +11,8 @@ const creerGrille = () => Array(TAILLE).fill(null).map(() => Array(TAILLE).fill(
 
 const placerBateauxAuto = () => {
   const grille = creerGrille();
+  const bateaux = [];
+  let idBateau = 0;
   for (let taille of BATEAUX) {
     let place = false;
     while (!place) {
@@ -24,16 +26,41 @@ const placerBateauxAuto = () => {
         if (grille[nr][nc]) { ok = false; break; }
       }
       if (ok) {
+        const cases = [];
         for (let i = 0; i < taille; i++) {
           const nr = horizontal ? r : r + i;
           const nc = horizontal ? c + i : c;
           grille[nr][nc] = "bateau";
+          cases.push([nr, nc]);
         }
+        bateaux.push({ id: idBateau, taille, horizontal, cases });
+        idBateau++;
         place = true;
       }
     }
   }
-  return grille;
+  return { grille, bateaux };
+};
+
+const estBateauCoule = (bateau, tirs) => {
+  return bateau.cases.every(([r, c]) => tirs[r][c] === "touche");
+};
+
+const trouverBateauCase = (bateaux, r, c) => {
+  return bateaux.find((b) => b.cases.some(([br, bc]) => br === r && bc === c));
+};
+
+const stylePositionBateau = (bateau) => {
+  const [r0, c0] = bateau.cases[0];
+  const taillePct = 100 / TAILLE;
+  return {
+    position: "absolute",
+    top: `${r0 * taillePct}%`,
+    left: `${c0 * taillePct}%`,
+    width: bateau.horizontal ? `${bateau.taille * taillePct}%` : `${taillePct}%`,
+    height: bateau.horizontal ? `${taillePct}%` : `${bateau.taille * taillePct}%`,
+    pointerEvents: "none",
+  };
 };
 
 const compterBateaux = (grille, tirs) => {
@@ -80,8 +107,10 @@ function BatailleNavale({ onRetour }) {
   const { t } = useTranslation();
   const [mode, setMode] = useState(null);
   const [difficulte, setDifficulte] = useState(null);
-  const [grilleJ1, setGrilleJ1] = useState(placerBateauxAuto());
-  const [grilleJ2, setGrilleJ2] = useState(placerBateauxAuto());
+  const [dataJ1, setDataJ1] = useState(placerBateauxAuto());
+  const [dataJ2, setDataJ2] = useState(placerBateauxAuto());
+  const grilleJ1 = dataJ1.grille;
+  const grilleJ2 = dataJ2.grille;
   const [tirsJ1, setTirsJ1] = useState(creerGrille());
   const [tirsJ2, setTirsJ2] = useState(creerGrille());
   const [joueur, setJoueur] = useState(1);
@@ -91,8 +120,8 @@ function BatailleNavale({ onRetour }) {
   const partieId = useRef(Date.now().toString());
 
   const reinitialiser = () => {
-    setGrilleJ1(placerBateauxAuto());
-    setGrilleJ2(placerBateauxAuto());
+    setDataJ1(placerBateauxAuto());
+    setDataJ2(placerBateauxAuto());
     setTirsJ1(creerGrille());
     setTirsJ2(creerGrille());
     setJoueur(1);
@@ -207,37 +236,80 @@ function BatailleNavale({ onRetour }) {
       </div>
 
       <p className="jeu-mode-titre">{t("batailleNavale.taFlotte")}</p>
-      <div className="bn-grille bn-grille-defense">
+      <div className="bn-grille bn-grille-defense" style={{ position: "relative" }}>
         {grilleJ1.map((row, r) =>
           row.map((cell, c) => {
             const tir = tirsJ2[r][c];
+            let contenu = "";
+            let classe = "";
+            if (tir === "touche") {
+              classe = "touche";
+              contenu = "💥";
+            } else if (tir === "rate") {
+              classe = "rate";
+              contenu = "💧";
+            }
             return (
               <button
                 key={`def-${r}-${c}`}
-                className={`bn-case ${tir === "touche" ? "touche" : tir === "rate" ? "rate" : ""}`}
+                className={`bn-case ${classe}`}
                 disabled
               >
-                {tir === "touche" ? "💥" : tir === "rate" ? "💧" : cell === "bateau" ? "🚢" : ""}
+                {contenu}
               </button>
             );
           })
         )}
+        {dataJ1.bateaux.map((bateau) => {
+          const coule = estBateauCoule(bateau, tirsJ2);
+          return (
+            <div
+              key={`bateau-def-${bateau.id}`}
+              className={`bn-bateau ${coule ? "coule" : ""} ${bateau.horizontal ? "horizontal" : "vertical"}`}
+              style={stylePositionBateau(bateau)}
+            >
+              {coule ? "☠️" : "🚢"}
+            </div>
+          );
+        })}
       </div>
 
       <p className="jeu-mode-titre">{t("batailleNavale.zoneEnnemie")}</p>
-      <div className="bn-grille">
+      <div className="bn-grille" style={{ position: "relative" }}>
         {grilleAffichee.map((row, r) =>
-          row.map((cell, c) => (
-            <button
-              key={`att-${r}-${c}`}
-              className={`bn-case ${cell === "touche" ? "touche" : cell === "rate" ? "rate" : ""}`}
-              onClick={() => tirer(r, c)}
-              disabled={iaReflechit}
-            >
-              {cell === "touche" ? "💥" : cell === "rate" ? "💧" : ""}
-            </button>
-          ))
+          row.map((cell, c) => {
+            let contenu = "";
+            let classe = "";
+            if (cell === "touche") {
+              classe = "touche";
+              contenu = "💥";
+            } else if (cell === "rate") {
+              classe = "rate";
+              contenu = "💧";
+            }
+            return (
+              <button
+                key={`att-${r}-${c}`}
+                className={`bn-case ${classe}`}
+                onClick={() => tirer(r, c)}
+                disabled={iaReflechit}
+              >
+                {contenu}
+              </button>
+            );
+          })
         )}
+        {(mode === "ia" ? dataJ2 : joueur === 1 ? dataJ2 : dataJ1).bateaux
+          .filter((bateau) => estBateauCoule(bateau, grilleAffichee))
+          .map((bateau) => (
+            <div
+              key={`bateau-att-${bateau.id}`}
+              className={`bn-bateau coule ${bateau.horizontal ? "horizontal" : "vertical"}`}
+              style={stylePositionBateau(bateau)}
+            >
+              ☠️
+            </div>
+          ))}
       </div>
 
       {winner && (
