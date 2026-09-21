@@ -1222,7 +1222,7 @@ const resources = {
         derniereMaj: "Last updated: August 10, 2026",
         sommaire: "Contents",
         section1Titre: "1. Who we are",
-        section1Texte: "Zink is a social network published by Alpha Coulibaly. For any question about your personal data, contact us at zinkcontact8@gmail.com.",
+        section1Texte: "Zink is a social network published by Abdramane Coulibaly. For any question about your personal data, contact us at zinkcontact8@gmail.com.",
         section2Titre: "2. Data we collect",
         section2Texte: "Account information (username, email, encrypted password, optional phone number), profile information (date of birth, gender, country, photo, personal status), content you post (posts, photos, videos, comments, private messages, voice messages), and technical information (online status, game-related activity).",
         section3Titre: "3. Why we collect this data",
