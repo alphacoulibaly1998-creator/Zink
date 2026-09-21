@@ -32,6 +32,7 @@ html, body {
   margin-bottom: 20px;
   background: linear-gradient(90deg, #ff6b6b, #a855f7);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -104,6 +105,7 @@ html, body {
   text-align: center;
   background: linear-gradient(90deg, #ff6b6b, #a855f7);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -232,8 +234,9 @@ html, body {
 .profil-pseudo {
   font-size: 22px;
   font-weight: 800;
-  background: linear-gradient(90deg, #ff6b6b, #a855f7);
+    background: linear-gradient(90deg, #ff6b6b, #a855f7);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -365,6 +368,7 @@ html, body {
   font-weight: 900;
   background: linear-gradient(90deg, #ff6b6b, #a855f7);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -2013,6 +2017,7 @@ html, body {
   font-weight: 800;
   background: linear-gradient(90deg, #ff6b6b, #a855f7);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -3434,6 +3439,7 @@ html, body {
   margin-bottom: 8px;
   background: linear-gradient(90deg, #ff6b6b, #a855f7);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
