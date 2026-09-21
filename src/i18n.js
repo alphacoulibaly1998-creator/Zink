@@ -545,7 +545,7 @@ const resources = {
         derniereMaj: "Dernière mise à jour : 10 août 2026",
         sommaire: "Sommaire",
         section1Titre: "1. Qui sommes-nous",
-        section1Texte: "Zink est un réseau social édité par Alpha Coulibaly. Pour toute question relative à vos données personnelles, contactez-nous à zinkcontact8@gmail.com.",
+        section1Texte: "Zink est un réseau social édité par Abdramane Coulibaly. Pour toute question relative à vos données personnelles, contactez-nous à zinkcontact8@gmail.com.",
         section2Titre: "2. Données que nous collectons",
         section2Texte: "Informations de compte (pseudo, email, mot de passe chiffré, numéro de téléphone optionnel), informations de profil (date de naissance, sexe, pays, photo, statut personnalisé), contenu que vous publiez (publications, photos, vidéos, commentaires, messages privés, messages vocaux), et informations techniques (statut de connexion, activité liée aux jeux).",
         section3Titre: "3. Pourquoi nous collectons ces données",

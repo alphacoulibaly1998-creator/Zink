@@ -18,7 +18,7 @@ function APropos({ onRetour }) {
       <div className="apropos-infos">
         <div className="apropos-item">
           <span className="apropos-label">{t("apropos.createur")}</span>
-          <span className="apropos-valeur">Alpha Coulibaly</span>
+          <span className="apropos-valeur">Abdramane Coulibaly</span>
         </div>
         <div className="apropos-item">
           <span className="apropos-label">{t("apropos.contact")}</span>
